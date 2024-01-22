@@ -7,7 +7,6 @@ const server = fastify({
   logger:false,
 });
 server.register(Routes);
-console.log('test')
  server.register(oauthPlugin, {
     name: 'msOAuth2',
     credentials: {
