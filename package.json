@@ -1,0 +1,47 @@
+{
+  "name": "farmutate-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Farmutate/api.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Farmutate/api/issues"
+  },
+  "homepage": "https://github.com/Farmutate/api#readme",
+  "dependencies": {
+    "@fastify/oauth2": "^7.7.0",
+    "aws-sdk": "^2.1508.0",
+    "axios": "^1.6.2",
+    "cors": "^2.8.5",
+    "dotenv": "^8.6.0",
+    "fastify": "^4.24.3",
+    "fastify-swagger": "^3.5.0",
+    "joi": "^17.11.0",
+    "lodash": "^4.17.21",
+    "nodemon": "^3.0.3",
+    "pg": "^8.11.3",
+    "redis": "^3.1.2",
+    "sequelize": "^6.35.1",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@types/bluebird": "^3.5.42",
+    "@types/node": "^20.11.5",
+    "@types/pg": "^8.10.9",
+    "@types/sequelize": "^4.28.19",
+    "@types/validator": "^13.11.7",
+    "reflect-metadata": "^0.1.13",
+    "sequelize-typescript": "^2.1.6",
+    "typescript": "^5.3.3"
+  }
+}

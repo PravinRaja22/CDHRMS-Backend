@@ -1,0 +1,1 @@
+{"version":3,"file":"headers.schema.js","sourceRoot":"","sources":["../../../src/routes/schemas/headers.schema.ts"],"names":[],"mappings":"AAAA,MAAM,CAAC,MAAM,YAAY,GAAG;IACxB,IAAI,EAAC,QAAQ;IACb,QAAQ,EAAG,CAAC,OAAO,CAAC;IACpB,UAAU,EAAC;QACP,KAAK,EAAG,EAAC,IAAI,EAAG,QAAQ,EAAG,MAAM,EAAG,MAAM,EAAC;KAC9C;CACJ,CAAA"}
