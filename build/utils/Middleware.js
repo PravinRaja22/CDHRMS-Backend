@@ -1,4 +1,4 @@
-import { CacheStore } from "../helpers/CacheStore";
+import { CacheStore } from "../helpers/CacheStore.js";
 export const checkSessionID = async (sessionId) => {
     console.log(sessionId);
     return new Promise((resolve, reject) => {

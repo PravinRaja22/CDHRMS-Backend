@@ -1,9 +1,9 @@
 import { DataTypes, Model, Deferrable } from "sequelize";
-import { sequelize } from "../index";
-import Farm from "./Farm.model";
-import Account from "./Account.model";
-import Person from "./Person.model";
-import OptionValue from "./OptionValue.model";
+import { sequelize } from "../index.js";
+import Farm from "./Farm.model.js";
+import Account from "./Account.model.js";
+import Person from "./Person.model.js";
+import OptionValue from "./OptionValue.model.js";
 export default class Batch extends Model {
 }
 Batch.init({

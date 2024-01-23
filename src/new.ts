@@ -33,7 +33,7 @@ server.register(Routes);
     reply.send({ access_token: token.access_token })
   })
 
-  server.listen({ port: 8080 }, (err, address) => {
+  server.listen({ port: 8000 }, (err, address) => {
     if (err) {
       console.error(err)
       // process.exit(1)

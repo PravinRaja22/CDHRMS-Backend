@@ -1,5 +1,5 @@
-import Person from "../database/models/Person.model";
-import OptionValue from "../database/models/OptionValue.model";
+import Person from "../database/models/Person.model.js";
+import OptionValue from "../database/models/OptionValue.model.js";
 export var UserService;
 (function (UserService) {
     UserService.findUserByKey = async (key, value) => {

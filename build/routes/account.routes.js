@@ -1,6 +1,6 @@
-import { AccountController } from "../controllers/Account.controller";
-import { AccountFetchSchema, AccountCreationSchema, AccountUpdateSchema, AccountSearchSchema, AccountActivationSchema } from "./schemas/account.schema";
-import { headerSchema } from "./schemas/headers.schema";
+import { AccountController } from "../controllers/Account.controller.js";
+import { AccountFetchSchema, AccountCreationSchema, AccountUpdateSchema, AccountSearchSchema, AccountActivationSchema } from "./schemas/account.schema.js";
+import { headerSchema } from "./schemas/headers.schema.js";
 export default [
     {
         method: "GET",

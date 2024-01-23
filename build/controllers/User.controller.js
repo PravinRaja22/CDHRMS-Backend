@@ -1,5 +1,5 @@
-import Person from "../database/models/Person.model";
-import Account from "../database/models/Account.model";
+import Person from "../database/models/Person.model.js";
+import Account from "../database/models/Account.model.js";
 export var UserController;
 (function (UserController) {
     UserController.fetchUsers = async (req, res) => {

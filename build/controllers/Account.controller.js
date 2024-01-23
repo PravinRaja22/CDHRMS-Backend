@@ -1,5 +1,5 @@
 import * as _ from "lodash";
-import { AccountService } from "../services/Account.service";
+import { AccountService } from "../services/Account.service.js";
 import { Sequelize, Op } from "sequelize";
 export var AccountController;
 (function (AccountController) {

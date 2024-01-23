@@ -12,6 +12,7 @@ import {
   getSingleLeaves, 
   upsertLeaves 
 } from '../../controllers/HRMS/leave.Controller.js';
+import { getLeaveBalanceByUsers, upsertLeaveBalanceByUsers } from '../../controllers/HRMS/leaveBalance.Controller.js';
 
 const Routes = function (fastify: FastifyInstance, opts: any, done: () => void) {
   //User Object Routes
@@ -27,7 +28,9 @@ const Routes = function (fastify: FastifyInstance, opts: any, done: () => void) 
     fastify.get('/leaves/user/:userId',getLeavesByUsers)
     fastify.get('/leaves/approver/:approverId',getLeavesByApprover)
 
-
+    //Leave-Balance Object Routes
+    fastify.get('/leave-balance/:userId',getLeaveBalanceByUsers)
+    fastify.post('/leave-balance/:userId',upsertLeaveBalanceByUsers)
     done();
   };
   

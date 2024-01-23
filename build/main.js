@@ -4,9 +4,9 @@ import swagger from "fastify-swagger";
 if (require.main === module) {
     require("dotenv").config({ path: path.join(__dirname, "../.env") });
 }
-import * as Database from "./database";
-import { CacheStore } from "./helpers/CacheStore";
-import { checkSessionID } from "./utils/Middleware";
+import * as Database from "./database.js";
+import { CacheStore } from "./helpers/CacheStore.js";
+import { checkSessionID } from "./utils/Middleware.js";
 const server = fastify({
     logger: {
         level: "info",

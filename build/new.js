@@ -1,9 +1,11 @@
 import fastify from "fastify";
 import oauthPlugin from "@fastify/oauth2";
-import { connection } from "./database/postgress.js";
+// import { connection } from "./database/postgress.js";
+import Routes from "./routes/HRMS/routeshrms.js";
 const server = fastify({
-    logger: true,
+    logger: false,
 });
+server.register(Routes);
 server.register(oauthPlugin, {
     name: 'msOAuth2',
     credentials: {
@@ -18,7 +20,8 @@ server.register(oauthPlugin, {
     // facebook redirect here after the user login
     callbackUri: 'http://localhost:3000/login/facebook/callback'
 });
-connection();
+// let postgressconnection = connection();
+// console.log(postgressconnection)
 server.get('/login/ms/callback', async function (request, reply) {
     const { token } = await this.msOAuth2.getAccessTokenFromAuthorizationCodeFlow(request);
     console.log(token.access_token);
@@ -26,15 +29,11 @@ server.get('/login/ms/callback', async function (request, reply) {
     // const { token: newToken } = await this.getNewAccessTokenUsingRefreshToken(token)
     reply.send({ access_token: token.access_token });
 });
-server.listen({ port: 8080 }, (err, address) => {
+server.listen({ port: 8000 }, (err, address) => {
     if (err) {
         console.error(err);
-        process.exit(1);
+        // process.exit(1)
     }
-    console.log('test');
-    console.log(process.env.DATABASE_CONNECTION_STRING);
-    console.log('test2');
-    console.log('test2');
     console.log(`Server listening at ${address}`);
 });
 //# sourceMappingURL=new.js.map

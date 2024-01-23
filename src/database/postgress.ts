@@ -19,7 +19,16 @@ const pool = new pkg.Pool({
   password: "admin",
   host: "192.168.0.116",
   port: 5432,
+<<<<<<< Updated upstream
   database: "HRMS",
+=======
+  database: 'postgres',
+  // user: "clouddesk",
+  // password: "admin",
+  // host: "192.168.0.116",
+  // port: 5432,
+  // database: "HRMS",
+>>>>>>> Stashed changes
 });
 console.log('test')
 console.log('test')

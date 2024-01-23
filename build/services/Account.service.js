@@ -1,5 +1,5 @@
 import * as _ from "lodash";
-import AccountModel from "../database/models/Account.model";
+import AccountModel from "../database/models/Account.model.js";
 export var AccountService;
 (function (AccountService) {
     AccountService.createAccount = async (inObj) => {
