@@ -15,13 +15,14 @@
 import pkg from 'pg';
 
 const pool = new pkg.Pool({
-  user: 'postgres',
-  password: 'admin',
-  host: 'localhost',
+  user: "clouddesk",
+  password: "admin",
+  host: "192.168.0.116",
   port: 5432,
-  database: 'HRMS',
+  database: "HRMS",
 });
-
+console.log('test')
+console.log('test')
 pool.on('connect', () => {
   console.log('Database connected');
 });

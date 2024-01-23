@@ -2,7 +2,6 @@ import fastify from "fastify";
 import oauthPlugin from "@fastify/oauth2";
 // import { connection } from "./database/postgress.js";
 import Routes from "./routes/HRMS/routeshrms.js";
-
 const server = fastify({
   logger:false,
 });
