@@ -1,8 +1,9 @@
+import { forEach } from "lodash";
 import pool from "../../database/postgress.js";
 import { QueryResult } from 'pg';
 
 export module attendanceService {
-    export async function getAttendanceDate() {
+    export async function getAttendanceData() {
         try {
             console.log("attendanceService call");
             const result: QueryResult = await pool.query('SELECT * FROM attendances');
@@ -30,20 +31,122 @@ export module attendanceService {
         }
     }
 
+    export async function getAttendanceByUserIdDate(params:any){
+        console.log("getAttendanceByUserIdDate");
+        console.log(params,"params");
+
+        const existingRecord:any = await pool.query(
+            'SELECT * FROM attendances WHERE employeeDetails->>\'employeeId\' = $1 AND date = $2',
+            [params.userId, params.attendanceDate]
+        )
+        console.log(existingRecord.rows,"existingRecord");
+        if (existingRecord.rows.length === 0) {
+            // No attendance record found for the user and date
+            console.log(`No attendance record found for user ${params.userId} on ${params.attendanceDate}`);
+            return { success: false, message: 'No attendance record found for the specified user and date.' };
+        }
+        else{
+            return existingRecord.rows[0] 
+        }
+
+    }
+
     export async function updateAttendance(params:any,body:any){
         console.log(params,"params updateAttendance service");
         console.log(body,"body updateAttendance service");
 
-        const existingRecord = await pool.query(
+        const existingRecord:any = await pool.query(
             'SELECT * FROM attendances WHERE employeeDetails->>\'employeeId\' = $1 AND date = $2',
             [params.userId, params.attendanceDate]
         )
+console.log(params.userId);
+        if (existingRecord.rows.length === 0) {
+            // No attendance record found for the user and date
+            console.log(`No attendance record found for user ${params.userId} on ${params.attendanceDate}`);
+            return { success: false, message: 'No attendance record found for the specified user and date.' };
+        }else{
+            //upsert request body
+            console.log(existingRecord.rows ,'Rows isd ');
+            let recId =existingRecord.rows[0].id
+            let query;
+            let params;
+            let fieldNames = Object.keys(body);
+            let fieldValues = Object.values(body)
+            console.log(fieldNames,"fieldNames");
+            console.log("********");
+            console.log(fieldNames.length + 1);
+            console.log("**********");
+            try{
+                if(fieldNames.length>0) {
+                    query = `UPDATE attendances SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(', ')} WHERE id = $${fieldNames.length + 1}`;
+                    params = [...fieldValues, recId];
+                }
+                console.log(recId ,'ID ID ');
+                console.log(params ,'params');
+                let result = await pool.query(query, params);
+                console.log(result, "upsert result");
+                let message = result.command ==='UPDATE' && result.rowCount>0 ? 'Attendance upserted successfully' :'Attendance upserte failure'
+                return ({ message});
 
-        console.log(existingRecord,"existingRecord updateAttendance");
-        console.log(existingRecord.rows[0].signin,"first record");
-        let isFirst = Object.keys(existingRecord.rows[0].signin).length ===1 ?true:false
-        console.log(isFirst,"isFirst");
+            }catch(error){
+                console.log(error.message,"upsert error");
+                return error.message;
+            }
         
+            
+        }
+
+    
+        
+    }
+
+    export async function updateAttendanceStatus(params:any) {
+        //update all user attendance status,working hours, session timings
+
+        console.log(params,"updateAttendanceStatus params");
+        let attendanceDate = params.attendanceDate;
+        try{
+            let attendanceRecords;
+            let result =  await pool.query(`SELECT * FROM attendances WHERE date = ${attendanceDate}`);
+            console.log(result,"attendanceRecords");
+            console.log('***********');
+            console.log(result.rows);
+            console.log('***********');
+            if(result.rowCount>0){
+                attendanceRecords = result.rows;
+            }else{
+                return{message:"No Records Found"}
+            }
+            if(attendanceRecords){
+                attendanceRecords.map(i=>{
+                    console.log(i,"______________");
+                    let signIns = i.signin.data
+                    let signOuts = i.signout.data
+                        console.log(signIns,"signIns aaaaaaaaaaa");
+                        console.log(signOuts,"signOuts aaaaaaaaaaa");
+
+                        let dateA:any = new Date(signIns[0].timeStamp);
+                        let dateB:any = new Date(signOuts[0].timeStamp);
+                        let timeDifference = dateB - dateA;
+                        
+                        // Convert the time difference to hours
+                        
+                        let totalHours = Math.floor(timeDifference / (1000 * 60 * 60));
+                        let totalMinutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+                        
+                        console.log(totalHours,totalMinutes,"&&&&&&&&&")
+                    
+                })
+            }
+        
+
+          
+
+        }
+        catch(error){
+            console.log(error.message,"error updateAttendanceStatus");
+            
+        }
 
     }
 
@@ -76,11 +179,11 @@ export module attendanceService {
                     let obj: any = {
                         date: newDateUTC,
                         employeeDetails: { "employeeName": user.username, "employeeuuId": user.uuid, "employeeId": user.id },
-                        signIn: '[{"timeStamp":null,"lat":null,"lng":null}]',
-                        signOut: '[{"timeStamp":null,"lat":null,"lng":null}]',
-                        shift: '{ "shiftType": "GS", "shiftStart": "09:00", "shiftEnd": "18:00" }',
-                        workingHours: '{ "firstIn": null, "lastOut": null, "totalWorkHours": null }',
-                        status: '{}',
+                        signIn:{data:[{"timeStamp":null,"lat":null,"lng":null}]},
+                        signOut:{data:[{ "timeStamp": null, "lat": null, "lng": null }]} ,
+                        shift: { "shiftType": "GS", "shiftStart": "09:00", "shiftEnd": "18:00" },
+                        workingHours: { "firstIn": null, "lastOut": null, "totalWorkHours": null },
+                        status: {},
                         isWeekend: newDate.getDay() === 0 || newDate.getDay() === 6,
                         isRegularized: false,
                         isHoliday: false,
