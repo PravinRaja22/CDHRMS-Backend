@@ -28,18 +28,23 @@ export module leaveBalanceService {
                 UPDATE leaveBalances
                 SET balance = $1
                 WHERE (userId->>'userId')::int = $2
-            `, [requestBody, userId]);
+            `, [requestBody.balance, userId]);
     
-            console.log(result.rowCount, "rows updated");
-    
+            console.log(result.rows, "rows updated");
+            console.log(result, "rows updated");
+            let message = `${requestBody.userId.userName} leaveBalance Updated successfully` 
+            //check the query result has record or not
             if (result.rowCount === 0) {
                 let resultInsert = await pool.query(`
                     INSERT INTO leaveBalances (userId, balance)
                     VALUES ($1, $2)
-                `, [requestBody.userid.userId, requestBody.balance]);
-                return resultInsert.rows;
+                `, [requestBody.userId, requestBody.balance]);
+                console.log(resultInsert,"resultInsert");
+                let message = `${requestBody.userId.userName} leaveBalance inserted successfully` 
+
+                return message;
             } else {
-                return result.rows;
+                return message;
             }
         } catch (error: any) {
             return error.message;

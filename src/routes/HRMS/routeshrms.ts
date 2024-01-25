@@ -13,6 +13,7 @@ import {
   upsertLeaves 
 } from '../../controllers/HRMS/leave.Controller.js';
 import { getLeaveBalanceByUsers, upsertLeaveBalanceByUsers } from '../../controllers/HRMS/leaveBalance.Controller.js';
+import { getAttendanceDate, updateAttendance, upsertAttendance } from '../../controllers/HRMS/attendance.Controller.js';
 
 const Routes = function (fastify: FastifyInstance, opts: any, done: () => void) {
   //User Object Routes
@@ -31,6 +32,11 @@ const Routes = function (fastify: FastifyInstance, opts: any, done: () => void) 
     //Leave-Balance Object Routes
     fastify.get('/leave-balance/:userId',getLeaveBalanceByUsers)
     fastify.post('/leave-balance/:userId',upsertLeaveBalanceByUsers)
+    
+    //attendance
+    fastify.get('/attendance',getAttendanceDate)
+    fastify.post('/attendance',upsertAttendance)
+    fastify.put('/attendance/:userId/:attendanceDate',updateAttendance)
     done();
   };
   
