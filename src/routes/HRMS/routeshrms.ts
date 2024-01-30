@@ -48,12 +48,38 @@ import {
   getSingleOnboardingData,
   upsertOnboardingData,
 } from "../../controllers/HRMS/onBoarding.Controller.js";
-import { deleteBankDetails, getBankDetails, getIndividualBankDetails, upsertBankDetails } from "../../controllers/HRMS/bankDetails.Controller.js";
-import { deletePFDetails, getIndividualPFDetails, getPFDetails, upsertPFDetails } from "../../controllers/HRMS/pfDetails.controller.js";
-import { getAllAttendanceRegularize, insertAttendanceRegularize,
-  getAttendanceRegularizebyUser,updateAttendanceRegularize,getAttendanceRegularizebyId } from "../../controllers/HRMS/attendanceRegularize.Controller.js";
+import {
+  deleteBankDetails,
+  getBankDetails,
+  getIndividualBankDetails,
+  upsertBankDetails,
+} from "../../controllers/HRMS/bankDetails.Controller.js";
+import {
+  deletePFDetails,
+  getIndividualPFDetails,
+  getPFDetails,
+  upsertPFDetails,
+} from "../../controllers/HRMS/pfDetails.controller.js";
+import {
+  getAllAttendanceRegularize,
+  insertAttendanceRegularize,
+  getAttendanceRegularizebyUser,
+  updateAttendanceRegularize,
+  getAttendanceRegularizebyId,
+} from "../../controllers/HRMS/attendanceRegularize.Controller.js";
+import {
+  deleteEightyCData,
+  getAllEightyCData,
+  getEightyCDataById,
+  getEightyCDataByUserId,
+  upsertEightyCData,
+} from "../../controllers/HRMS/eightyC.Controller.js";
 
-const Routes = function (fastify: FastifyInstance,opts: any,done: () => void) {
+const Routes = function (
+  fastify: FastifyInstance,
+  opts: any,
+  done: () => void
+) {
   //User Object Routes
   fastify.get("/users", getUser);
   fastify.get("/users/:id", getSingleUser);
@@ -83,11 +109,13 @@ const Routes = function (fastify: FastifyInstance,opts: any,done: () => void) {
   //attendance Regularize
 
   fastify.get("/attendance-regularize", getAllAttendanceRegularize);
-  fastify.post("/attendance-regularize",insertAttendanceRegularize);
-  fastify.get("/attendance-regularize/userdetails/:userId",getAttendanceRegularizebyUser)
-  fastify.get("/attendance-regularize/:id",getAttendanceRegularizebyId)
-  fastify.put("/attendance-regularize/:id",updateAttendanceRegularize)
-
+  fastify.post("/attendance-regularize", insertAttendanceRegularize);
+  fastify.get(
+    "/attendance-regularize/userdetails/:userId",
+    getAttendanceRegularizebyUser
+  );
+  fastify.get("/attendance-regularize/:id", getAttendanceRegularizebyId);
+  fastify.put("/attendance-regularize/:id", updateAttendanceRegularize);
 
   //loan
   fastify.get("/loan", getLoans);
@@ -96,16 +124,17 @@ const Routes = function (fastify: FastifyInstance,opts: any,done: () => void) {
   fastify.delete("/loan/:id", deleteLoan);
 
   //jobApplicants
-  fastify.post("/job/application", upsertJobApplicant);
-  fastify.get("/job/application", getAllJobApplicants);
-  fastify.get("/job/application/:applicantId", getSingleJobApplicant);
-  fastify.delete("/job/application/:applicantId", deleteJobApplicant);
+  fastify.post("/job-application", upsertJobApplicant);
+  fastify.get("/job-application", getAllJobApplicants);
+  fastify.get("/job-application/:applicantId", getSingleJobApplicant);
+  fastify.delete("/job-application/:applicantId", deleteJobApplicant);
 
   //scheduleInterview
-  fastify.post("/schedule_interview", upsertScheduledInterview);
-  fastify.get("/schedule_interview", getAllScheduledInterviews);
-  fastify.get("/schedule_interview/:applicantId", getScheduledInterviewById);
-  fastify.delete("/schedule_interview/:applicantId", cancelScheduledInterview);
+
+  fastify.post("/schedule-interview", upsertScheduledInterview);
+  fastify.get("/schedule-interview", getAllScheduledInterviews);
+  fastify.get("/schedule-interview/:applicantId", getScheduledInterviewById);
+  fastify.delete("/schedule-interview/:applicantId", cancelScheduledInterview);
 
   //onBoarding
   fastify.post("/onboarding", upsertOnboardingData);
@@ -114,16 +143,23 @@ const Routes = function (fastify: FastifyInstance,opts: any,done: () => void) {
   fastify.delete("/onboarding/:id", deleteOnboardingData);
 
   //bankDetails
-  fastify.post("/bank-details",upsertBankDetails);
-  fastify.get("/bank-details",getBankDetails);
-  fastify.get("/bank-details/:id",getIndividualBankDetails);
-  fastify.delete("/bank-details/:id",deleteBankDetails);
+  fastify.post("/bank-details", upsertBankDetails);
+  fastify.get("/bank-details", getBankDetails);
+  fastify.get("/bank-details/:id", getIndividualBankDetails);
+  fastify.delete("/bank-details/:id", deleteBankDetails);
 
-    //pfDetails
-    fastify.post("/pf-details",upsertPFDetails);
-    fastify.get("/pf-details",getPFDetails);
-    fastify.get("/pf-details/:id",getIndividualPFDetails);
-    fastify.delete("/pf-details/:id",deletePFDetails);
+  //pfDetails
+  fastify.post("/pf-details", upsertPFDetails);
+  fastify.get("/pf-details", getPFDetails);
+  fastify.get("/pf-details/:id", getIndividualPFDetails);
+  fastify.delete("/pf-details/:id", deletePFDetails);
+  //eightyC
+
+  fastify.post("/eightyC", upsertEightyCData);
+  fastify.get("/eightyC", getAllEightyCData);
+  fastify.get("/eightyC/:id", getEightyCDataById);
+  fastify.get("/eightyC/user/:userId", getEightyCDataByUserId);
+  fastify.delete("/eightyC/:id", deleteEightyCData);
   done();
 };
 
