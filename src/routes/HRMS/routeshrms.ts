@@ -90,7 +90,6 @@ const Routes = function (fastify: FastifyInstance,opts: any,done: () => void) {
   fastify.delete("/job/application/:applicantId", deleteJobApplicant);
 
   //scheduleInterview
-
   fastify.post("/schedule_interview", upsertScheduledInterview);
   fastify.get("/schedule_interview", getAllScheduledInterviews);
   fastify.get("/schedule_interview/:applicantId", getScheduledInterviewById);
