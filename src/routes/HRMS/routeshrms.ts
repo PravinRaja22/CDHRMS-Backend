@@ -50,6 +50,8 @@ import {
 } from "../../controllers/HRMS/onBoarding.Controller.js";
 import { deleteBankDetails, getBankDetails, getIndividualBankDetails, upsertBankDetails } from "../../controllers/HRMS/bankDetails.Controller.js";
 import { deletePFDetails, getIndividualPFDetails, getPFDetails, upsertPFDetails } from "../../controllers/HRMS/pfDetails.controller.js";
+import { getAllAttendanceRegularize, insertAttendanceRegularize,
+  getAttendanceRegularizebyUser,updateAttendanceRegularize,getAttendanceRegularizebyId } from "../../controllers/HRMS/attendanceRegularize.Controller.js";
 
 const Routes = function (fastify: FastifyInstance,opts: any,done: () => void) {
   //User Object Routes
@@ -77,6 +79,15 @@ const Routes = function (fastify: FastifyInstance,opts: any,done: () => void) {
   fastify.put("/attendance/:userId/:attendanceDate", updateAttendance);
   fastify.put("/attendance/:attendanceDate", updateAttendanceStatus);
   fastify.get("/attendance/:id", getsingleAttendance);
+
+  //attendance Regularize
+
+  fastify.get("/attendance-regularize", getAllAttendanceRegularize);
+  fastify.post("/attendance-regularize",insertAttendanceRegularize);
+  fastify.get("/attendance-regularize/userdetails/:userId",getAttendanceRegularizebyUser)
+  fastify.get("/attendance-regularize/:id",getAttendanceRegularizebyId)
+  fastify.put("/attendance-regularize/:id",updateAttendanceRegularize)
+
 
   //loan
   fastify.get("/loan", getLoans);
