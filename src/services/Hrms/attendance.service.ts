@@ -1,7 +1,6 @@
 import { forEach } from "lodash";
 import pool from "../../database/postgress.js";
 import { Query, QueryResult } from 'pg';
-
 export module attendanceService {
     export async function getAttendanceData() {
         try {
