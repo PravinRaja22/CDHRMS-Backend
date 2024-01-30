@@ -14,6 +14,23 @@ export module bankDetailsService {
             return error.message
         }
     }
+    export async function getIndividualBankDetails(recID :string) {
+        try {
+            console.log("bankDetails - getSinglebankDetails call");
+            const result = await pool.query(
+              "SELECT * FROM bankDetails WHERE id = $1",
+              [recID]
+            );
+            console.log(result.rows, "single bankDetails record");
+            return result.rows[0];
+          } catch (error) {
+            console.error(
+              `Error in getSbankDetails for id ${recID}:`,
+              error.message
+            );
+            return { error: error.message };
+          }
+    }
 
 
     export const upsertBankDetails = async (values: any) => {

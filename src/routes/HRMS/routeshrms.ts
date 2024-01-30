@@ -48,7 +48,7 @@ import {
   getSingleOnboardingData,
   upsertOnboardingData,
 } from "../../controllers/HRMS/onBoarding.Controller.js";
-import { deleteBankDetails, getBankDetails, upsertBankDetails } from "../../controllers/HRMS/bankDetails.Controller.js";
+import { deleteBankDetails, getBankDetails, getIndividualBankDetails, upsertBankDetails } from "../../controllers/HRMS/bankDetails.Controller.js";
 
 const Routes = function (fastify: FastifyInstance,opts: any,done: () => void) {
   //User Object Routes
@@ -104,6 +104,7 @@ const Routes = function (fastify: FastifyInstance,opts: any,done: () => void) {
   //bankDetails
   fastify.post("/bank-detials",upsertBankDetails)
   fastify.get("/bank-detials",getBankDetails)
+  fastify.get("/bank-detials/:id",getIndividualBankDetails)
   fastify.delete("/bank-detials/:id",deleteBankDetails)
   done();
 };

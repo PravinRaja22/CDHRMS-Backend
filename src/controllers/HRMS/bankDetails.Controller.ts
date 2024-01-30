@@ -30,3 +30,14 @@ export const deleteBankDetails = async (request: any, reply: any) => {
         reply.send(error.message)
     }
 }
+
+export const getIndividualBankDetails = async (request:any,reply:any)=>{
+    try{
+        const recId = request.params.id;
+        let result = await bankDetailsService.getIndividualBankDetails(recId)
+        reply.send(result)
+    }
+    catch(error){
+        reply.send(error.message)
+    }
+}
