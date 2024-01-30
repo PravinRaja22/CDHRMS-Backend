@@ -1,31 +1,31 @@
 
 import pool from "../../database/postgress.js";
 import { QueryResult } from 'pg';
-export module bankDetailsService {
+export module PFDetailsService {
 
 
-    export async function getBankDetails() {
+    export async function getPFDetails() {
         try {
-            console.log('Get bankDetails')
-            const result: QueryResult = await pool.query('SELECT * FROM bankDetails');
+            console.log('Get PFDetails')
+            const result: QueryResult = await pool.query('SELECT * FROM pfDetails');
             console.log(result.rows, "query results");
             return result.rows
         } catch (error: any) {
             return error.message
         }
     }
-    export async function getIndividualBankDetails(recID :string) {
+    export async function getIndividualPFDetails(recID :string) {
         try {
-            console.log("bankDetails - getSinglebankDetails call");
+            console.log("PFDetails - getSinglePFDetails call");
             const result = await pool.query(
-              "SELECT * FROM bankDetails WHERE id = $1",
+              "SELECT * FROM pfDetails WHERE id = $1",
               [recID]
             );
-            console.log(result.rows, "single bankDetails record");
+            console.log(result.rows, "single PFDetails record");
             return result.rows[0];
           } catch (error) {
             console.error(
-              `Error in getSbankDetails for id ${recID}:`,
+              `Error in getSPFDetails for id ${recID}:`,
               error.message
             );
             return { error: error.message };
@@ -33,8 +33,8 @@ export module bankDetailsService {
     }
 
 
-    export const upsertBankDetails = async (values: any) => {
-        console.log("Bank Details Data ", values)
+    export const upsertPFDetails = async (values: any) => {
+        console.log("PF Details Data ", values)
         try {
             const { id, ...upsertFields } = values;
             console.log(values, "upsertLeaves Request body");
@@ -49,17 +49,17 @@ export module bankDetailsService {
 
             if (id) {
                 // If id is provided, update the existing user
-                query = `UPDATE bankDetails SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(', ')} WHERE id = $${fieldNames.length + 1}`;
+                query = `UPDATE pfDetails SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(', ')} WHERE id = $${fieldNames.length + 1}`;
                 params = [...fieldValues, id];
 
             } else {
                 // If id is not provided, insert a new user
-                query = `INSERT INTO bankDetails (${fieldNames.join(', ')}) VALUES (${fieldNames.map((_, index) => `$${index + 1}`).join(', ')})`;
+                query = `INSERT INTO pfDetails (${fieldNames.join(', ')}) VALUES (${fieldNames.map((_, index) => `$${index + 1}`).join(', ')})`;
                 params = fieldValues;
             }
 
-            console.log(query, "upsert Bank Details query");
-            console.log(params, "upsert Bank Details params");
+            console.log(query, "upsert PF Details query");
+            console.log(params, "upsert PF Details params");
             let result = await pool.query(query, params);
             console.log(result, "upsert result");
             return ({ message: 'Back Details upserted successfully' });
@@ -70,25 +70,25 @@ export module bankDetailsService {
         }
     }
 
-    export const deleteBankDetails = async (recId : string)=>{
+    export const deletePFDetails = async (recId : string)=>{
         try {
-            console.log("deleteBankDetails - deleteBankDetails call");
+            console.log("pfDetails - deletepfDetails call");
             const result = await pool.query(
-              "DELETE FROM bankDetails WHERE id = $1 RETURNING *",
+              "DELETE FROM PFDetails WHERE id = $1 RETURNING *",
               [recId]
             );
             if (result.rowCount > 0) {
-              console.log(`bankDetails Data with id ${recId} deleted successfully`);
+              console.log(`PFDetails Data with id ${recId} deleted successfully`);
               return {
-                message: `bankDetails Data with id ${recId} deleted successfully`,
+                message: `PFDetails Data with id ${recId} deleted successfully`,
               };
             } else {
-              console.log(`bankDetails Data with id ${recId} not found`);
-              return { message: `bankDetails Data with id ${recId} not found` };
+              console.log(`PFDetails Data with id ${recId} not found`);
+              return { message: `PFDetails Data with id ${recId} not found` };
             }
           } catch (error) {
             console.error(
-              `Error in deletebankDetails for id ${recId}:`,
+              `Error in deletePFDetails for id ${recId}:`,
               error.message
             );
             return { error: error.message };

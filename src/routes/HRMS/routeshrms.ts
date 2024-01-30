@@ -49,6 +49,7 @@ import {
   upsertOnboardingData,
 } from "../../controllers/HRMS/onBoarding.Controller.js";
 import { deleteBankDetails, getBankDetails, getIndividualBankDetails, upsertBankDetails } from "../../controllers/HRMS/bankDetails.Controller.js";
+import { deletePFDetails, getIndividualPFDetails, getPFDetails, upsertPFDetails } from "../../controllers/HRMS/pfDetails.controller.js";
 
 const Routes = function (fastify: FastifyInstance,opts: any,done: () => void) {
   //User Object Routes
@@ -102,10 +103,16 @@ const Routes = function (fastify: FastifyInstance,opts: any,done: () => void) {
   fastify.delete("/onboarding/:id", deleteOnboardingData);
 
   //bankDetails
-  fastify.post("/bank-detials",upsertBankDetails)
-  fastify.get("/bank-detials",getBankDetails)
-  fastify.get("/bank-detials/:id",getIndividualBankDetails)
-  fastify.delete("/bank-detials/:id",deleteBankDetails)
+  fastify.post("/bank-details",upsertBankDetails);
+  fastify.get("/bank-details",getBankDetails);
+  fastify.get("/bank-details/:id",getIndividualBankDetails);
+  fastify.delete("/bank-details/:id",deleteBankDetails);
+
+    //pfDetails
+    fastify.post("/pf-details",upsertPFDetails);
+    fastify.get("/pf-details",getPFDetails);
+    fastify.get("/pf-details/:id",getIndividualPFDetails);
+    fastify.delete("/pf-details/:id",deletePFDetails);
   done();
 };
 
