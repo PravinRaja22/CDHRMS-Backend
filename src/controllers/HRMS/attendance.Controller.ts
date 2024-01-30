@@ -40,6 +40,16 @@ export async function updateAttendance(request:any,reply:any){
 export async function updateAttendanceStatus(request:any,reply:any){
     try{
         let result = await attendanceService.updateAttendanceStatus(request.params)
+        console.log(result ,'Final Result data is ');
+        reply.send(result)
+    }catch(error){
+        reply.status(500).send(error.message)
+    }
+}
+
+export async function getsingleAttendance(request:any,reply:any){
+    try{
+        let result = await attendanceService.getsingleAttendance(request.params.id)
         reply.send(result)
     }catch(error){
         reply.status(500).send(error.message)

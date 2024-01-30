@@ -13,7 +13,7 @@ import {
   upsertLeaves 
 } from '../../controllers/HRMS/leave.Controller.js';
 import { getLeaveBalanceByUsers, upsertLeaveBalanceByUsers } from '../../controllers/HRMS/leaveBalance.Controller.js';
-import { getAttendanceDate, updateAttendance, upsertAttendance,getAttendanceByUserIdDate,updateAttendanceStatus } from '../../controllers/HRMS/attendance.Controller.js';
+import { getAttendanceDate, updateAttendance, upsertAttendance,getAttendanceByUserIdDate,updateAttendanceStatus, getsingleAttendance } from '../../controllers/HRMS/attendance.Controller.js';
 
 const Routes = function (fastify: FastifyInstance, opts: any, done: () => void) {
   //User Object Routes
@@ -40,6 +40,7 @@ const Routes = function (fastify: FastifyInstance, opts: any, done: () => void) 
     fastify.get('/attendance/:userId/:attendanceDate',getAttendanceByUserIdDate)
     fastify.put('/attendance/:userId/:attendanceDate',updateAttendance)
     fastify.put('/attendance/:attendanceDate',updateAttendanceStatus)
+    fastify.get('/attendance/:id',getsingleAttendance)
     done();
   };
   

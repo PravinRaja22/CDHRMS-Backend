@@ -17,9 +17,9 @@ import pkg from 'pg';
 const pool = new pkg.Pool({
   user: "postgres",
   password: "admin",
-  host: "localhost",
+  host: "192.168.0.123",
   port: 5432,
-  database: "postgres",
+  database: "HRMS",
 });
 
 pool.on('connect', () => {
