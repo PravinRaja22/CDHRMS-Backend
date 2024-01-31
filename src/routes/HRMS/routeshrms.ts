@@ -74,6 +74,7 @@ import {
   getEightyCDataByUserId,
   upsertEightyCData,
 } from "../../controllers/HRMS/eightyC.Controller.js";
+import { deletepreviousEmployeeIncome, getAllpreviousEmployeeIncome, getSinglepreviousEmployeeIncome, getSinglepreviousEmployeeIncomebyuserId, upsertpreviousEmployeeIncome } from "../../controllers/HRMS/previousEmployeeIncome.controller.js";
 
 const Routes = function (
   fastify: FastifyInstance,
@@ -130,7 +131,6 @@ const Routes = function (
   fastify.delete("/job-application/:applicantId", deleteJobApplicant);
 
   //scheduleInterview
-
   fastify.post("/schedule-interview", upsertScheduledInterview);
   fastify.get("/schedule-interview", getAllScheduledInterviews);
   fastify.get("/schedule-interview/:applicantId", getScheduledInterviewById);
@@ -153,13 +153,20 @@ const Routes = function (
   fastify.get("/pf-details", getPFDetails);
   fastify.get("/pf-details/:id", getIndividualPFDetails);
   fastify.delete("/pf-details/:id", deletePFDetails);
-  //eightyC
 
+  //eightyC
   fastify.post("/eightyC", upsertEightyCData);
   fastify.get("/eightyC", getAllEightyCData);
   fastify.get("/eightyC/:id", getEightyCDataById);
   fastify.get("/eightyC/user/:userId", getEightyCDataByUserId);
   fastify.delete("/eightyC/:id", deleteEightyCData);
+
+  //previousEmpoyeeIncome
+  fastify.get("/income-Tax-Declaration/PrevEmployeeIncome", getAllpreviousEmployeeIncome);
+  fastify.get("/income-Tax-Declaration/PrevEmployeeIncome/:id", getSinglepreviousEmployeeIncome);
+  fastify.post("/income-Tax-Declaration/PrevEmployeeIncome", upsertpreviousEmployeeIncome);
+  fastify.get("/income-Tax-Declaration/PrevEmployeeIncome/user/:userId", getSinglepreviousEmployeeIncomebyuserId);
+  fastify.delete("/income-Tax-Declaration/PrevEmployeeIncome/:id", deletepreviousEmployeeIncome);
   done();
 };
 
