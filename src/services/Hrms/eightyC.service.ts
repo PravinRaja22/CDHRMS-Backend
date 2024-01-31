@@ -4,15 +4,10 @@ export module eightyCService {
   export async function getAllEightyCData() {
     try {
       console.log(`Fetching all 80C data for all employees`);
-
       const query = `SELECT * FROM eightyC`;
-
       console.log(query, "getAllEightyCData query");
-
       const result = await pool.query(query);
-
       console.log(`Fetched all 80C Data Result:`, result.rows);
-
       return result.rows;
     } catch (error) {
       console.error("Error in getAllEightyCData:", error.message);
@@ -37,7 +32,7 @@ export module eightyCService {
     try {
       console.log(`Fetching 80C data for userId: ${userId}`);
       const result = await pool.query(
-        "SELECT * FROM eightyC WHERE userID->>'id' = $1",
+        "SELECT * FROM eightyC WHERE userDetails->>'id' = $1",
         [userId]
       );
       console.log("Fetched 80C Data:", result.rows);

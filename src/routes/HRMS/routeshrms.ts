@@ -74,7 +74,50 @@ import {
   getEightyCDataByUserId,
   upsertEightyCData,
 } from "../../controllers/HRMS/eightyC.Controller.js";
-import { deletepreviousEmployeeIncome, getAllpreviousEmployeeIncome, getSinglepreviousEmployeeIncome, getSinglepreviousEmployeeIncomebyuserId, upsertpreviousEmployeeIncome } from "../../controllers/HRMS/previousEmployeeIncome.controller.js";
+import {
+  deletepreviousEmployeeIncome,
+  getAllpreviousEmployeeIncome,
+  getSinglepreviousEmployeeIncome,
+  getSinglepreviousEmployeeIncomebyuserId,
+  upsertpreviousEmployeeIncome,
+} from "../../controllers/HRMS/previousEmployeeIncome.controller.js";
+import {
+  deleteOtherChaptersData,
+  getAllOtherChaptersData,
+  getOtherChaptersDataByUserId,
+  getSingleOtherChaptersData,
+  upsertOtherChaptersData,
+} from "../../controllers/HRMS/otherChapters.Controller.js";
+import {
+  deleteHouseRentAllowanceData,
+  getAllHouseRentAllowanceData,
+  getHouseRentAllowanceDataByUserId,
+  getSingleHouseRentAllowanceData,
+  upsertHouseRentAllowanceData,
+} from "../../controllers/HRMS/houseRentAllowance.Controller.js";
+
+import {
+  getAllMedicalSectionEightyDData,
+  getMedicalSectionEightyDDataById,
+  getMedicalSectionEightyDDataByUserId,
+  upsertMedicalSectionEightyDData,
+  deleteMedicalSectionEightyDData,
+} from "../../controllers/HRMS/medicalSectionEightyD.Controller.js";
+
+import {
+  getAllIncomeLossHousePropertiesData,
+  getSingleIncomeLossHousePropertiesData,
+  getIncomeLossHousePropertiesDataByUserId,
+  upsertIncomeLossHousePropertiesData,
+  deleteIncomeLossHousePropertiesData,
+} from "../../controllers/HRMS/incomeLossHouseProperties.Controller.js";
+import {
+  deleteOtherIncomeData,
+  getAllOtherIncomeData,
+  getOtherIncomeDataByUserId,
+  getSingleOtherIncomeData,
+  upsertOtherIncomeData,
+} from "../../controllers/HRMS/otherIncome.Controller.js";
 
 const Routes = function (
   fastify: FastifyInstance,
@@ -160,11 +203,88 @@ const Routes = function (
   fastify.delete("/eightyC/:id", deleteEightyCData);
 
   //previousEmpoyeeIncome
-  fastify.get("/income-Tax-Declaration/PrevEmployeeIncome", getAllpreviousEmployeeIncome);
-  fastify.get("/income-Tax-Declaration/PrevEmployeeIncome/:id", getSinglepreviousEmployeeIncome);
-  fastify.post("/income-Tax-Declaration/PrevEmployeeIncome", upsertpreviousEmployeeIncome);
-  fastify.get("/income-Tax-Declaration/PrevEmployeeIncome/user/:userId", getSinglepreviousEmployeeIncomebyuserId);
-  fastify.delete("/income-Tax-Declaration/PrevEmployeeIncome/:id", deletepreviousEmployeeIncome);
+  fastify.get(
+    "/income-Tax-Declaration/PrevEmployeeIncome",
+    getAllpreviousEmployeeIncome
+  );
+  fastify.get(
+    "/income-Tax-Declaration/PrevEmployeeIncome/:id",
+    getSinglepreviousEmployeeIncome
+  );
+  fastify.post(
+    "/income-Tax-Declaration/PrevEmployeeIncome",
+    upsertpreviousEmployeeIncome
+  );
+  fastify.get(
+    "/income-Tax-Declaration/PrevEmployeeIncome/user/:userId",
+    getSinglepreviousEmployeeIncomebyuserId
+  );
+  fastify.delete(
+    "/income-Tax-Declaration/PrevEmployeeIncome/:id",
+    deletepreviousEmployeeIncome
+  );
+  //otherChapters
+
+  fastify.post("/otherChapters", upsertOtherChaptersData);
+  fastify.get("/otherChapters", getAllOtherChaptersData);
+  fastify.get("/otherChapters/:id", getSingleOtherChaptersData);
+  fastify.get("/otherChapters/user/:userId", getOtherChaptersDataByUserId);
+  fastify.delete("/otherChapters/:id", deleteOtherChaptersData);
+
+  //houseRentAllowance
+
+  fastify.post("/houseRentAllowance", upsertHouseRentAllowanceData);
+  fastify.get("/houseRentAllowance", getAllHouseRentAllowanceData);
+  fastify.get("/houseRentAllowance/:id", getSingleHouseRentAllowanceData);
+  fastify.get(
+    "/houseRentAllowance/user/:userId",
+    getHouseRentAllowanceDataByUserId
+  );
+  fastify.delete("/houseRentAllowance/:id", deleteHouseRentAllowanceData);
+
+  //medicalSectionEightyD
+
+  fastify.post("/medicalSectionEightyD", {}, upsertMedicalSectionEightyDData);
+  fastify.get("/medicalSectionEightyD", getAllMedicalSectionEightyDData);
+  fastify.get("/medicalSectionEightyD/:id", getMedicalSectionEightyDDataById);
+  fastify.get(
+    "/medicalSectionEightyD/user/:userId",
+    getMedicalSectionEightyDDataByUserId
+  );
+  fastify.delete("/medicalSectionEightyD/:id", deleteMedicalSectionEightyDData);
+
+  //incomeLossHouseProperties
+
+  fastify.post(
+    "/incomeLossHouseProperties",
+    {},
+    upsertIncomeLossHousePropertiesData
+  );
+  fastify.get(
+    "/incomeLossHouseProperties",
+    getAllIncomeLossHousePropertiesData
+  );
+  fastify.get(
+    "/incomeLossHouseProperties/:id",
+    getSingleIncomeLossHousePropertiesData
+  );
+  fastify.get(
+    "/incomeLossHouseProperties/user/:userId",
+    getIncomeLossHousePropertiesDataByUserId
+  );
+  fastify.delete(
+    "/incomeLossHouseProperties/:id",
+    deleteIncomeLossHousePropertiesData
+  );
+
+  // otherIncome
+
+  fastify.post("/otherIncome", upsertOtherIncomeData);
+  fastify.get("/otherIncome", getAllOtherIncomeData);
+  fastify.get("/otherIncome/:id", getSingleOtherIncomeData);
+  fastify.get("/otherIncome/user/:userId", getOtherIncomeDataByUserId);
+  fastify.delete("/otherIncome/:id", deleteOtherIncomeData);
+
   done();
 };
 
