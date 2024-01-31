@@ -1,5 +1,6 @@
 import pool from "../../database/postgress.js";
 import { Query, QueryResult } from 'pg';
+import { approvalService } from "./approval.service.js";
 
 export module attendanceRegularizeService{
 
@@ -38,6 +39,10 @@ export module attendanceRegularizeService{
             let result = await pool.query(query, params);
             console.log(result, "attendanceRegularizations insert result");
            if(result.rowCount>0){
+
+            //call Insert Approvals
+            let approval = await approvalService.insertApprovals(result.rows[0],{"label":"attendanceRegularizations","value":"Attendance Regularizations"})
+            console.log(approval,"approval call");
             return ({ message: 'Attendance Regularize Insert successfully' });
            }else{
             return ({message:"Attendance Regularize Insert Failure"})

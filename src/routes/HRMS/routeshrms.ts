@@ -95,6 +95,11 @@ import {
   getSingleHouseRentAllowanceData,
   upsertHouseRentAllowanceData,
 } from "../../controllers/HRMS/houseRentAllowance.Controller.js";
+// import { deleteBankDetails, getBankDetails, getIndividualBankDetails, upsertBankDetails } from "../../controllers/HRMS/bankDetails.Controller.js";
+// import { deletePFDetails, getIndividualPFDetails, getPFDetails, upsertPFDetails } from "../../controllers/HRMS/pfDetails.controller.js";
+// import { getAllAttendanceRegularize, insertAttendanceRegularize,
+//   getAttendanceRegularizebyUser,updateAttendanceRegularize,getAttendanceRegularizebyId } from "../../controllers/HRMS/attendanceRegularize.Controller.js";
+import { getAllApprovals, getApprovalbyApprover, insertApprovals, updateApprovals } from "../../controllers/HRMS/approval.Controller.js";
 
 import {
   getAllMedicalSectionEightyDData,
@@ -152,12 +157,16 @@ const Routes = function (
   //attendance Regularize
   fastify.get("/attendance-regularize", getAllAttendanceRegularize);
   fastify.post("/attendance-regularize", insertAttendanceRegularize);
-  fastify.get(
-    "/attendance-regularize/userdetails/:userId",
-    getAttendanceRegularizebyUser
-  );
-  fastify.get("/attendance-regularize/:id", getAttendanceRegularizebyId);
-  fastify.put("/attendance-regularize/:id", updateAttendanceRegularize);
+  fastify.get("/attendance-regularize/userdetails/:userId", getAttendanceRegularizebyUser)
+  fastify.get("/attendance-regularize/:id", getAttendanceRegularizebyId)
+  fastify.put("/attendance-regularize/:id", updateAttendanceRegularize)
+
+  //Approval
+
+  fastify.get("/approval", getAllApprovals)
+  fastify.post("/approval", insertApprovals)
+  fastify.get("/approval/:approverId", getApprovalbyApprover)
+  fastify.put("/approval/:id", updateApprovals)
 
   //loan
   fastify.get("/loan", getLoans);
