@@ -99,7 +99,6 @@ const Routes = function (
   fastify.post("/leave-balance/:userId", upsertLeaveBalanceByUsers);
 
   //attendance
-
   fastify.get("/attendance", getAttendanceDate);
   fastify.post("/attendance", upsertAttendance);
   fastify.get("/attendance/:userId/:attendanceDate", getAttendanceByUserIdDate);
@@ -108,7 +107,6 @@ const Routes = function (
   fastify.get("/attendance/:id", getsingleAttendance);
 
   //attendance Regularize
-
   fastify.get("/attendance-regularize", getAllAttendanceRegularize);
   fastify.post("/attendance-regularize", insertAttendanceRegularize);
   fastify.get(
