@@ -1,11 +1,17 @@
 import fastify from "fastify";
 import oauthPlugin from "@fastify/oauth2";
+import cors from '@fastify/cors'
 // import { connection } from "./database/postgress.js";
 import Routes from "./routes/HRMS/routeshrms.js";
 const server = fastify({
   logger:false,
 });
+await server.register(cors)
+
 server.register(Routes);
+
+
+
  server.register(oauthPlugin, {
     name: 'msOAuth2',
     credentials: {
