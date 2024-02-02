@@ -99,7 +99,12 @@ import {
 // import { deletePFDetails, getIndividualPFDetails, getPFDetails, upsertPFDetails } from "../../controllers/HRMS/pfDetails.controller.js";
 // import { getAllAttendanceRegularize, insertAttendanceRegularize,
 //   getAttendanceRegularizebyUser,updateAttendanceRegularize,getAttendanceRegularizebyId } from "../../controllers/HRMS/attendanceRegularize.Controller.js";
-import { getAllApprovals, getApprovalbyApprover, insertApprovals, updateApprovals } from "../../controllers/HRMS/approval.Controller.js";
+import {
+  getAllApprovals,
+  getApprovalbyApprover,
+  insertApprovals,
+  updateApprovals,
+} from "../../controllers/HRMS/approval.Controller.js";
 
 import {
   getAllMedicalSectionEightyDData,
@@ -124,21 +129,23 @@ import {
   upsertOtherIncomeData,
 } from "../../controllers/HRMS/otherIncome.Controller.js";
 import authVerify from "../../auth/auth.js";
+import {
+  deleteDeclaredTaxAmountData,
+  getAllDeclaredTaxAmountData,
+  getDeclaredTaxAmountDataByUserId,
+  getSingleDeclaredTaxAmountData,
+  upsertDeclaredTaxAmountData,
+} from "../../controllers/HRMS/declaredTaxAmount.Controller.js";
 
 const Routes = function (
   fastify: FastifyInstance,
   opts: any,
   done: () => void
 ) {
-
-
   //Authentication
-  fastify.post('/signup',{preHandler:authVerify},(req,reply)=>{
-    reply.send('yes ')
-  })
-
-
-
+  fastify.post("/signup", { preHandler: authVerify }, (req, reply) => {
+    reply.send("yes ");
+  });
 
   //User Object Routes
   fastify.get("/users", getUser);
@@ -168,16 +175,19 @@ const Routes = function (
   //attendance Regularize
   fastify.get("/attendance-regularize", getAllAttendanceRegularize);
   fastify.post("/attendance-regularize", insertAttendanceRegularize);
-  fastify.get("/attendance-regularize/userdetails/:userId", getAttendanceRegularizebyUser)
-  fastify.get("/attendance-regularize/:id", getAttendanceRegularizebyId)
-  fastify.put("/attendance-regularize/:id", updateAttendanceRegularize)
+  fastify.get(
+    "/attendance-regularize/userdetails/:userId",
+    getAttendanceRegularizebyUser
+  );
+  fastify.get("/attendance-regularize/:id", getAttendanceRegularizebyId);
+  fastify.put("/attendance-regularize/:id", updateAttendanceRegularize);
 
   //Approval
 
-  fastify.get("/approval", getAllApprovals)
-  fastify.post("/approval", insertApprovals)
-  fastify.get("/approval/:approverId", getApprovalbyApprover)
-  fastify.put("/approval/:id", updateApprovals)
+  fastify.get("/approval", getAllApprovals);
+  fastify.post("/approval", insertApprovals);
+  fastify.get("/approval/:approverId", getApprovalbyApprover);
+  fastify.put("/approval/:id", updateApprovals);
 
   //loan
   fastify.get("/loan", getLoans);
@@ -305,6 +315,16 @@ const Routes = function (
   fastify.get("/otherIncome/user/:userId", getOtherIncomeDataByUserId);
   fastify.delete("/otherIncome/:id", deleteOtherIncomeData);
 
+  //declaredTaxAmount
+
+  fastify.post("/declaredTaxAmount", upsertDeclaredTaxAmountData);
+  fastify.get("/declaredTaxAmount", getAllDeclaredTaxAmountData);
+  fastify.get("/declaredTaxAmount/:id", getSingleDeclaredTaxAmountData);
+  fastify.get(
+    "/declaredTaxAmount/user/:userId",
+    getDeclaredTaxAmountDataByUserId
+  );
+  fastify.delete("/declaredTaxAmount/:id", deleteDeclaredTaxAmountData);
   done();
 };
 

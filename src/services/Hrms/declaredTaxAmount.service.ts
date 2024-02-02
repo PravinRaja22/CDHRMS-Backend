@@ -1,0 +1,116 @@
+import pool from "../../database/postgress.js";
+
+export module declaredTaxAmountService {
+  export async function getAllDeclaredTaxAmountData() {
+    try {
+      console.log(`Fetching all Declared Tax Amount data for all employees`);
+
+      const query = `SELECT * FROM declaredTaxAmount`;
+
+      console.log(query, "getAllDeclaredTaxAmountData query");
+
+      const result = await pool.query(query);
+
+      console.log(`Fetched all Declared Tax Amount Data Result:`, result.rows);
+
+      return result.rows;
+    } catch (error) {
+      console.error("Error in getAllDeclaredTaxAmountData:", error.message);
+      throw error;
+    }
+  }
+
+  export async function getDeclaredTaxAmountDataById(id) {
+    try {
+      console.log(`Fetching Declared Tax Amount data for userId: ${id}`);
+      const result = await pool.query(
+        "SELECT * FROM declaredTaxAmount WHERE id = $1",
+        [id]
+      );
+      console.log("Fetched Declared Tax Amount Data:", result.rows);
+      return result.rows;
+    } catch (error) {
+      console.error("Error fetching Declared Tax Amount data:", error.message);
+      throw error;
+    }
+  }
+
+  export async function getDeclaredTaxAmountDataByUserId(userId) {
+    try {
+      console.log(`Fetching Declared Tax Amount data for userId: ${userId}`);
+      const result = await pool.query(
+        "SELECT * FROM declaredTaxAmount WHERE userDetails->>'id' = $1",
+        [userId]
+      );
+      console.log("Fetched Declared Tax Amount Data:", result.rows);
+      return result.rows;
+    } catch (error) {
+      console.error("Error fetching Declared Tax Amount data:", error.message);
+      throw error;
+    }
+  }
+
+  export const upsertDeclaredTaxAmountData = async (request: any) => {
+    try {
+      const { id, ...upsertFields } = request;
+      console.log(request, "upsertDeclaredTaxAmountData Request body");
+      console.log("Update or Insert Declared Tax Amount Data");
+
+      const fieldNames = Object.keys(upsertFields);
+      const fieldValues = Object.values(upsertFields);
+      console.log(fieldNames, "upsertDeclaredTaxAmountData fieldNames");
+      console.log(fieldValues, "upsertDeclaredTaxAmountData fieldValues");
+
+      let query;
+      let params: any[] = [];
+
+      if (id) {
+        // If id is provided, update the existing Declared Tax Amount data
+        query = `UPDATE declaredTaxAmount SET ${fieldNames
+          .map((field, index) => `${field} = $${index + 1}`)
+          .join(", ")} WHERE id = $${fieldNames.length + 1}`;
+        params = [...fieldValues, id];
+      } else {
+        // If id is not provided, insert a new Declared Tax Amount data
+        query = `INSERT INTO declaredTaxAmount (${fieldNames.join(
+          ", "
+        )}) VALUES (${fieldNames
+          .map((_, index) => `$${index + 1}`)
+          .join(", ")})`;
+        params = fieldValues;
+      }
+
+      console.log(query, "upsertDeclaredTaxAmountData query");
+      console.log(params, "upsertDeclaredTaxAmountData params");
+
+      let result = await pool.query(query, params);
+      let message =
+        result.command === "UPDATE"
+          ? `${result.rowCount} Declared Tax Amount Data Updated successfully`
+          : `${result.rowCount} Declared Tax Amount Data Inserted successfully`;
+
+      console.log(message);
+      return { message };
+    } catch (error) {
+      console.error("Error in upsertDeclaredTaxAmountData:", error.message);
+      return { error: error.message };
+    }
+  };
+
+  export async function deleteDeclaredTaxAmountData(id) {
+    try {
+      console.log(`Deleting Declared Tax Amount data for userId: ${id}`);
+      const result = await pool.query(
+        "DELETE FROM declaredTaxAmount WHERE id = $1 RETURNING *",
+        [id]
+      );
+      console.log("Deleted Declared Tax Amount Data Result:", result.rows);
+      return {
+        message: `${result.rowCount} Declared Tax Amount data deleted successfully`,
+      };
+    } catch (error) {
+      console.error("Error deleting Declared Tax Amount data:", error.message);
+      throw error;
+    }
+  }
+}
