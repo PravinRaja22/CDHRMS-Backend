@@ -1,4 +1,4 @@
-import { ConfidentialClientApplication, CryptoProvider } from '@azure/msal-node';
+import { ConfidentialClientApplication} from '@azure/msal-node';
 
 const config = {
   auth: {
