@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/Farmutate/api#readme",
   "dependencies": {
+    "@azure/msal-node": "^2.6.2",
     "@fastify/cors": "^9.0.0",
     "@fastify/oauth2": "^7.7.0",
     "aws-sdk": "^2.1508.0",

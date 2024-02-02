@@ -123,12 +123,23 @@ import {
   getSingleOtherIncomeData,
   upsertOtherIncomeData,
 } from "../../controllers/HRMS/otherIncome.Controller.js";
+import authVerify from "../../auth/auth.js";
 
 const Routes = function (
   fastify: FastifyInstance,
   opts: any,
   done: () => void
 ) {
+
+
+  //Authentication
+  fastify.post('/signup',{preHandler:authVerify},(req,reply)=>{
+    reply.send('yes ')
+  })
+
+
+
+
   //User Object Routes
   fastify.get("/users", getUser);
   fastify.get("/users/:id", getSingleUser);
