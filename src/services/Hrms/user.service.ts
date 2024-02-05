@@ -8,7 +8,14 @@ export module userService {
     export const getAllUsers = async () => {
         try {
             console.log("Get All Users");
-            const result: QueryResult = await pool.query('SELECT * FROM users');
+            let joinQuery = `SELECT
+                users.* ,pfdetails.* , bankdetails.* 
+                FROM
+                users AS users
+                INNER JOIN pfdetails AS pfDetails ON pfdetails.userid = users.id
+                INNER JOIN bankdetails AS bankDetails ON bankdetails.userid = users.id`;
+
+            const result: QueryResult = await pool.query(joinQuery);
             console.log(result, "query results");
             return result.rows
 
