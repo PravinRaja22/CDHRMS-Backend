@@ -92,7 +92,7 @@ export module leaveService {
             return (error.message);
         }
     }
-}
+
 
 export async function getLeavesByUsers(userId: any) {
     try {
@@ -122,4 +122,4 @@ export async function getLeavesByApprover(approverId: string) {
         return error.message;
     }
 }
-
+}

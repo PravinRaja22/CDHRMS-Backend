@@ -26,8 +26,8 @@ export module approvalService {
         console.log("postApprovals", values);
         try {
 
-            let fieldNames = Object.keys(values)
-            let fieldValues = Object.values(values)
+         
+
             let obj = {
                 "parentId": values?.id,
                 "requesterId": values?.userId || values.userid,
@@ -37,6 +37,9 @@ export module approvalService {
                 "reason": values?.reason,
                 "comments": null,
             }
+
+            let fieldNames = Object.keys(obj)
+            let fieldValues = Object.values(obj)
 
             let query = `INSERT INTO approvals (${fieldNames.join(
                 ", "
@@ -58,7 +61,6 @@ export module approvalService {
             console.log(error.message, "approval insert error");
         }
     }
-}
 
 export async function getApprovalbyApprover(approverId: any) {
     try {
@@ -97,8 +99,8 @@ export async function updateApprovals(requestBody: any, requestParams: any) {
             //update the parent record
             let approvalRec = result.rows[0]
             let updateParent = await updateParentRecord(approvalRec, requestParams)
-
-            return ({ message: `${requestBody.type.label} ${requestBody.status.label} Successfully` });
+                console.log(updateParent,"updateParent");
+            return ({ message: `${requestBody.type} ${requestBody.status} Successfully` });
         } else {
             return { message: 'Approval Update Failure' }
         }
@@ -182,9 +184,13 @@ async function updateParentRecord(approvalRec, approvalRecId) {
             let getLeaveRecord = await leaveService.getSingleLeaves(
                 approvalRec.parentId || approvalRec.parentid
             );
-            let newLeave = { ...getLeaveRecord[0] };
+            let newLeave1 = { ...getLeaveRecord[0] };
+
+            let {uuid,...newLeave} = newLeave1
+
+            console.log(newLeave,"newLeave");
             newLeave.status = approvalRec.status;
-            newLeave.approval = { id: approvalRecId };
+            // newLeave.approval = { id: approvalRecId };
             let updateLeave = await leaveService.upsertLeaves(newLeave);
             console.log(updateLeave, "updateLeave");
 
@@ -239,7 +245,7 @@ const updateAttendance = async (attendanceRecord, updateType) => {
         try {
             let result = await attendanceService.updateAttendance(params, updatedAttendanceRecord);
             console.log(result, "result");
-            if (result.rowCount > 0) {
+            if (result.message > 'Attendance upserted successfully' ) {
                 return { status: 200 };
             }
         }
@@ -257,6 +263,7 @@ const updateLeaveBalance = async () => {
 
 }
 
+}
 
 
 
