@@ -38,7 +38,7 @@ pool.on("error", (err) => {
 
 export const query = async (stmt,options)=>{
   console.log('querying');
-  return await pool.query(stmt,options);
+  return await pool.query(stmt);
 }
 
 export default pool;

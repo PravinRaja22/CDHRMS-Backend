@@ -138,6 +138,7 @@ import {
   getSingleDeclaredTaxAmountData,
   upsertDeclaredTaxAmountData,
 } from "../../controllers/HRMS/declaredTaxAmount.Controller.js";
+import { generatePayslip } from "../../controllers/HRMS/payslip.Controller.js";
 
 const Routes = function (
   fastify: FastifyInstance,
@@ -178,7 +179,6 @@ const Routes = function (
   fastify.post("/attendance/bulk",upsertBulkAttendance)
 
 
-
   //attendance Regularize
   fastify.get("/attendance-regularize", getAllAttendanceRegularize);
   fastify.post("/attendance-regularize", insertAttendanceRegularize);
@@ -188,6 +188,12 @@ const Routes = function (
   );
   fastify.get("/attendance-regularize/:id", getAttendanceRegularizebyId);
   fastify.put("/attendance-regularize/:id", updateAttendanceRegularize);
+
+
+  //Payslip
+
+  fastify.get("/payslip/:userId/:month/:year",generatePayslip)
+
 
   //Approval
 
