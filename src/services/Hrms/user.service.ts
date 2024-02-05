@@ -18,6 +18,36 @@ export module userService {
 
     }
 
+    export const getAuthorizedUserdata = async (username) => {
+        try {
+            console.log(username, 'data in userName')
+            let data : any = await pool.query('SELECT * FROM users WHERE username = $1', [username])
+            console.log(data.rows.length ,'data')
+            if (data.rows.length > 0) {
+                return {status:'sucess',result:data.rows}
+            }
+            else {
+                console.log('else section ')
+                let upsertResult = upsertUser({ userName: username })
+                console.log(upsertResult)
+                return {staus:'sucess',result:upsertResult};
+            }
+            //  const resultdatasetrehg  = await pool.query('SELECT * FROM users WHERE username = $1', [username])
+            //  console.log('test')
+            // console.log(result.rows.length, "result get Authorized User");
+            // if(result.rows.length > 0){
+            //     return result.rows
+            // }
+            // else{
+            //     console.log('testing data set')
+            // //   let upsertResult =   upsertUser({userName:username})
+            // //   return upsertResult;
+            // }
+        } catch (error) {
+            return error.message
+        }
+    }
+
     export const getSingleUser = async (recId: string) => {
         try {
             console.log("Get single Users");
@@ -33,7 +63,7 @@ export module userService {
     export const upsertUser = async (request: any) => {
         try {
             const { id, ...upsertFields } = request;
-            console.log(request, "upsertUser Request body");
+            // console.log(request, "upsertUser Request body");
             console.log("Update Users");
             const fieldNames = Object.keys(upsertFields);
             const fieldValues = Object.values(upsertFields);
@@ -56,12 +86,12 @@ export module userService {
 
             console.log(query, "upsertUser query");
             console.log(params, "upsertUser params");
-           let result = await pool.query(query, params);
-           let message = result.command ==='UPDATE' ? 
-           `${result.rowCount} User Updated successfully` :
-           `${result.rowCount} User Inserted successfully`;
-           
-            return ({ message});
+            let result = await pool.query(query, params);
+            let message = result.command === 'UPDATE' ?
+                `${result.rowCount} User Updated successfully` :
+                `${result.rowCount} User Inserted successfully`;
+
+            return ({ message });
         } catch (error) {
             return error.message
         }

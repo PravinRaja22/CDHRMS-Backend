@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import {
   deleteUser,
+  getAuthorizeduser,
   getSingleUser,
   getUser,
   upsertUser,
@@ -143,9 +144,11 @@ const Routes = function (
   done: () => void
 ) {
   //Authentication
-  fastify.post("/signup", { preHandler: authVerify }, (req, reply) => {
-    reply.send("yes ");
-  });
+  // fastify.post("/signup", { preHandler: authVerify }, (req, reply) => {
+  //   console.log(req.userData.result.account ,'dataset is ')
+  //   reply.send("yes ");
+  // });
+  fastify.post("/signup", { preHandler: authVerify }, getAuthorizeduser);
 
   //User Object Routes
   fastify.get("/users", getUser);
