@@ -1,17 +1,14 @@
 import { validateToken } from "./validatetoken.js";
 
-let authVerify = async (request, reply, next) => {
+let authVerify = async (request, reply) => {
 
-  console.log(request.headers.authorization , "header sections");
+  console.log(request.headers.authorization, "header sections");
 
   try {
-    let result = await validateToken(request.headers.authorization);
-    // console.log(result, "testing data set");
+    let result: any = await validateToken(request.headers.authorization);
     if (result.status === true) {
       console.log("success data");
       request.userData = result;
-      next();
-    //   done()
     } else {
       reply.send("validaton failed");
     }

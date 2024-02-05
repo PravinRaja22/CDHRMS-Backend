@@ -17,7 +17,7 @@ const pool = new pkg.Pool({
   // user: "postgres",
   // password: "admin",
   // host: "localhost",
-  // port: 5432,
+  // port: 5432',
   // database: "postgres",
   user: "postgres",
   password: "admin",
@@ -34,5 +34,11 @@ pool.on("error", (err) => {
   console.log("error is ");
   console.error("Error connecting to the database:", err.message);
 });
+
+
+export const query = async (stmt,options)=>{
+  console.log('querying');
+  return await pool.query(stmt,options);
+}
 
 export default pool;

@@ -148,7 +148,7 @@ const Routes = function (
   //   console.log(req.userData.result.account ,'dataset is ')
   //   reply.send("yes ");
   // });
-  fastify.post("/signup", { preHandler: authVerify }, getAuthorizeduser);
+  fastify.post("/signup", { preHandler: [authVerify] }, getAuthorizeduser);
 
   //User Object Routes
   fastify.get("/users", getUser);
