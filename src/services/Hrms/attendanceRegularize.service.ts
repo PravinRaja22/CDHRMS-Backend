@@ -41,7 +41,7 @@ export module attendanceRegularizeService{
            if(result.rowCount>0){
 
             //call Insert Approvals
-            let approval = await approvalService.insertApprovals(result.rows[0],{"label":"attendanceRegularizations","value":"Attendance Regularizations"})
+            let approval = await approvalService.insertApprovals(result.rows[0],{"value":"attendanceRegularizations","label":"Attendance Regularizations"})
             console.log(approval,"approval call");
             return ({ message: 'Attendance Regularize Insert successfully' });
            }else{
