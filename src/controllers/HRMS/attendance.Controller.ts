@@ -55,3 +55,12 @@ export async function getsingleAttendance(request:any,reply:any){
         reply.status(500).send(error.message)
     }
 }
+
+export async function upsertBulkAttendance(request:any,reply:any){
+    try{
+        let result = await attendanceService.upsertBulkAttendance(request.body)
+        reply.send(result)
+    }catch(error){
+        reply.status(500).send(error.message)
+    }
+}

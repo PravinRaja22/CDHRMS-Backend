@@ -118,6 +118,72 @@ export module attendanceService {
 
     }
 
+    //attendance bulk insert
+    export async function upsertBulkAttendance(values: any) {
+        try {
+            console.log("inside upsertBulkAttendance", values);
+            const userId = values.userId || values.userid;
+            const startDate = new Date('2024-01-01T00:05:00Z'); 
+            const endDate = new Date('2024-01-31T23:59:59Z'); 
+    
+            while (startDate <= endDate) {
+                const dateInMillis = startDate.getTime();
+  
+                const record = {
+                    userId,
+                    date: dateInMillis,
+                    signin: {
+                        data: [
+                            {
+                                timeStamp: dateInMillis + 9 * 60 * 60 * 1000, // 9:00 AM UTC
+                                lat: 0, 
+                                lng: 0,
+                            },
+                        ],
+                    },
+                    signout: {
+                        data: [
+                            {
+                                timeStamp: dateInMillis + 18 * 60 * 60 * 1000, // 6:00 PM UTC
+                                lat: 0, 
+                                lng: 0, 
+                            },
+                        ],
+                    },
+                    isweekend: startDate.getUTCDay() === 0 || startDate.getUTCDay() === 6, // Sunday or Saturday
+                    status : startDate.getUTCDay() === 0 || startDate.getUTCDay() === 6 ? "weekoff" :"present",
+                    shift: {
+                        "shiftType": "GS",
+                        "shiftStart": "09:00",
+                        "shiftEnd": "18:00"
+                      }
+                };
+    
+               
+                await upsertAttendanceRecord(record);
+    
+                // Move to the next day
+                startDate.setDate(startDate.getDate() + 1);
+            }
+           
+        } catch (error) {
+            return error.message
+        }
+    }
+
+    async function upsertAttendanceRecord(record: any) {
+        // Your upsert or insert logic goes here
+        console.log("Upserting record:", record);
+        let fieldNames = Object.keys(record)
+        let fieldValues =Object.values(record)
+
+        let query = `INSERT INTO attendances (${fieldNames.join(', ')}) VALUES (${fieldValues.map((_, index) => `$${index + 1}`).join(', ')}) RETURNING *`;
+        let params = fieldValues;
+        const result = await pool.query(query, params);
+        console.log(result.command,"record insert result");
+
+    }
+
     // export async function updateAttendanceStatus(params: any) {
     //     //update all user attendance status,working hours, session timings
 
