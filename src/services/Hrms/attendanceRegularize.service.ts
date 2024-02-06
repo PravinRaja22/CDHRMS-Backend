@@ -6,7 +6,7 @@ export module attendanceRegularizeService{
 
     export async function getAllAttendanceRegularize() {
         try{
-            let result :QueryResult =  await query(`SELECT * FROM attendanceRegularizations`,{})
+            let result :QueryResult =  await query(`SELECT * FROM attendanceRegularizations`,[])
             console.log(result,"QueryResult");
             return result.rows
         }
@@ -18,7 +18,7 @@ export module attendanceRegularizeService{
     
     export async function getAttendanceRegularizebyId(recId) {
         try{
-            let result :QueryResult =  await query(`SELECT * FROM attendanceRegularizations WHERE id =${recId}`,{})
+            let result :QueryResult =  await query(`SELECT * FROM attendanceRegularizations WHERE id =${recId}`,[])
             console.log(result,"QueryResult");
             return result.rows
         }

@@ -7,7 +7,7 @@ export module bankDetailsService {
     export async function getBankDetails() {
         try {
             console.log('Get bankDetails')
-            const result: QueryResult = await query('SELECT * FROM bankDetails',{});
+            const result: QueryResult = await query('SELECT * FROM bankDetails',[]);
             console.log(result.rows, "query results");
             return result.rows
         } catch (error: any) {

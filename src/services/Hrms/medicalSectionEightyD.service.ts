@@ -1,15 +1,15 @@
-import pool from "../../database/postgress.js";
+import {query} from "../../database/postgress.js";
 
 export module medicalSectionEightyDService {
   export async function getAllMedicalSectionEightyDData() {
     try {
       console.log(`Fetching all Medical Section 80D data for all employees`);
 
-      const query = `SELECT * FROM medicalSectionEightyD`;
+      const querydata = `SELECT * FROM medicalSectionEightyD`;
 
-      console.log(query, "getAllMedicalSectionEightyDData query");
+      console.log(querydata, "getAllMedicalSectionEightyDData query");
 
-      const result = await pool.query(query);
+      const result = await query(querydata,[]);
 
       console.log(`Fetched all Medical Section 80D Data Result:`, result.rows);
 
@@ -23,7 +23,7 @@ export module medicalSectionEightyDService {
   export async function getMedicalSectionEightyDDataById(id) {
     try {
       console.log(`Fetching Medical Section 80D data for id: ${id}`);
-      const result = await pool.query(
+      const result = await query(
         "SELECT * FROM medicalSectionEightyD WHERE id = $1",
         [id]
       );
@@ -38,7 +38,7 @@ export module medicalSectionEightyDService {
   export async function getMedicalSectionEightyDDataByUserId(userId) {
     try {
       console.log(`Fetching Medical Section 80D data for userId: ${userId}`);
-      const result = await pool.query(
+      const result = await query(
         "SELECT * FROM medicalSectionEightyD WHERE userDetails->>'id' = $1",
         [userId]
       );
@@ -61,18 +61,18 @@ export module medicalSectionEightyDService {
       console.log(fieldNames, "upsertMedicalSectionEightyDData fieldNames");
       console.log(fieldValues, "upsertMedicalSectionEightyDData fieldValues");
 
-      let query;
+      let querydata;
       let params: any[] = [];
 
       if (id) {
         // If id is provided, update the existing Medical Section 80D data
-        query = `UPDATE medicalSectionEightyD SET ${fieldNames
+        querydata = `UPDATE medicalSectionEightyD SET ${fieldNames
           .map((field, index) => `${field} = $${index + 1}`)
           .join(", ")} WHERE id = $${fieldNames.length + 1}`;
         params = [...fieldValues, id];
       } else {
         // If id is not provided, insert a new Medical Section 80D data
-        query = `INSERT INTO medicalSectionEightyD (${fieldNames.join(
+        querydata = `INSERT INTO medicalSectionEightyD (${fieldNames.join(
           ", "
         )}) VALUES (${fieldNames
           .map((_, index) => `$${index + 1}`)
@@ -80,10 +80,10 @@ export module medicalSectionEightyDService {
         params = fieldValues;
       }
 
-      console.log(query, "upsertMedicalSectionEightyDData query");
+      console.log(querydata, "upsertMedicalSectionEightyDData query");
       console.log(params, "upsertMedicalSectionEightyDData params");
 
-      let result = await pool.query(query, params);
+      let result = await query(querydata, params);
       let message =
         result.command === "UPDATE"
           ? `${result.rowCount} Medical Section 80D Data Updated successfully`
@@ -100,7 +100,7 @@ export module medicalSectionEightyDService {
   export async function deleteMedicalSectionEightyDData(id) {
     try {
       console.log(`Deleting Medical Section 80D data for id: ${id}`);
-      const result = await pool.query(
+      const result = await query(
         "DELETE FROM medicalSectionEightyD WHERE id = $1 RETURNING *",
         [id]
       );

@@ -9,7 +9,7 @@ export module declaredTaxAmountService {
 
       console.log(querydata, "getAllDeclaredTaxAmountData query");
 
-      const result = await query(query,{});
+      const result = await query(query,[]);
 
       console.log(`Fetched all Declared Tax Amount Data Result:`, result.rows);
 

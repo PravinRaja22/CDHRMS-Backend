@@ -1,13 +1,13 @@
 
-import pool from "../../database/postgress.js";
+import {query} from "../../database/postgress.js";
 import { QueryResult } from 'pg';
 export module leaveBalanceService {
     export async function getLeaveBalanceByUsers(userId:any) {
         try {
             console.log('Get getLeaveBalanceByUsers') ;
 
-            const result: QueryResult = await pool.query(`SELECT * FROM leaveBalances
-            WHERE (userId->>'userId')::int = ${userId}`);
+            const result: QueryResult = await query(`SELECT * FROM leaveBalances
+            WHERE (userId->>'userId')::int = ${userId}`,[]);
             console.log(result.rows, "query results");
             return result.rows
         } catch (error: any) {
@@ -24,7 +24,7 @@ export module leaveBalanceService {
 
            
 
-            const result: QueryResult = await pool.query(`
+            const result: QueryResult = await query(`
                 UPDATE leaveBalances
                 SET balance = $1
                 WHERE (userId->>'userId')::int = $2
@@ -35,7 +35,7 @@ export module leaveBalanceService {
             let message = `${requestBody.userId.userName} leaveBalance Updated successfully` 
             //check the query result has record or not
             if (result.rowCount === 0) {
-                let resultInsert = await pool.query(`
+                let resultInsert = await query(`
                     INSERT INTO leaveBalances (userId, balance)
                     VALUES ($1, $2)
                 `, [requestBody.userId, requestBody.balance]);

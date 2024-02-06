@@ -1,11 +1,11 @@
-import pool from "../../database/postgress.js";
+import {query} from "../../database/postgress.js";
 import { QueryResult } from "pg";
 
 export module loanService {
   export async function getAllLoans() {
     try {
       console.log("getAllLoans call");
-      const result: QueryResult = await pool.query("SELECT * FROM loans");
+      const result: QueryResult = await query("SELECT * FROM loans",[]);
       console.log(result.rows, "Query results for getAllLoans");
       return result.rows;
     } catch (error) {
@@ -17,7 +17,7 @@ export module loanService {
   export async function getLoanById(loanId: string) {
     try {
       console.log("getLoanById call");
-      const result: QueryResult = await pool.query(
+      const result: QueryResult = await query(
         "SELECT * FROM loans WHERE id = $1",
         [loanId]
       );
@@ -46,17 +46,17 @@ export module loanService {
       console.log(fieldNames, "upsertLoan fieldNames");
       console.log(fieldValues, "upsertLoan fieldValues");
 
-      let query;
+      let querydata;
       let params: any[] = [];
       //   if (id) {
       //     // If id is provided, update the existing loan
-      //     query = `UPDATE loans SET ${fieldNames
+      //     querydata = `UPDATE loans SET ${fieldNames
       //       .map((field, index) => `${field} = $${index + 1}`)
       //       .join(", ")} WHERE id = $${fieldNames.length + 1}`;
       //     params = [...fieldValues, id];
       //   } else {
       //     // If id is not provided, insert a new loan
-      //     query = `INSERT INTO loans (${fieldNames.join(
+      //     querydata = `INSERT INTO loans (${fieldNames.join(
       //       ", "
       //     )}) VALUES (${fieldNames
       //       .map((_, index) => `$${index + 1}`)
@@ -66,13 +66,13 @@ export module loanService {
 
       if (id) {
         // If id is provided, update the existing user
-        query = `UPDATE loans SET ${fieldNames
+        querydata = `UPDATE loans SET ${fieldNames
           .map((field, index) => `${field} = $${index + 1}`)
           .join(", ")} WHERE id = $${fieldNames.length + 1}`;
         params = [...fieldValues, id];
       } else {
         // If id is not provided, insert a new user
-        query = `INSERT INTO loans (${fieldNames.join(
+        querydata = `INSERT INTO loans (${fieldNames.join(
           ", "
         )}) VALUES (${fieldNames
           .map((_, index) => `$${index + 1}`)
@@ -80,10 +80,10 @@ export module loanService {
         params = fieldValues;
       }
 
-      console.log(query, "upsertLoan query");
+      console.log(querydata, "upsertLoan query");
       console.log(params, "upsertLoan params");
 
-      const result = await pool.query(query, params);
+      const result = await query(querydata, params);
       const message =
         result.command === "UPDATE"
           ? `${result.rowCount} Loan Updated successfully`
@@ -102,16 +102,14 @@ export module loanService {
   export async function deleteLoan(loanId: string) {
     try {
       console.log("deleteLoan call");
-      const result = await pool.query(
+      const result = await query(
         "DELETE FROM loans WHERE id = $1 RETURNING *",
         [loanId]
       );
-
       if (result.rows.length === 0) {
         console.log(`No loan found for id ${loanId}`);
         return { success: false, message: "Loan not found." };
       }
-
       console.log(result.rows[0], "Deleted loan details for deleteLoan");
       return { success: true, message: "Loan deleted successfully." };
     } catch (error) {

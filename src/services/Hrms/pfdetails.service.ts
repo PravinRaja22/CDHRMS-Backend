@@ -1,5 +1,5 @@
 
-import pool from "../../database/postgress.js";
+import {query} from "../../database/postgress.js";
 import { QueryResult } from 'pg';
 export module PFDetailsService {
 
@@ -7,7 +7,7 @@ export module PFDetailsService {
     export async function getPFDetails() {
         try {
             console.log('Get PFDetails')
-            const result: QueryResult = await pool.query('SELECT * FROM pfDetails');
+            const result: QueryResult = await query('SELECT * FROM pfDetails',[]);
             console.log(result.rows, "query results");
             return result.rows
         } catch (error: any) {
@@ -17,7 +17,7 @@ export module PFDetailsService {
     export async function getIndividualPFDetails(recID :string) {
         try {
             console.log("PFDetails - getSinglePFDetails call");
-            const result = await pool.query(
+            const result = await query(
               "SELECT * FROM pfDetails WHERE id = $1",
               [recID]
             );
@@ -44,23 +44,23 @@ export module PFDetailsService {
             console.log(fieldNames, "upsertLeaves fieldNames");
             console.log(fieldValues, "upsertLeaves fieldValues");
 
-            let query;
+            let querydata;
             let params: any[] = [];
 
             if (id) {
                 // If id is provided, update the existing user
-                query = `UPDATE pfDetails SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(', ')} WHERE id = $${fieldNames.length + 1}`;
+                querydata = `UPDATE pfDetails SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(', ')} WHERE id = $${fieldNames.length + 1}`;
                 params = [...fieldValues, id];
 
             } else {
                 // If id is not provided, insert a new user
-                query = `INSERT INTO pfDetails (${fieldNames.join(', ')}) VALUES (${fieldNames.map((_, index) => `$${index + 1}`).join(', ')})`;
+                querydata = `INSERT INTO pfDetails (${fieldNames.join(', ')}) VALUES (${fieldNames.map((_, index) => `$${index + 1}`).join(', ')})`;
                 params = fieldValues;
             }
 
-            console.log(query, "upsert PF Details query");
+            console.log(querydata, "upsert PF Details query");
             console.log(params, "upsert PF Details params");
-            let result = await pool.query(query, params);
+            let result = await query(querydata, params);
             console.log(result, "upsert result");
             return ({ message: 'Back Details upserted successfully' });
 
@@ -73,7 +73,7 @@ export module PFDetailsService {
     export const deletePFDetails = async (recId : string)=>{
         try {
             console.log("pfDetails - deletepfDetails call");
-            const result = await pool.query(
+            const result = await query(
               "DELETE FROM PFDetails WHERE id = $1 RETURNING *",
               [recId]
             );

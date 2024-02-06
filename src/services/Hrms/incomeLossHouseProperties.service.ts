@@ -1,4 +1,4 @@
-import pool from "../../database/postgress.js";
+import {query} from "../../database/postgress.js";
 
 export module incomeLossHousePropertiesService {
   export async function getAllIncomeLossHousePropertiesData() {
@@ -7,11 +7,11 @@ export module incomeLossHousePropertiesService {
         `Fetching all income loss house properties data for all employees`
       );
 
-      const query = `SELECT * FROM incomeLossHouseProperties`;
+      const querydata = `SELECT * FROM incomeLossHouseProperties`;
 
-      console.log(query, "getAllIncomeLossHousePropertiesData query");
+      console.log(querydata, "getAllIncomeLossHousePropertiesData query");
 
-      const result = await pool.query(query);
+      const result = await query(querydata);
 
       console.log(
         `Fetched all Income Loss House Properties Data Result:`,
@@ -31,7 +31,7 @@ export module incomeLossHousePropertiesService {
   export async function getIncomeLossHousePropertiesDataById(id) {
     try {
       console.log(`Fetching income loss house properties data for id: ${id}`);
-      const result = await pool.query(
+      const result = await query(
         "SELECT * FROM incomeLossHouseProperties WHERE id = $1",
         [id]
       );
@@ -51,7 +51,7 @@ export module incomeLossHousePropertiesService {
       console.log(
         `Fetching income loss house properties data for userId: ${userId}`
       );
-      const result = await pool.query(
+      const result = await query(
         "SELECT * FROM incomeLossHouseProperties WHERE userDetails->>'id' = $1",
         [userId]
       );
@@ -80,18 +80,18 @@ export module incomeLossHousePropertiesService {
         "upsertIncomeLossHousePropertiesData fieldValues"
       );
 
-      let query;
+      let querydata;
       let params: any[] = [];
 
       if (id) {
         // If id is provided, update the existing Income Loss House Properties data
-        query = `UPDATE incomeLossHouseProperties SET ${fieldNames
+        querydata = `UPDATE incomeLossHouseProperties SET ${fieldNames
           .map((field, index) => `"${field}" = $${index + 1}`)
           .join(", ")} WHERE id = $${fieldNames.length + 1}`;
         params = [...fieldValues, id];
       } else {
         // If id is not provided, insert a new Income Loss House Properties data
-        query = `INSERT INTO incomeLossHouseProperties (${fieldNames.join(
+        querydata = `INSERT INTO incomeLossHouseProperties (${fieldNames.join(
           ", "
         )}) VALUES (${fieldNames
           .map((_, index) => `$${index + 1}`)
@@ -99,10 +99,10 @@ export module incomeLossHousePropertiesService {
         params = fieldValues;
       }
 
-      console.log(query, "upsertIncomeLossHousePropertiesData query");
+      console.log(querydata, "upsertIncomeLossHousePropertiesData query");
       console.log(params, "upsertIncomeLossHousePropertiesData params");
 
-      let result = await pool.query(query, params);
+      let result = await query(querydata, params);
       let message =
         result.command === "UPDATE"
           ? `${result.rowCount} Income Loss House Properties Data Updated successfully`
@@ -122,7 +122,7 @@ export module incomeLossHousePropertiesService {
   export async function deleteIncomeLossHousePropertiesData(id) {
     try {
       console.log(`Deleting income loss house properties data for id: ${id}`);
-      const result = await pool.query(
+      const result = await query(
         "DELETE FROM incomeLossHouseProperties WHERE id = $1 RETURNING *",
         [id]
       );

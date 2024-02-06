@@ -1,10 +1,10 @@
-import pool from "../../database/postgress.js";
+import {query} from "../../database/postgress.js";
 
 export module onboardingService {
   export async function getAllOnboardingData() {
     try {
       console.log("onboardingService - getAllOnboardingData call");
-      const result = await pool.query("SELECT * FROM onboarding");
+      const result = await query("SELECT * FROM onboarding",[]);
       console.log(result.rows, "onboarding query results");
       return result.rows;
     } catch (error) {
@@ -16,7 +16,7 @@ export module onboardingService {
   export async function getSingleOnboardingData(id: string) {
     try {
       console.log("onboardingService - getSingleOnboardingData call");
-      const result = await pool.query(
+      const result = await query(
         "SELECT * FROM onboarding WHERE id = $1",
         [id]
       );
@@ -42,18 +42,18 @@ export module onboardingService {
       console.log(fieldNames, "upsertOnboardingData fieldNames");
       console.log(fieldValues, "upsertOnboardingData fieldValues");
 
-      let query;
+      let querydata;
       let params: any[] = [];
 
       if (id) {
         // If id is provided, update the existing onboarding data
-        query = `UPDATE onboarding SET ${fieldNames
+        querydata = `UPDATE onboarding SET ${fieldNames
           .map((field, index) => `${field} = $${index + 1}`)
           .join(", ")} WHERE id = $${fieldNames.length + 1}`;
         params = [...fieldValues, id];
       } else {
         // If id is not provided, insert a new onboarding data
-        query = `INSERT INTO onboarding (${fieldNames.join(
+        querydata = `INSERT INTO onboarding (${fieldNames.join(
           ", "
         )}) VALUES (${fieldNames
           .map((_, index) => `$${index + 1}`)
@@ -61,10 +61,10 @@ export module onboardingService {
         params = fieldValues;
       }
 
-      console.log(query, "upsertOnboardingData query");
+      console.log(querydata, "upsertOnboardingData query");
       console.log(params, "upsertOnboardingData params");
 
-      let result = await pool.query(query, params);
+      let result = await query(querydata, params);
       let message =
         result.command === "UPDATE"
           ? `${result.rowCount} Onboarding Data Updated successfully`
@@ -81,7 +81,7 @@ export module onboardingService {
   export async function deleteOnboardingData(id: string) {
     try {
       console.log("onboardingService - deleteOnboardingData call");
-      const result = await pool.query(
+      const result = await query(
         "DELETE FROM onboarding WHERE id = $1 RETURNING *",
         [id]
       );

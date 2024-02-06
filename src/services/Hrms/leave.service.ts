@@ -1,11 +1,11 @@
-import pool from "../../database/postgress.js";
+import { query } from "../../database/postgress.js";
 import { QueryResult } from 'pg';
 import { approvalService } from "./approval.service.js";
 export module leaveService {
     export async function getLeaves() {
         try {
             console.log("Get Leaves");
-            const result: QueryResult = await pool.query("SELECT * FROM leaves");
+            const result: QueryResult = await query("SELECT * FROM leaves", []);
             console.log(result.rows, "query results");
             return result.rows;
         } catch (error: any) {
@@ -17,7 +17,7 @@ export module leaveService {
         console.log(recId, "getSingleLeave callback request");
         try {
             console.log(recId, "getSingleLeave params id");
-            const result = await pool.query("SELECT * FROM leaves WHERE id = $1", [
+            const result = await query("SELECT * FROM leaves WHERE id = $1", [
                 recId,
             ]);
             console.log(result.rows, "result getSingleLeave");
@@ -36,24 +36,24 @@ export module leaveService {
             console.log(fieldNames, "upsertLeaves fieldNames");
             console.log(fieldValues, "upsertLeaves fieldValues");
 
-            let query;
+            let querydata;
             let params: any[] = [];
 
             if (id) {
                 // If id is provided, update the existing user
-                query = `UPDATE leaves SET ${fieldNames
+                querydata = `UPDATE leaves SET ${fieldNames
                     .map((field, index) => `${field} = $${index + 1}`)
                     .join(", ")} WHERE id = $${fieldNames.length + 1}`;
                 params = [...fieldValues, id];
             } else {
                 // If id is not provided, insert a new user
-                query = `INSERT INTO leaves (${fieldNames.join(', ')}) VALUES (${fieldNames.map((_, index) => `$${index + 1}`).join(', ')}) RETURNING *`;
+                querydata = `INSERT INTO leaves (${fieldNames.join(', ')}) VALUES (${fieldNames.map((_, index) => `$${index + 1}`).join(', ')}) RETURNING *`;
                 params = fieldValues;
             }
 
 
 
-            let result = await pool.query(query, params);
+            let result = await query(querydata, params);
             console.log(result, "upsert result");
 
             if (result.rowCount > 0 && result.command === 'INSERT') {
@@ -77,10 +77,10 @@ export module leaveService {
                     const fieldValues = Object.values(leaveRec);
                     console.log(fieldNames);
                     console.log(fieldValues);
-                    query = `UPDATE leaves SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(', ')} WHERE id = $${fieldNames.length + 1}`;
+                    querydata = `UPDATE leaves SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(', ')} WHERE id = $${fieldNames.length + 1}`;
                     params = [...fieldValues, id];
                     try {
-                        let result = await pool.query(query, params);
+                        let result = await query(querydata, params);
                         console.log(result, "upsert result with approval");
                     } catch (error) {
                         console.log(error, "update leaves error");
@@ -94,32 +94,32 @@ export module leaveService {
     }
 
 
-export async function getLeavesByUsers(userId: any) {
-    try {
-        console.log("getLeavesByUsers");
-        //   const result: QueryResult = await pool.query(`SELECT * FROM leaves WHERE (recordOwner->>\'userId\') = ${userId}`);
-        const result: QueryResult = await pool.query(
-            "SELECT * FROM leaves WHERE (recordOwner->>'userId') = $1",
-            [userId]
-        );
-        console.log(result.rows, "query results");
-        return result.rows;
-    } catch (error: any) {
-        return error.message;
+    export async function getLeavesByUsers(userId: any) {
+        try {
+            console.log("getLeavesByUsers");
+            //   const result: QueryResult = await query(`SELECT * FROM leaves WHERE (recordOwner->>\'userId\') = ${userId}`);
+            const result: QueryResult = await query(
+                "SELECT * FROM leaves WHERE (recordOwner->>'userId') = $1",
+                [userId]
+            );
+            console.log(result.rows, "query results");
+            return result.rows;
+        } catch (error: any) {
+            return error.message;
+        }
     }
-}
 
-export async function getLeavesByApprover(approverId: string) {
-    try {
-        console.log("getLeavesByApprover");
-        const result: QueryResult = await pool.query(
-            "SELECT * FROM leaves WHERE (applyingTo->>'userId') = $1",
-            [approverId]
-        );
-        console.log(result.rows, "query results");
-        return result.rows;
-    } catch (error: any) {
-        return error.message;
+    export async function getLeavesByApprover(approverId: string) {
+        try {
+            console.log("getLeavesByApprover");
+            const result: QueryResult = await query(
+                "SELECT * FROM leaves WHERE (applyingTo->>'userId') = $1",
+                [approverId]
+            );
+            console.log(result.rows, "query results");
+            return result.rows;
+        } catch (error: any) {
+            return error.message;
+        }
     }
-}
 }

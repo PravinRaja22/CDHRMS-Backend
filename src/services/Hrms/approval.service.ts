@@ -14,7 +14,7 @@ export module approvalService {
     export async function getAllApprovals() {
         try {
             console.log("getAllApprovals call");
-            const result: QueryResult = await query("SELECT * FROM approvals",{});
+            const result: QueryResult = await query("SELECT * FROM approvals",[]);
             console.log(result, "query results");
             return result.rows;
         } catch (error) {

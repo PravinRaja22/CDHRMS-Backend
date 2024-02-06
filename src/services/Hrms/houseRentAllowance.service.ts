@@ -6,7 +6,7 @@ export module houseRentAllowanceService {
       console.log(`Fetching all House Rent Allowance data for all employees`);
       const querydata = `SELECT * FROM houseRentAllowance`;
       console.log(querydata, "getAllHouseRentAllowanceData query");
-      const result = await query(querydata,{});
+      const result = await query(querydata,[]);
       console.log(`Fetched all House Rent Allowance Data Result:`, result.rows);
       return result.rows;
     } catch (error) {
@@ -33,7 +33,7 @@ export module houseRentAllowanceService {
   export async function getHouseRentAllowanceDataByUserId(userId) {
     try {
       console.log(`Fetching House Rent Allowance data for userId: ${userId}`);
-      const result = await pool.query(
+      const result = await query(
         "SELECT * FROM houseRentAllowance WHERE userDetails->>'id' = $1",
         [userId]
       );
@@ -56,18 +56,18 @@ export module houseRentAllowanceService {
       console.log(fieldNames, "upsertHouseRentAllowanceData fieldNames");
       console.log(fieldValues, "upsertHouseRentAllowanceData fieldValues");
 
-      let query;
+      let querydata;
       let params: any[] = [];
 
       if (id) {
         // If id is provided, update the existing House Rent Allowance data
-        query = `UPDATE houseRentAllowance SET ${fieldNames
+        querydata = `UPDATE houseRentAllowance SET ${fieldNames
           .map((field, index) => `${field} = $${index + 1}`)
           .join(", ")} WHERE id = $${fieldNames.length + 1}`;
         params = [...fieldValues, id];
       } else {
         // If id is not provided, insert a new House Rent Allowance data
-        query = `INSERT INTO houseRentAllowance (${fieldNames.join(
+        querydata = `INSERT INTO houseRentAllowance (${fieldNames.join(
           ", "
         )}) VALUES (${fieldNames
           .map((_, index) => `$${index + 1}`)
@@ -75,17 +75,17 @@ export module houseRentAllowanceService {
         params = fieldValues;
       }
 
-      console.log(query, "upsertHouseRentAllowanceData query");
+      console.log(querydata, "upsertHouseRentAllowanceData query");
       console.log(params, "upsertHouseRentAllowanceData params");
 
-      let result = await pool.query(query, params);
+      let result = await query(querydata,params);
       let message =
         result.command === "UPDATE"
           ? `${result.rowCount} House Rent Allowance Data Updated successfully`
           : `${result.rowCount} House Rent Allowance Data Inserted successfully`;
 
       console.log(message);
-      return { message };
+      return {message};
     } catch (error) {
       console.error("Error in upsertHouseRentAllowanceData:", error.message);
       return { error: error.message };
@@ -95,7 +95,7 @@ export module houseRentAllowanceService {
   export async function deleteHouseRentAllowanceData(id) {
     try {
       console.log(`Deleting House Rent Allowance data for userId: ${id}`);
-      const result = await pool.query(
+      const result = await query(
         "DELETE FROM houseRentAllowance WHERE id = $1 RETURNING *",
         [id]
       );

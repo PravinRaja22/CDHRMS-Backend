@@ -1,12 +1,12 @@
-import pool from "../../database/postgress.js";
+import {query} from "../../database/postgress.js";
 import { QueryResult } from "pg";
 
 export module jobApplicantService {
   export async function getAllJobApplicants() {
     try {
       console.log("getAllJobApplicants call");
-      const result: QueryResult = await pool.query(
-        "SELECT * FROM job_applicants"
+      const result: QueryResult = await query(
+        "SELECT * FROM job_applicants",[]
       );
       console.log(result, "query results");
       return result.rows;
@@ -20,7 +20,7 @@ export module jobApplicantService {
     try {
       console.log("getJobApplicantById");
       console.log(applicantId, "applicantId");
-      const result: QueryResult = await pool.query(
+      const result: QueryResult = await query(
         "SELECT * FROM job_applicants WHERE id = $1",
         [applicantId]
       );
@@ -44,18 +44,18 @@ export module jobApplicantService {
       const fieldNames = Object.keys(upsertFields);
       const fieldValues = Object.values(upsertFields);
 
-      let query;
+      let querydata;
       let params: any[] = [];
 
       if (id) {
         // If id is provided, update the existing job applicant
-        query = `UPDATE job_applicants SET ${fieldNames
+        querydata = `UPDATE job_applicants SET ${fieldNames
           .map((field, index) => `${field} = $${index + 1}`)
           .join(", ")} WHERE id = $${fieldNames.length + 1}`;
         params = [...fieldValues, id];
       } else {
         // If id is not provided, insert a new job applicant
-        query = `INSERT INTO job_applicants (${fieldNames.join(
+        querydata = `INSERT INTO job_applicants (${fieldNames.join(
           ", "
         )}) VALUES (${fieldNames
           .map((_, index) => `$${index + 1}`)
@@ -63,10 +63,10 @@ export module jobApplicantService {
         params = fieldValues;
       }
 
-      console.log(query, "upsertJobApplicant query");
+      console.log(querydata, "upsertJobApplicant query");
       console.log(params, "upsertJobApplicant params");
 
-      const result = await pool.query(query, params);
+      const result = await query(querydata, params);
       console.log(result, "upsert result");
 
       return {
@@ -87,7 +87,7 @@ export module jobApplicantService {
       console.log("deleteJobApplicant");
       console.log(applicantId, "applicantId");
 
-      const result = await pool.query(
+      const result = await query(
         "DELETE FROM job_applicants WHERE id = $1 RETURNING *",
         [applicantId]
       );

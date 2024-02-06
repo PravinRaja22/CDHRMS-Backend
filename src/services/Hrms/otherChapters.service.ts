@@ -1,15 +1,15 @@
-import pool from "../../database/postgress.js";
+import {query} from "../../database/postgress.js";
 
 export module otherChaptersService {
   export async function getAllOtherChaptersData() {
     try {
       console.log(`Fetching all Other Chapters data for all employees`);
 
-      const query = `SELECT * FROM otherChapters`;
+      const querydata = `SELECT * FROM otherChapters`;
 
-      console.log(query, "getAllOtherChaptersData query");
+      console.log(querydata, "getAllOtherChaptersData query");
 
-      const result = await pool.query(query);
+      const result = await query(querydata,[]);
 
       console.log(`Fetched all Other Chapters Data Result:`, result.rows);
 
@@ -23,7 +23,7 @@ export module otherChaptersService {
   export async function getOtherChaptersDataById(id) {
     try {
       console.log(`Fetching Other Chapters data for userId: ${id}`);
-      const result = await pool.query(
+      const result = await query(
         "SELECT * FROM otherChapters WHERE id = $1",
         [id]
       );
@@ -38,7 +38,7 @@ export module otherChaptersService {
   export async function getOtherChaptersDataByUserId(userId) {
     try {
       console.log(`Fetching Other Chapters data for userId: ${userId}`);
-      const result = await pool.query(
+      const result = await query(
         "SELECT * FROM otherChapters WHERE userDetails->>'id' = $1",
         [userId]
       );
@@ -61,18 +61,18 @@ export module otherChaptersService {
       console.log(fieldNames, "upsertOtherChaptersData fieldNames");
       console.log(fieldValues, "upsertOtherChaptersData fieldValues");
 
-      let query;
+      let querydata;
       let params: any[] = [];
 
       if (id) {
         // If id is provided, update the existing Other Chapters data
-        query = `UPDATE otherChapters SET ${fieldNames
+        querydata = `UPDATE otherChapters SET ${fieldNames
           .map((field, index) => `${field} = $${index + 1}`)
           .join(", ")} WHERE id = $${fieldNames.length + 1}`;
         params = [...fieldValues, id];
       } else {
         // If id is not provided, insert a new Other Chapters data
-        query = `INSERT INTO otherChapters (${fieldNames.join(
+        querydata = `INSERT INTO otherChapters (${fieldNames.join(
           ", "
         )}) VALUES (${fieldNames
           .map((_, index) => `$${index + 1}`)
@@ -80,10 +80,10 @@ export module otherChaptersService {
         params = fieldValues;
       }
 
-      console.log(query, "upsertOtherChaptersData query");
+      console.log(querydata, "upsertOtherChaptersData query");
       console.log(params, "upsertOtherChaptersData params");
 
-      let result = await pool.query(query, params);
+      let result = await query(querydata, params);
       let message =
         result.command === "UPDATE"
           ? `${result.rowCount} Other Chapters Data Updated successfully`
@@ -100,7 +100,7 @@ export module otherChaptersService {
   export async function deleteOtherChaptersData(id) {
     try {
       console.log(`Deleting Other Chapters data for userId: ${id}`);
-      const result = await pool.query(
+      const result = await query(
         "DELETE FROM otherChapters WHERE id = $1 RETURNING *",
         [id]
       );

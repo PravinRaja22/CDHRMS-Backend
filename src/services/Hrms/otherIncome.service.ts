@@ -1,15 +1,15 @@
-import pool from "../../database/postgress.js";
+import {query} from "../../database/postgress.js";
 
 export module otherIncomeService {
   export async function getAllOtherIncomeData() {
     try {
       console.log(`Fetching all Other Income data for all employees`);
 
-      const query = `SELECT * FROM otherIncome`;
+      const querydata = `SELECT * FROM otherIncome`;
 
       console.log(query, "getAllOtherIncomeData query");
 
-      const result = await pool.query(query);
+      const result = await query(querydata,[]);
 
       console.log(`Fetched all Other Income Data Result:`, result.rows);
 
@@ -23,7 +23,7 @@ export module otherIncomeService {
   export async function getOtherIncomeDataById(id) {
     try {
       console.log(`Fetching Other Income data for userId: ${id}`);
-      const result = await pool.query(
+      const result = await query(
         "SELECT * FROM otherIncome WHERE id = $1",
         [id]
       );
@@ -38,7 +38,7 @@ export module otherIncomeService {
   export async function getOtherIncomeDataByUserId(userId) {
     try {
       console.log(`Fetching Other Income data for userId: ${userId}`);
-      const result = await pool.query(
+      const result = await query(
         "SELECT * FROM otherIncome WHERE userDetails->>'id' = $1",
         [userId]
       );
@@ -61,18 +61,18 @@ export module otherIncomeService {
       console.log(fieldNames, "upsertOtherIncomeData fieldNames");
       console.log(fieldValues, "upsertOtherIncomeData fieldValues");
 
-      let query;
+      let querydata;
       let params: any[] = [];
 
       if (id) {
         // If id is provided, update the existing Other Income data
-        query = `UPDATE otherIncome SET ${fieldNames
+        querydata = `UPDATE otherIncome SET ${fieldNames
           .map((field, index) => `${field} = $${index + 1}`)
           .join(", ")} WHERE id = $${fieldNames.length + 1}`;
         params = [...fieldValues, id];
       } else {
         // If id is not provided, insert a new Other Income data
-        query = `INSERT INTO otherIncome (${fieldNames.join(
+        querydata = `INSERT INTO otherIncome (${fieldNames.join(
           ", "
         )}) VALUES (${fieldNames
           .map((_, index) => `$${index + 1}`)
@@ -80,10 +80,10 @@ export module otherIncomeService {
         params = fieldValues;
       }
 
-      console.log(query, "upsertOtherIncomeData query");
+      console.log(querydata, "upsertOtherIncomeData query");
       console.log(params, "upsertOtherIncomeData params");
 
-      let result = await pool.query(query, params);
+      let result = await query(querydata, params);
       let message =
         result.command === "UPDATE"
           ? `${result.rowCount} Other Income Data Updated successfully`
@@ -100,7 +100,7 @@ export module otherIncomeService {
   export async function deleteOtherIncomeData(id) {
     try {
       console.log(`Deleting Other Income data for userId: ${id}`);
-      const result = await pool.query(
+      const result = await query(
         "DELETE FROM otherIncome WHERE id = $1 RETURNING *",
         [id]
       );

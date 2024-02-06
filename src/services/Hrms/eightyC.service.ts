@@ -6,7 +6,7 @@ export module eightyCService {
       console.log(`Fetching all 80C data for all employees`);
       const querydata = `SELECT * FROM eightyC`;
       console.log(querydata, "getAllEightyCData query");
-      const result = await query(query,{});
+      const result = await query(query,[]);
       console.log(`Fetched all 80C Data Result:`, result.rows);
       return result.rows;
     } catch (error) {

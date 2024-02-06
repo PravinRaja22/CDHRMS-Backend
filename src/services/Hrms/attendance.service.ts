@@ -5,7 +5,7 @@ export module attendanceService {
     export async function getAttendanceData() {
         try {
             console.log("attendanceService call");
-            const result: QueryResult = await query('SELECT * FROM attendances',{});
+            const result: QueryResult = await query('SELECT * FROM attendances',[]);
             console.log(result, "query results");
             return result.rows
         } catch (error) {
@@ -105,7 +105,7 @@ export module attendanceService {
 
         try{
             const result: any = await query(
-                `SELECT * FROM attendances WHERE id = ${recId}`,{}
+                `SELECT * FROM attendances WHERE id = ${recId}`,[]
             )
             console.log(result,"findRecord");
             if(result.rowCount=1){
@@ -458,7 +458,7 @@ export module attendanceService {
 
     async function generateAttendanceData(values: any) {
         console.log(values, "generateAttendanceData");
-        const allUsers: QueryResult = await query('SELECT * FROM users',{});
+        const allUsers: QueryResult = await query('SELECT * FROM users',[]);
         console.log(allUsers, "allUsers get results");
         try {
             let successInsert = 0;
