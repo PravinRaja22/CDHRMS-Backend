@@ -56,7 +56,7 @@ export module attendanceService {
         console.log(body, "body updateAttendance service");
 
         const existingRecord: any = await query(
-            'SELECT * FROM attendances WHERE employeeDetails->>\'employeeId\' = $1 AND date = $2',
+            'SELECT * FROM attendances WHERE userId = $1 AND date = $2',
             [params.userId, params.attendanceDate]
         )
         console.log(params.userId);
@@ -122,10 +122,18 @@ export module attendanceService {
     export async function upsertBulkAttendance(values: any) {
         try {
             console.log("inside upsertBulkAttendance", values);
-            const userId = values.userId || values.userid;
-            const startDate = new Date('2024-01-01T00:05:00Z'); 
-            const endDate = new Date('2024-01-31T23:59:59Z'); 
-    
+          
+            const { month, year, utcSec ,userId } = values;
+            // const startDate = new Date('2024-01-01T00:05:00Z'); 
+            // const endDate = new Date('2024-01-31T23:59:59Z'); 
+            let startDate;
+            let endDate;
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const monthIndex = months.indexOf(month);
+
+            startDate = new Date(year, monthIndex, 1);
+            endDate = new Date(year, monthIndex + 1, 0);
+            
             while (startDate <= endDate) {
                 const dateInMillis = startDate.getTime();
   
@@ -177,9 +185,9 @@ export module attendanceService {
         let fieldNames = Object.keys(record)
         let fieldValues =Object.values(record)
 
-        let query = `INSERT INTO attendances (${fieldNames.join(', ')}) VALUES (${fieldValues.map((_, index) => `$${index + 1}`).join(', ')}) RETURNING *`;
+        let querydata = `INSERT INTO attendances (${fieldNames.join(', ')}) VALUES (${fieldValues.map((_, index) => `$${index + 1}`).join(', ')}) RETURNING *`;
         let params = fieldValues;
-        const result = await pool.query(query, params);
+        const result = await query(querydata, params);
         console.log(result.command,"record insert result");
 
     }
@@ -194,7 +202,7 @@ export module attendanceService {
     //         let failuresqlCount = 0;
     //         let returnValue = {};
     //         let attendanceRecords;
-    //         let result = await pool.query(`SELECT * FROM attendances WHERE date = ${attendanceDate}`);
+    //         let result = await query(`SELECT * FROM attendances WHERE date = ${attendanceDate}`);
     //         console.log(result, "attendanceRecords");
     //         console.log('***********');
     //         console.log(result.rows);
@@ -547,7 +555,7 @@ export module attendanceService {
         //         //query for insert 
         //         let query = `INSERT INTO attendances (${fieldNames.join(', ')}) VALUES (${fieldNames.map((_, index) => `$${index + 1}`).join(', ')}) RETURNING *`;
         //         let params = fieldValues;
-        //         result = await pool.query(query, params)
+        //         result = await query(query, params)
 
         //         if (result.command === 'INSERT' || result.command === 'UPDATE') {
         //             successInsert.push(result)
@@ -575,7 +583,7 @@ export module attendanceService {
         export async function getAttendanceDate(){
            try{
                 console.log("attendanceService call");
-                const result: QueryResult = await pool.query('SELECT * FROM attendances');
+                const result: QueryResult = await query('SELECT * FROM attendances');
                 console.log(result, "query results");
                 return result.rows
            }catch(error){
@@ -600,7 +608,7 @@ export module attendanceService {
 
         async function generateAttendanceData(values:any){
             console.log(values,"generateAttendanceData");
-            const allUsers: QueryResult = await pool.query('SELECT * FROM users');
+            const allUsers: QueryResult = await query('SELECT * FROM users');
             console.log(allUsers, "allUsers get results");
 
            
@@ -635,7 +643,7 @@ export module attendanceService {
 
                  
                 //     console.log(result, "upsert result");
-            //     const result = await pool.query(`
+            //     const result = await query(`
             //     INSERT INTO attendances (date, employeeDetails, signIn, signOut, shift, workingHours, status, isWeekend, isRegularized, isHoliday, session)
             //     VALUES ($1, $2::json, $3, $4, $5, $6, $7, $8, $9, $10, $11)
             //     RETURNING *
@@ -644,10 +652,10 @@ export module attendanceService {
             const placeholders = fieldNames.map((_, index) => `$${index + 1}`);
             // const query = `INSERT INTO attendances (${fieldNames.join(', ')}) VALUES (${placeholders.join(', ')}) RETURNING *`;
 
-            //  result = await pool.query(query, fieldValues);
+            //  result = await query(query, fieldValues);
             let query = `INSERT INTO attendances (${fieldNames.join(', ')}) VALUES (${fieldNames.map((_, index) => `$${index + 1}`).join(', ')}) RETURNING *`;
             let params = fieldValues;
-              result = await pool.query(query,params)
+              result = await query(query,params)
 
              if(result.command ==='INSERT' || result.command ==='UPDATE'){
                 successInsert.push(result)

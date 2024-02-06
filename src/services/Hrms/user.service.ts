@@ -1,7 +1,7 @@
 
 import {query} from "../../database/postgress.js";
 import { QueryResult } from 'pg';
-
+import pool from "../../database/postgress.js";
 
 
 export module userService {
@@ -15,7 +15,8 @@ export module userService {
                 INNER JOIN pfdetails AS pfDetails ON pfdetails.userid = users.id
                 INNER JOIN bankdetails AS bankDetails ON bankdetails.userid = users.id`;
 
-            const result: QueryResult = await query(joinQuery,{});
+                let usersQuery = `SELECT * FROM users`
+            const result: QueryResult = await query(usersQuery,[]);
             console.log( "query results");
             return result.rows
 
@@ -71,7 +72,7 @@ export module userService {
         try {
             const { id, ...upsertFields } = request;
             // console.log(request, "upsertUser Request body");
-            console.log("Update Users");
+            console.log("Update Users ",request);
             const fieldNames = Object.keys(upsertFields);
             const fieldValues = Object.values(upsertFields);
             console.log(fieldNames, "upsertUser fieldNames");
@@ -94,6 +95,7 @@ export module userService {
             console.log(query, "upsertUser query");
             console.log(params, "upsertUser params");
             let result = await query(querydata, params);
+            // let result = await pool.query(querydata,params)
             let message = result.command === 'UPDATE' ?
                 `${result.rowCount} User Updated successfully` :
                 `${result.rowCount} User Inserted successfully`;
