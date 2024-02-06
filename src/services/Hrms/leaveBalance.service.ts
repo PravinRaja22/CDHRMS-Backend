@@ -1,54 +1,71 @@
-
-import {query} from "../../database/postgress.js";
-import { QueryResult } from 'pg';
+import { query } from "../../database/postgress.js";
+import { QueryResult } from "pg";
 export module leaveBalanceService {
-    export async function getLeaveBalanceByUsers(userId:any) {
-        try {
-            console.log('Get getLeaveBalanceByUsers') ;
+  export async function getLeaveBalanceByUsers(userId: any) {
+    try {
+      console.log("Get getLeaveBalanceByUsers");
 
-            const result: QueryResult = await query(`SELECT * FROM leaveBalances
-            WHERE (userId->>'userId')::int = ${userId}`,[]);
-            console.log(result.rows, "query results");
-            return result.rows
-        } catch (error: any) {
-            return error.message
-        }
+      const result: QueryResult = await query(
+        `SELECT * FROM leaveBalances
+            WHERE userId = $1 `,
+        [userId]
+      );
+      console.log(result.rows, "query results");
+      return result.rows;
+    } catch (error: any) {
+      return error.message;
     }
+  }
 
-    export async function upsertLeaveBalanceByUsers(userId: any, requestBody: any) {
-        try {
-            console.log('Get upsertLeaveBalanceByUsers');
-            console.log(userId, "userId upsertLeaveBalanceByUsers");
-            console.log(requestBody, "requestBody upsertLeaveBalanceByUsers");
-            console.log(typeof(requestBody.balance),"typeof");
+  export async function upsertLeaveBalanceByUsers(
+    userId: any,
+    requestBody: any
+  ) {
+    try {
+      console.log("Get upsertLeaveBalanceByUsers");
+      console.log(userId, "userId upsertLeaveBalanceByUsers");
+      console.log(requestBody, "requestBody upsertLeaveBalanceByUsers");
+      console.log(requestBody.balance, "typeof");
 
-           
+      //   const result: QueryResult = await pool.query(
+      //     `
+      //             UPDATE leaveBalances
+      //             SET balance = $1
+      //             WHERE userId = $2
+      //         `,
+      //     [requestBody.balance, userId]
+      //   );
 
-            const result: QueryResult = await query(`
+      const result: QueryResult = await query(
+        `
                 UPDATE leaveBalances
                 SET balance = $1
-                WHERE (userId->>'userId')::int = $2
-            `, [requestBody.balance, userId]);
-    
-            console.log(result.rows, "rows updated");
-            console.log(result, "rows updated");
-            let message = `${requestBody.userId.userName} leaveBalance Updated successfully` 
-            //check the query result has record or not
-            if (result.rowCount === 0) {
-                let resultInsert = await query(`
+                WHERE userId = $2
+            `,
+        [requestBody.balance, userId]
+      );
+
+      console.log(result.rows, "rows updated");
+      console.log(result, "rows updated");
+      let message = `${requestBody.userId.userName} leaveBalance Updated successfully`;
+      //check the query result has record or not
+      if (result.rowCount === 0) {
+        let resultInsert = await query(
+          `
                     INSERT INTO leaveBalances (userId, balance)
                     VALUES ($1, $2)
-                `, [requestBody.userId, requestBody.balance]);
-                console.log(resultInsert,"resultInsert");
-                let message = `${requestBody.userId.userName} leaveBalance inserted successfully` 
+                `,
+          [requestBody.userId, requestBody.balance]
+        );
+        console.log(resultInsert, "resultInsert");
+        let message = `${requestBody.userId.userName} leaveBalance inserted successfully`;
 
-                return message;
-            } else {
-                return message;
-            }
-        } catch (error: any) {
-            return error.message;
-        }
+        //     return message;
+        //   } else {
+        //     return message;
+      }
+    } catch (error: any) {
+      return error.message;
     }
-    
+  }
 }
