@@ -1,12 +1,12 @@
-import pool from "../../database/postgress.js";
+import {query} from "../../database/postgress.js";
 
 export module eightyCService {
   export async function getAllEightyCData() {
     try {
       console.log(`Fetching all 80C data for all employees`);
-      const query = `SELECT * FROM eightyC`;
-      console.log(query, "getAllEightyCData query");
-      const result = await pool.query(query);
+      const querydata = `SELECT * FROM eightyC`;
+      console.log(querydata, "getAllEightyCData query");
+      const result = await query(query,{});
       console.log(`Fetched all 80C Data Result:`, result.rows);
       return result.rows;
     } catch (error) {
@@ -18,7 +18,7 @@ export module eightyCService {
   export async function getEightyCDataById(id) {
     try {
       console.log(`Fetching 80C data for userId: ${id}`);
-      const result = await pool.query("SELECT * FROM eightyC WHERE id = $1", [
+      const result = await query("SELECT * FROM eightyC WHERE id = $1", [
         id,
       ]);
       console.log("Fetched 80C Data:", result.rows);
@@ -31,7 +31,7 @@ export module eightyCService {
   export async function getEightyCDataByUserId(userId) {
     try {
       console.log(`Fetching 80C data for userId: ${userId}`);
-      const result = await pool.query(
+      const result = await query(
         "SELECT * FROM eightyC WHERE userDetails->>'id' = $1",
         [userId]
       );
@@ -54,18 +54,18 @@ export module eightyCService {
       console.log(fieldNames, "upsertEightyCData fieldNames");
       console.log(fieldValues, "upsertEightyCData fieldValues");
 
-      let query;
+      let querydata;
       let params: any[] = [];
 
       if (id) {
         // If id is provided, update the existing EightyC data
-        query = `UPDATE EightyC SET ${fieldNames
+        querydata = `UPDATE EightyC SET ${fieldNames
           .map((field, index) => `${field} = $${index + 1}`)
           .join(", ")} WHERE id = $${fieldNames.length + 1}`;
         params = [...fieldValues, id];
       } else {
         // If id is not provided, insert a new EightyC data
-        query = `INSERT INTO EightyC (${fieldNames.join(
+        querydata = `INSERT INTO EightyC (${fieldNames.join(
           ", "
         )}) VALUES (${fieldNames
           .map((_, index) => `$${index + 1}`)
@@ -73,10 +73,10 @@ export module eightyCService {
         params = fieldValues;
       }
 
-      console.log(query, "upsertEightyCData query");
+      console.log(querydata, "upsertEightyCData query");
       console.log(params, "upsertEightyCData params");
 
-      let result = await pool.query(query, params);
+      let result = await query(query, params);
       let message =
         result.command === "UPDATE"
           ? `${result.rowCount} EightyC Data Updated successfully`
@@ -93,7 +93,7 @@ export module eightyCService {
   export async function deleteEightyCData(id) {
     try {
       console.log(`Deleting 80C data for userId: ${id}`);
-      const result = await pool.query(
+      const result = await query(
         "DELETE FROM eightyC WHERE id = $1 RETURNING *",
         [id]
       );

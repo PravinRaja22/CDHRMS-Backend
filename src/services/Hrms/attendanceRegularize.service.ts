@@ -1,12 +1,12 @@
-import pool from "../../database/postgress.js";
-import { Query, QueryResult } from 'pg';
+import {query} from "../../database/postgress.js";
+import {QueryResult } from 'pg';
 import { approvalService } from "./approval.service.js";
 
 export module attendanceRegularizeService{
 
     export async function getAllAttendanceRegularize() {
         try{
-            let result :QueryResult =  await pool.query(`SELECT * FROM attendanceRegularizations`)
+            let result :QueryResult =  await query(`SELECT * FROM attendanceRegularizations`,{})
             console.log(result,"QueryResult");
             return result.rows
         }
@@ -18,7 +18,7 @@ export module attendanceRegularizeService{
     
     export async function getAttendanceRegularizebyId(recId) {
         try{
-            let result :QueryResult =  await pool.query(`SELECT * FROM attendanceRegularizations WHERE id =${recId}`)
+            let result :QueryResult =  await query(`SELECT * FROM attendanceRegularizations WHERE id =${recId}`,{})
             console.log(result,"QueryResult");
             return result.rows
         }
@@ -33,10 +33,10 @@ export module attendanceRegularizeService{
             let fieldNames = Object.keys(requestBody); 
             let fieldValues = Object.values(requestBody); 
 
-            let  query = `INSERT INTO attendanceRegularizations (${fieldNames.join(', ')}) VALUES (${fieldNames.map((_, index) => `$${index + 1}`).join(', ')}) RETURNING *`;
+            let  querydata = `INSERT INTO attendanceRegularizations (${fieldNames.join(', ')}) VALUES (${fieldNames.map((_, index) => `$${index + 1}`).join(', ')}) RETURNING *`;
             let  params = fieldValues;
 
-            let result = await pool.query(query, params);
+            let result = await query(querydata, params);
             console.log(result, "attendanceRegularizations insert result");
            if(result.rowCount>0){
 
@@ -55,7 +55,7 @@ export module attendanceRegularizeService{
 
     export async function getAttendanceRegularizebyUser(requestParams){
         try{
-            const result: QueryResult = await pool.query(
+            const result: QueryResult = await query(
                 'SELECT * FROM attendanceRegularizations WHERE (userDetails->>\'id\') = $1',
                 [requestParams]
             );
@@ -73,14 +73,14 @@ export module attendanceRegularizeService{
         console.log(fieldNames, "update Attendance fieldNames");
         console.log(fieldValues, "update Attendance  fieldValues");
 
-        let query;
+        let querydata;
         let params: any[] = [];
         let id =requestParams || requestBody?.id
 
         try {
-            query = `UPDATE attendanceRegularizations SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(', ')} WHERE id = $${fieldNames.length + 1}`;
+            querydata = `UPDATE attendanceRegularizations SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(', ')} WHERE id = $${fieldNames.length + 1}`;
             params = [...fieldValues,id];
-            let result = await pool.query(query, params);
+            let result = await query(querydata, params);
             console.log(result, "upsert result");
             if (result.command === 'UPDATE' && result.rowCount > 0) {
                 return ({ message: 'Attendance Regularize updated successfully' });

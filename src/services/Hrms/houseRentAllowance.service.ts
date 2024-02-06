@@ -1,18 +1,13 @@
-import pool from "../../database/postgress.js";
+import {query} from "../../database/postgress.js";
 
 export module houseRentAllowanceService {
   export async function getAllHouseRentAllowanceData() {
     try {
       console.log(`Fetching all House Rent Allowance data for all employees`);
-
-      const query = `SELECT * FROM houseRentAllowance`;
-
-      console.log(query, "getAllHouseRentAllowanceData query");
-
-      const result = await pool.query(query);
-
+      const querydata = `SELECT * FROM houseRentAllowance`;
+      console.log(querydata, "getAllHouseRentAllowanceData query");
+      const result = await query(querydata,{});
       console.log(`Fetched all House Rent Allowance Data Result:`, result.rows);
-
       return result.rows;
     } catch (error) {
       console.error("Error in getAllHouseRentAllowanceData:", error.message);
@@ -23,7 +18,7 @@ export module houseRentAllowanceService {
   export async function getHouseRentAllowanceDataById(id) {
     try {
       console.log(`Fetching House Rent Allowance data for userId: ${id}`);
-      const result = await pool.query(
+      const result = await query(
         "SELECT * FROM houseRentAllowance WHERE id = $1",
         [id]
       );

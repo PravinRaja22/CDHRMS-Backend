@@ -17,13 +17,14 @@ export async function getAuthorizeduser(request, reply) {
     // let result = await userService.getAllUsers();
     let result = await userService.getAuthorizedUserdata(request.userData.result.account.username)
     console.log(result ,' data set data st')
-    reply.send(result)
+    // reply.send(result)
     console.log(result.status)
     if (result.status === 'sucess') {
       const sessionId = uuidv4();
       console.log(sessionId, ' Session ID ID ')
       // request.session.set('sessionId', sessionId);
       console.log(`Session ID ${sessionId} set successfully!`)
+      console.log(sessionId)
       reply.send(sessionId)
     }
     else {

@@ -1,6 +1,6 @@
 import { CloudHSM } from "aws-sdk";
-import pool from "../../database/postgress.js";
-import { Query, QueryResult } from "pg";
+import {query} from "../../database/postgress.js";
+import {QueryResult } from "pg";
 import {
     getAttendanceRegularizebyId,
     getAttendanceRegularizebyUser,
@@ -14,7 +14,7 @@ export module approvalService {
     export async function getAllApprovals() {
         try {
             console.log("getAllApprovals call");
-            const result: QueryResult = await pool.query("SELECT * FROM approvals");
+            const result: QueryResult = await query("SELECT * FROM approvals",{});
             console.log(result, "query results");
             return result.rows;
         } catch (error) {
@@ -41,14 +41,14 @@ export module approvalService {
             let fieldNames = Object.keys(obj)
             let fieldValues = Object.values(obj)
 
-            let query = `INSERT INTO approvals (${fieldNames.join(
+            let querydata = `INSERT INTO approvals (${fieldNames.join(
                 ", "
             )}) VALUES (${fieldNames
                 .map((_, index) => `$${index + 1}`)
                 .join(", ")}) RETURNING *`;
             let params = fieldValues;
 
-            let result = await pool.query(query, params);
+            let result = await query(querydata, params);
             console.log(result, `${objectName} insert result`);
             console.log(result, "attendanceRegularizations insert result");
 
@@ -65,9 +65,9 @@ export module approvalService {
 export async function getApprovalbyApprover(approverId: any) {
     try {
         console.log("getApprovalbyApprover call");
-        let query = `SELECT * FROM approvals WHERE approverDetails->>\'id\' = $1`;
+        let querydata = `SELECT * FROM approvals WHERE approverDetails->>\'id\' = $1`;
         let params = approverId;
-        const result: QueryResult = await pool.query(query, [params]);
+        const result: QueryResult = await query(querydata, [params]);
 
         console.log(result, "getApprovalbyApprover query results");
         return result.rows;
@@ -86,14 +86,14 @@ export async function updateApprovals(requestBody: any, requestParams: any) {
     console.log(fieldNames, "update approvals fieldNames");
     console.log(fieldValues, "update approvals  fieldValues");
 
-    let query;
+    let querydata;
     let params: any[] = [];
     let id = requestParams || requestBody?.id;
 
     try {
-        query = `UPDATE approvals SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(', ')} WHERE id = $${fieldNames.length + 1}  RETURNING *`;
+        querydata = `UPDATE approvals SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(', ')} WHERE id = $${fieldNames.length + 1}  RETURNING *`;
         params = [...fieldValues, id];
-        let result = await pool.query(query, params);
+        let result = await query(querydata, params);
         console.log(result, "update approval result");
         if (result.command === 'UPDATE' && result.rowCount > 0) {
             //update the parent record

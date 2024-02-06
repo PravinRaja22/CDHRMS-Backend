@@ -1,11 +1,11 @@
 import { forEach } from "lodash";
-import pool from "../../database/postgress.js";
-import { Query, QueryResult } from 'pg';
+import {query} from "../../database/postgress.js";
+import {QueryResult } from 'pg';
 export module attendanceService {
     export async function getAttendanceData() {
         try {
             console.log("attendanceService call");
-            const result: QueryResult = await pool.query('SELECT * FROM attendances');
+            const result: QueryResult = await query('SELECT * FROM attendances',{});
             console.log(result, "query results");
             return result.rows
         } catch (error) {
@@ -35,7 +35,7 @@ export module attendanceService {
         console.log("getAttendanceByUserIdDate");
         console.log(params, "params");
 
-        const existingRecord: any = await pool.query(
+        const existingRecord: any = await query(
             'SELECT * FROM attendances WHERE employeeDetails->>\'employeeId\' = $1 AND date = $2',
             [params.userId, params.attendanceDate]
         )
@@ -55,7 +55,7 @@ export module attendanceService {
         console.log(params, "params updateAttendance service");
         console.log(body, "body updateAttendance service");
 
-        const existingRecord: any = await pool.query(
+        const existingRecord: any = await query(
             'SELECT * FROM attendances WHERE employeeDetails->>\'employeeId\' = $1 AND date = $2',
             [params.userId, params.attendanceDate]
         )
@@ -68,7 +68,7 @@ export module attendanceService {
             //upsert request body
             console.log(existingRecord.rows, 'Rows isd ');
             let recId = existingRecord.rows[0].id
-            let query;
+            let querydata;
             let params;
             let fieldNames = Object.keys(body);
             let fieldValues = Object.values(body)
@@ -78,12 +78,12 @@ export module attendanceService {
             console.log("**********");
             try {
                 if (fieldNames.length > 0) {
-                    query = `UPDATE attendances SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(', ')} WHERE id = $${fieldNames.length + 1}`;
+                    querydata = `UPDATE attendances SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(', ')} WHERE id = $${fieldNames.length + 1}`;
                     params = [...fieldValues, recId];
                 }
                 console.log(recId, 'ID ID ');
                 console.log(params, 'params');
-                let result = await pool.query(query, params);
+                let result = await query(querydata, params);
                 console.log(result, "upsert result");
                 let message = result.command === 'UPDATE' && result.rowCount > 0 ? 'Attendance upserted successfully' : 'Attendance upserte failure'
                 return ({ message });
@@ -104,8 +104,8 @@ export module attendanceService {
         console.log("getsingleAttendance",recId);
 
         try{
-            const result: any = await pool.query(
-                `SELECT * FROM attendances WHERE id = ${recId}`
+            const result: any = await query(
+                `SELECT * FROM attendances WHERE id = ${recId}`,{}
             )
             console.log(result,"findRecord");
             if(result.rowCount=1){
@@ -259,7 +259,7 @@ export module attendanceService {
             let failuresqlCount = 0;
             let returnValue = {};
             
-            let result = await pool.query(`SELECT * FROM attendances WHERE date = ${attendanceDate}`);
+            let result = await query(`SELECT * FROM attendances WHERE date = ${attendanceDate}`,{});
             console.log(result, "attendanceRecords");
             console.log('***********');
             console.log(result.rows);
@@ -324,13 +324,13 @@ export module attendanceService {
         console.log(fieldNames, "update Attendance fieldNames");
         console.log(fieldValues, "update Attendance  fieldValues");
 
-        let query;
+        let querydata;
         let params: any[] = [];
 
         try {
-            query = `UPDATE attendances SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(', ')} WHERE id = $${fieldNames.length + 1}`;
+            querydata = `UPDATE attendances SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(', ')} WHERE id = $${fieldNames.length + 1}`;
             params = [...fieldValues, updatedRecord.id];
-            let result = await pool.query(query, params);
+            let result = await query(querydata, params);
             console.log(result, "upsert result");
             if (result.command === 'UPDATE' && result.rowCount > 0) {
                 return ({ message: 'Attendance updated successfully', count: result.rowCount, statusCode: 200 });
@@ -450,7 +450,7 @@ export module attendanceService {
 
     async function generateAttendanceData(values: any) {
         console.log(values, "generateAttendanceData");
-        const allUsers: QueryResult = await pool.query('SELECT * FROM users');
+        const allUsers: QueryResult = await query('SELECT * FROM users',{});
         console.log(allUsers, "allUsers get results");
         try {
             let successInsert = 0;
@@ -463,7 +463,7 @@ export module attendanceService {
             for (const user of allUsers.rows) {
                 try {
                     // Check if attendance record already exists for the user and date
-                    const existingRecord = await pool.query(
+                    const existingRecord = await query(
                         'SELECT * FROM attendances WHERE employeeDetails->>\'employeeId\' = $1 AND date = $2',
                         [user.id, newDateUTC]
                     );
@@ -494,9 +494,9 @@ export module attendanceService {
                         const fieldValues = Object.values(obj);
 
                         // Query for insert
-                        let query = `INSERT INTO attendances (${fieldNames.join(', ')}) VALUES (${fieldValues.map((_, index) => `$${index + 1}`).join(', ')}) RETURNING *`;
+                        let querydata = `INSERT INTO attendances (${fieldNames.join(', ')}) VALUES (${fieldValues.map((_, index) => `$${index + 1}`).join(', ')}) RETURNING *`;
                         let params = fieldValues;
-                        const result = await pool.query(query, params);
+                        const result = await query(querydata, params);
 
                         if (result.command === 'INSERT' || result.command === 'UPDATE') {
                             console.log(`Attendance record inserted for user ${user.id}`);

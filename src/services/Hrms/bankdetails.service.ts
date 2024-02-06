@@ -1,5 +1,5 @@
 
-import pool from "../../database/postgress.js";
+import {query} from "../../database/postgress.js";
 import { QueryResult } from 'pg';
 export module bankDetailsService {
 
@@ -7,7 +7,7 @@ export module bankDetailsService {
     export async function getBankDetails() {
         try {
             console.log('Get bankDetails')
-            const result: QueryResult = await pool.query('SELECT * FROM bankDetails');
+            const result: QueryResult = await query('SELECT * FROM bankDetails',{});
             console.log(result.rows, "query results");
             return result.rows
         } catch (error: any) {
@@ -17,7 +17,7 @@ export module bankDetailsService {
     export async function getIndividualBankDetails(recID :string) {
         try {
             console.log("bankDetails - getSinglebankDetails call");
-            const result = await pool.query(
+            const result = await query(
               "SELECT * FROM bankDetails WHERE id = $1",
               [recID]
             );
@@ -44,23 +44,23 @@ export module bankDetailsService {
             console.log(fieldNames, "upsertLeaves fieldNames");
             console.log(fieldValues, "upsertLeaves fieldValues");
 
-            let query;
+            let querydata;
             let params: any[] = [];
 
             if (id) {
                 // If id is provided, update the existing user
-                query = `UPDATE bankDetails SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(', ')} WHERE id = $${fieldNames.length + 1}`;
+                querydata = `UPDATE bankDetails SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(', ')} WHERE id = $${fieldNames.length + 1}`;
                 params = [...fieldValues, id];
 
             } else {
                 // If id is not provided, insert a new user
-                query = `INSERT INTO bankDetails (${fieldNames.join(', ')}) VALUES (${fieldNames.map((_, index) => `$${index + 1}`).join(', ')})`;
+                querydata = `INSERT INTO bankDetails (${fieldNames.join(', ')}) VALUES (${fieldNames.map((_, index) => `$${index + 1}`).join(', ')})`;
                 params = fieldValues;
             }
 
-            console.log(query, "upsert Bank Details query");
+            console.log(querydata, "upsert Bank Details query");
             console.log(params, "upsert Bank Details params");
-            let result = await pool.query(query, params);
+            let result = await query(querydata, params);
             console.log(result, "upsert result");
             return ({ message: 'Back Details upserted successfully' });
 
@@ -73,7 +73,7 @@ export module bankDetailsService {
     export const deleteBankDetails = async (recId : string)=>{
         try {
             console.log("deleteBankDetails - deleteBankDetails call");
-            const result = await pool.query(
+            const result = await query(
               "DELETE FROM bankDetails WHERE id = $1 RETURNING *",
               [recId]
             );

@@ -1,15 +1,15 @@
-import pool from "../../database/postgress.js";
+import {query} from "../../database/postgress.js";
 
 export module declaredTaxAmountService {
   export async function getAllDeclaredTaxAmountData() {
     try {
       console.log(`Fetching all Declared Tax Amount data for all employees`);
 
-      const query = `SELECT * FROM declaredTaxAmount`;
+      const querydata = `SELECT * FROM declaredTaxAmount`;
 
-      console.log(query, "getAllDeclaredTaxAmountData query");
+      console.log(querydata, "getAllDeclaredTaxAmountData query");
 
-      const result = await pool.query(query);
+      const result = await query(query,{});
 
       console.log(`Fetched all Declared Tax Amount Data Result:`, result.rows);
 
@@ -23,7 +23,7 @@ export module declaredTaxAmountService {
   export async function getDeclaredTaxAmountDataById(id) {
     try {
       console.log(`Fetching Declared Tax Amount data for userId: ${id}`);
-      const result = await pool.query(
+      const result = await query(
         "SELECT * FROM declaredTaxAmount WHERE id = $1",
         [id]
       );
@@ -38,7 +38,7 @@ export module declaredTaxAmountService {
   export async function getDeclaredTaxAmountDataByUserId(userId) {
     try {
       console.log(`Fetching Declared Tax Amount data for userId: ${userId}`);
-      const result = await pool.query(
+      const result = await query(
         "SELECT * FROM declaredTaxAmount WHERE userDetails->>'id' = $1",
         [userId]
       );
@@ -61,18 +61,18 @@ export module declaredTaxAmountService {
       console.log(fieldNames, "upsertDeclaredTaxAmountData fieldNames");
       console.log(fieldValues, "upsertDeclaredTaxAmountData fieldValues");
 
-      let query;
+      let querydata;
       let params: any[] = [];
 
       if (id) {
         // If id is provided, update the existing Declared Tax Amount data
-        query = `UPDATE declaredTaxAmount SET ${fieldNames
+        querydata = `UPDATE declaredTaxAmount SET ${fieldNames
           .map((field, index) => `${field} = $${index + 1}`)
           .join(", ")} WHERE id = $${fieldNames.length + 1}`;
         params = [...fieldValues, id];
       } else {
         // If id is not provided, insert a new Declared Tax Amount data
-        query = `INSERT INTO declaredTaxAmount (${fieldNames.join(
+        querydata = `INSERT INTO declaredTaxAmount (${fieldNames.join(
           ", "
         )}) VALUES (${fieldNames
           .map((_, index) => `$${index + 1}`)
@@ -83,7 +83,7 @@ export module declaredTaxAmountService {
       console.log(query, "upsertDeclaredTaxAmountData query");
       console.log(params, "upsertDeclaredTaxAmountData params");
 
-      let result = await pool.query(query, params);
+      let result = await query(query, params);
       let message =
         result.command === "UPDATE"
           ? `${result.rowCount} Declared Tax Amount Data Updated successfully`
@@ -100,7 +100,7 @@ export module declaredTaxAmountService {
   export async function deleteDeclaredTaxAmountData(id) {
     try {
       console.log(`Deleting Declared Tax Amount data for userId: ${id}`);
-      const result = await pool.query(
+      const result = await query(
         "DELETE FROM declaredTaxAmount WHERE id = $1 RETURNING *",
         [id]
       );
