@@ -25,24 +25,19 @@ const pool = new pkg.Pool({
   port: 5432,
   database: "HRMS",
 });
-
 pool.on("connect", () => {
   console.log("Database connected");
 });
-
 pool.on("error", (err) => {
   console.log("error is ");
   console.error("Error connecting to the database:", err.message);
 });
-
-
 export const query = async (stmt, options) => {
   console.log('querying');
   console.log(options);
   if (Object.keys(options).length > 0 || options.length > 0) {
     console.log('if');
     return await pool.query(stmt, options);
-
   }
   else {
     console.log('else');

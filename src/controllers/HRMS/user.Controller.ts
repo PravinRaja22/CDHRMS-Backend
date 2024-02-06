@@ -25,7 +25,7 @@ export async function getAuthorizeduser(request, reply) {
       // request.session.set('sessionId', sessionId);
       console.log(`Session ID ${sessionId} set successfully!`)
       console.log(sessionId)
-      reply.send(sessionId)
+      reply.send({sessionId,userData:result.result})
     }
     else {
       reply.send('session Id Not Created Please Try again')
