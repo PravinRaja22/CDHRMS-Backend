@@ -176,8 +176,7 @@ const Routes = function (
   fastify.put("/attendance/:userId/:attendanceDate", updateAttendance);
   fastify.put("/attendance/:attendanceDate", updateAttendanceStatus);
   fastify.get("/attendance/:id", getsingleAttendance);
-  fastify.post("/attendance/bulk",upsertBulkAttendance)
-
+  fastify.post("/attendance/bulk", upsertBulkAttendance);
 
   //attendance Regularize
   fastify.get("/attendance-regularize", getAllAttendanceRegularize);
@@ -189,11 +188,9 @@ const Routes = function (
   fastify.get("/attendance-regularize/:id", getAttendanceRegularizebyId);
   fastify.put("/attendance-regularize/:id", updateAttendanceRegularize);
 
-
   //Payslip
 
-  fastify.get("/payslip/:userId/:month/:year",generatePayslip)
-
+  fastify.get("/payslip/:userId/:month/:year", generatePayslip);
 
   //Approval
 
@@ -338,6 +335,7 @@ const Routes = function (
     getDeclaredTaxAmountDataByUserId
   );
   fastify.delete("/declaredTaxAmount/:id", deleteDeclaredTaxAmountData);
+
   done();
 };
 
