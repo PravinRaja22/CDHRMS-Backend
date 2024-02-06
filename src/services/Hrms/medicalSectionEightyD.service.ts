@@ -99,6 +99,7 @@ export module medicalSectionEightyDService {
 
   export async function deleteMedicalSectionEightyDData(id) {
     try {
+      
       console.log(`Deleting Medical Section 80D data for id: ${id}`);
       const result = await query(
         "DELETE FROM medicalSectionEightyD WHERE id = $1 RETURNING *",
