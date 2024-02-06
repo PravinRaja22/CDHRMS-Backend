@@ -1,5 +1,5 @@
 import { query } from "../../database/postgress.js";
-
+import {generatePayslipFile} from '../../utils/HRMS/payslipGenerator.js'
 export module PayslipServices {
 
     export async function generatePayslip(request: any) {
@@ -43,7 +43,7 @@ export module PayslipServices {
 
             console.log(getAttendance,"getAttendance result");
 
-            let payslipAmount = calculatePayslip(getAttendance.rows,totalNumberOfDays,userId) 
+            let payslipAmount = calculatePayslip(getAttendance.rows,totalNumberOfDays,request) 
 
             return payslipAmount;
         } catch (error) {
@@ -52,60 +52,95 @@ export module PayslipServices {
         }
     }
 
-    const calculatePayslip =(attendanceRecords,totalNumberOfDaysMonth,userId)=>{
+    const calculatePayslip =async (attendanceRecords,totalNumberOfDaysMonth,request)=>{
         console.log(attendanceRecords,"attendanceRecords calculatePayslip");
+        console.log(request.params,"request.params calculatePayslip");
         // Net salary = Basic salary + HRA + Allowances – Income Tax – EPF – Professional Tax
-
+        const { month, year, utcSec,userId } = request.params;
 
         //GET Users Records
+      
+        try{
+            let getUsers = await query(`SELECT * FROM users WHERE id =$1`,[userId])
+            let getuserPF = await query (`SELECT * FROM pfdetails WHERE id=$1`,[userId])
+            let getUserBank = await query(`SELECT * FROM bankdetails WHERE id=$1`,[userId])
+            let userRecord ;
+            let pfRecord;
+            let bankRecord;
 
-        let getUsers = query(`SELECT * FROM users WHERE id =$1`,[userId])
-
-        console.log(getUsers,"getUsers");
-
-
-        //need to get CTC,pf,profetinal tax,income tax from user, now value is hardcoded,need to work
-        let currentCTC = 700000;
-        let currentPF = 2500;
+            if( getUsers.rowCount >0){
+                userRecord =getUsers.rows[0]
+                console.log(getUsers.rows,"getUsers");
+            }
+            if( getuserPF.rowCount >0){
+                pfRecord =getuserPF.rows[0]
+                console.log(getuserPF.rows,"pfRecord");
+            } if( getUserBank.rowCount >0){
+                bankRecord =getUserBank.rows[0]
+                console.log(getUserBank.rows,"bankRecord");
+            }
+           //need to pf,profetinal tax,income tax from user, now value is hardcoded,need to work
+        let currentCTC = Number(userRecord?.ctc);
+        let currentPF = (currentCTC/12)*0.03;
         let currentIT = 0;
         let currentPT = 0;
-
+            
         //calculate Present Days
 
-            let noOfPresentDays=0 ;
-            let noOfLOPDays=0 ;
+        let noOfPresentDays=0 ;
+        let noOfLOPDays=0 ;
 
-            attendanceRecords.map(i=>{
-                if(i.status==="present"){
-                    noOfPresentDays++
-                }else if(i.status==="weekoff"){
-                    noOfPresentDays++
-                }else if(i.status==="leave"){
-                    noOfLOPDays++
-                }
-            })
+        attendanceRecords.map(i=>{
+            if(i.status==="present"){
+                noOfPresentDays++
+            }else if(i.status==="weekoff"){
+                noOfPresentDays++
+            }else if(i.status==="leave"){
+                noOfLOPDays++
+            }
+        })
 
-            console.log(noOfPresentDays,"noOfPresentDays");
-            console.log(noOfLOPDays,"noOfLOPDays");
+        console.log(noOfPresentDays,"noOfPresentDays");
+        console.log(noOfLOPDays,"noOfLOPDays");
 
-            let earningsPerDay = currentCTC / (12* totalNumberOfDaysMonth);
-            let monthCTC = currentCTC / 12
+        let earningsPerDay = Math.round(currentCTC / (12* totalNumberOfDaysMonth));
+        let monthCTC = Math.round(currentCTC / 12)
 
-            let earnings = earningsPerDay * noOfPresentDays;
-            let LOP = earningsPerDay * noOfLOPDays;
-            let totalDeduction = LOP + currentPF + currentIT + currentPT
-            let totalEarnings = monthCTC - totalDeduction
-          
-            let basics =  0.4*totalEarnings
-            let HRA =  0.2*totalEarnings
-            let otherAllowance =  0.4*totalEarnings
-
-            return{
-                earning:{ totalEarnings ,basics,HRA,otherAllowance},
-                deduction:{LOP,currentPF,currentIT,currentPT}
+        let earnings = Math.round(earningsPerDay * noOfPresentDays);
+        let LOP = Math.round(earningsPerDay * noOfLOPDays);
+        let totalDeduction =Math.round( LOP + currentPF + currentIT + currentPT)
+        let totalEarnings = monthCTC - totalDeduction
+        let netPay = totalEarnings-totalDeduction
+        let basics =  Math.round(0.4*totalEarnings)
+        let HRA =  Math.round(0.2*totalEarnings)
+        let otherAllowance =  Math.round(0.4*totalEarnings)
+        let obj={
+            "name" :`${userRecord?.firstname} ${userRecord?.lastname}`  ,
+            "paySlipMonth" : month,
+            "paySlipYear" : year,
+            "employeeNo" : userRecord?.employeeid,
+            "joiningDate" : new Date(userRecord?.joiningdate)?.toJSON()?.slice(0,10) || null,
+            "designation" : userRecord?.designation,
+            "department" : userRecord?.department,
+            "location" : userRecord?.location,
+            "effectiveWorkDays"  : noOfPresentDays,
+            "lopDays" : noOfLOPDays,
+            "bankName" : bankRecord?.bankname,
+            "bankAccNo" :  bankRecord?.accountnumber,
+            "panNo" : pfRecord?.pfnumber,
+            "pfUan" : pfRecord?.uan,
+            "earnings" : { totalEarnings ,basics,HRA,otherAllowance},
+            "deductions" : {LOP,currentPF,currentIT,currentPT ,totalDeduction},
+            "netPay" : netPay
         }
+        console.log(obj,"obj");
 
-            
+       await generatePayslipFile([obj])
 
+        return obj
+        }catch(error){
+            console.log(error.message,"getusers error");
+        }
+       
     }
 }
