@@ -8,16 +8,42 @@ export module userService {
     export const getAllUsers = async () => {
         try {
             console.log("Get All Users");
-            let joinQuery = `SELECT
-                users.* ,pfdetails.* , bankdetails.* 
-                FROM
-                users AS users
-                INNER JOIN pfdetails AS pfDetails ON pfdetails.userid = users.id
-                INNER JOIN bankdetails AS bankDetails ON bankdetails.userid = users.id`;
+            // let joinQuery = `SELECT
+            //     users.* ,pfdetails.* , bankdetails.* 
+            //     FROM
+            //     users AS users
+            //     INNER JOIN pfdetails AS pfDetails ON pfdetails.userid = users.id
+            //     INNER JOIN bankdetails AS bankDetails ON bankdetails.userid = users.id`;
 
+            let joinQuery = `SELECT  users.*,
+            jsonb_build_object(
+                'id', pfdetails.id,
+                'uan', pfdetails.uan,
+                'pfnumber', pfdetails.pfnumber,
+                'pfcontribution', pfdetails.pfcontribution,
+                'pfemployercontribution', pfdetails.pfemployercontribution,
+                'pfemployeecontribution', pfdetails.pfemployeecontribution
+            ) AS "pfDetails",
+            jsonb_build_object(
+                'id', bankdetails.id,
+                'accountnumber', bankdetails.accountnumber,
+                'bankname', bankdetails.bankname,
+                'branch', bankdetails.branch,
+                'ifsccode', bankdetails.ifsccode,
+                'accountholdername', bankdetails.accountholdername,
+                'attachment', bankdetails.attachment
+            ) AS "bankDetails" 
+            FROM
+            users
+            INNER JOIN pfdetails ON pfdetails.userid = users.id
+            INNER JOIN bankdetails ON bankdetails.userid = users.id
+            `
                 let usersQuery = `SELECT * FROM users`
-            const result: QueryResult = await query(usersQuery,[]);
+            const result: QueryResult = await query(joinQuery,[]);
             console.log(result, "query results");
+
+            // let resultObj = usersHandler(result.rows)
+
             return result.rows
 
         } catch (error) {
@@ -126,4 +152,13 @@ export module userService {
             return (error.message);
         }
     }
+}
+
+
+const usersHandler = async(records)=>{
+
+    records.map(i=>{
+        
+    })
+
 }
