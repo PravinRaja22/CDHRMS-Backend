@@ -17,7 +17,7 @@ export module userService {
 
                 let usersQuery = `SELECT * FROM users`
             const result: QueryResult = await query(usersQuery,[]);
-            console.log( "query results");
+            console.log(result, "query results");
             return result.rows
 
         } catch (error) {
