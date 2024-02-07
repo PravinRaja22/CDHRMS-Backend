@@ -5,6 +5,7 @@ export module PayslipServices {
     export async function generatePayslip(request: any) {
         const { month, year, utcSec,userId } = request.params;
         // const userId = request.params.userId;
+        console.log(request.params,"****** params");
         let startDate;
         let endDate;
         let totalNumberOfDays ;
@@ -43,9 +44,14 @@ export module PayslipServices {
 
             console.log(getAttendance,"getAttendance result");
 
-            let payslipAmount = calculatePayslip(getAttendance.rows,totalNumberOfDays,request) 
+            if(getAttendance.rowCount>0){
+                let payslipAmount = calculatePayslip(getAttendance.rows,totalNumberOfDays,request) 
+                return payslipAmount;
+            }else{
+                return []
+            }
 
-            return payslipAmount;
+           
         } catch (error) {
             console.log(error.message, "getAttendance error");
             return error.message;
@@ -62,8 +68,8 @@ export module PayslipServices {
       
         try{
             let getUsers = await query(`SELECT * FROM users WHERE id =$1`,[userId])
-            let getuserPF = await query (`SELECT * FROM pfdetails WHERE id=$1`,[userId])
-            let getUserBank = await query(`SELECT * FROM bankdetails WHERE id=$1`,[userId])
+            let getuserPF = await query (`SELECT * FROM pfdetails WHERE userId =$1`,[userId])
+            let getUserBank = await query(`SELECT * FROM bankdetails WHERE userId =$1`,[userId])
             let userRecord ;
             let pfRecord;
             let bankRecord;
@@ -85,6 +91,8 @@ export module PayslipServices {
         let currentIT = 0;
         let currentPT = 0;
             
+
+        
         //calculate Present Days
 
         let noOfPresentDays=0 ;
@@ -95,7 +103,10 @@ export module PayslipServices {
                 noOfPresentDays++
             }else if(i.status==="weekoff"){
                 noOfPresentDays++
-            }else if(i.status==="leave"){
+            }else if(i.status==="annualLeave"){
+                noOfPresentDays++
+            }            
+            else if(i.status==="leave"){
                 noOfLOPDays++
             }
         })
@@ -112,7 +123,7 @@ export module PayslipServices {
         let totalEarnings = monthCTC - totalDeduction
         let netPay = totalEarnings-totalDeduction
         let basics =  Math.round(0.4*totalEarnings)
-        let HRA =  Math.round(0.2*totalEarnings)
+        let HRA =  Math.round(0.5*basics)
         let otherAllowance =  Math.round(0.4*totalEarnings)
         let obj={
             "name" :`${userRecord?.firstname} ${userRecord?.lastname}`  ,
@@ -133,9 +144,9 @@ export module PayslipServices {
             "deductions" : {LOP,currentPF,currentIT,currentPT ,totalDeduction},
             "netPay" : netPay
         }
-        console.log(obj,"obj");
+        console.log(obj,"obj****");
 
-       await generatePayslipFile([obj])
+    //    await generatePayslipFile([obj])
 
         return obj
         }catch(error){

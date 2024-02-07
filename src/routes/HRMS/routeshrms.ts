@@ -104,6 +104,7 @@ import {
 import {
   getAllApprovals,
   getApprovalbyApprover,
+  getApprovalsById,
   insertApprovals,
   updateApprovals,
 } from "../../controllers/HRMS/approval.Controller.js";
@@ -196,8 +197,10 @@ const Routes = function (
 
   fastify.get("/approval", getAllApprovals);
   fastify.post("/approval", insertApprovals);
-  fastify.get("/approval/:approverId", getApprovalbyApprover);
+  fastify.get("/approval/:id",getApprovalsById);
   fastify.put("/approval/:id", updateApprovals);
+  fastify.get("/approval/aprover/:approverId", getApprovalbyApprover);
+
 
   //loan
   fastify.get("/loan", getLoans);

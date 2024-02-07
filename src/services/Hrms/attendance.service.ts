@@ -36,7 +36,7 @@ export module attendanceService {
         console.log(params, "params");
 
         const existingRecord: any = await query(
-            'SELECT * FROM attendances WHERE employeeDetails->>\'employeeId\' = $1 AND date = $2',
+            'SELECT * FROM attendances WHERE userId = $1 AND date = $2',
             [params.userId, params.attendanceDate]
         )
         console.log(existingRecord.rows, "existingRecord");
@@ -86,7 +86,7 @@ export module attendanceService {
                 let result = await query(querydata, params);
                 console.log(result, "upsert result");
                 let message = result.command === 'UPDATE' && result.rowCount > 0 ? 'Attendance upserted successfully' : 'Attendance upserte failure'
-                return ({ message });
+                return ({ status:200, message });
 
             } catch (error) {
                 console.log(error.message, "upsert error");
@@ -472,7 +472,7 @@ export module attendanceService {
                 try {
                     // Check if attendance record already exists for the user and date
                     const existingRecord = await query(
-                        'SELECT * FROM attendances WHERE employeeDetails->>\'employeeId\' = $1 AND date = $2',
+                        'SELECT * FROM attendances WHERE userId = $1 AND date = $2',
                         [user.id, newDateUTC]
                     );
                     console.log(existingRecord, "existingRecord");
@@ -485,12 +485,12 @@ export module attendanceService {
                         console.log("inside else");
                         let obj: any = {
                             date: newDateUTC,
-                            employeeDetails: { "employeeName": user.username, "employeeuuId": user.uuid, "employeeId": user.id },
+                            userId:  user.id,
                             signIn: { data: [{ "timeStamp": null, "lat": null, "lng": null }] },
                             signOut: { data: [{ "timeStamp": null, "lat": null, "lng": null }] },
                             shift: { "shiftType": "GS", "shiftStart": "09:00", "shiftEnd": "18:00" },
                             workingHours: { "firstIn": null, "lastOut": null, "totalWorkHours": null },
-                            status: {},
+                            status: null,
                             isWeekend: newDate.getDay() === 0 || newDate.getDay() === 6,
                             isRegularized: false,
                             isHoliday: false,
@@ -527,51 +527,7 @@ export module attendanceService {
             console.log(error, "catch error");
             return { success: 0, failure: allUsers.rows.length };
         }
-        // try {
-        //     let result;
-        //     let successInsert = [];
-        //     let failureInsert = [];
-        //     let newDate = new Date();
-        //     newDate.setHours(0, 5, 0, 0);
-        //     let newDateUTC = newDate.getTime() 
-        //     for (const user of allUsers.rows) {             
-        //         let obj: any = {};
-        //         obj.date = newDateUTC;
-        //         obj.employeeDetails = { "employeeName": user.username, "employeeuuId": user.uuid, "employeeId": user.id };
-        //         obj.signIn = '[{"timeStamp":null,"lat":null,"lng":null}]';
-        //         obj.signOut = '[{"timeStamp":null,"lat":null,"lng":null}]';
-        //         obj.shift = '{ "shiftType": "GS", "shiftStart": "09:00", "shiftEnd": "18:00" }';
-        //         obj.workingHours = '{ "firstIn": null, "lastOut": null, "totalWorkHours": null }';
-        //         obj.status = '{}';
-        //         obj.isWeekend = newDate.getDay() === 0 || newDate.getDay() === 6;
-        //         obj.isRegularized = false;
-        //         obj.isHoliday = false;
-        //         obj.session = '{"session 1":{"sessionTimings":"09:00 - 13:00","firstIn":null,"lastOut":null},"session 2":{"sessionTimings":"13:01 - 18:00","firstIn":null,"lastOut":null}}';
-
-        //         console.log(obj, "obj try");
-        //         const fieldNames = Object.keys(obj);
-        //         const fieldValues = Object.values(obj);
-
-        //         //query for insert 
-        //         let query = `INSERT INTO attendances (${fieldNames.join(', ')}) VALUES (${fieldNames.map((_, index) => `$${index + 1}`).join(', ')}) RETURNING *`;
-        //         let params = fieldValues;
-        //         result = await query(query, params)
-
-        //         if (result.command === 'INSERT' || result.command === 'UPDATE') {
-        //             successInsert.push(result)
-        //         } else {
-        //             failureInsert.push(result)
-        //         }
-        //     }
-        //     console.log(result, "resultInsert");
-        //     console.log(successInsert.length, "sucess insert");
-        //     console.log(failureInsert.length, "failure insert");
-        //     return { sucess: successInsert.length, failure: failureInsert.length }
-        // }
-        // catch (error) {
-        //     console.log(error, "catch error");
-        //     return error
-        // }
+      
     }
 }
 

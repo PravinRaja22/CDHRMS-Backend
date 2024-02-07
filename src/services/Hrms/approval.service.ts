@@ -63,10 +63,27 @@ export module approvalService {
     }
   }
 
+  export async function getApprovalsById(recId:any){
+    console.log("getApprovalsById" , recId);
+
+    try{
+      let querydata = `SELECT * FROM approvals WHERE id = $1`
+      let params = recId
+      const result: QueryResult = await query(querydata, [params]);
+      console.log(result.rows,"result rows getApprovalsById ");
+      if(result.rowCount>0){
+        return result.rows
+      }
+    }catch(error){
+        console.log(error.message ,"error getApprovalsById ");
+        return error.message
+    }
+  }
+
   export async function getApprovalbyApprover(approverId: any) {
     try {
       console.log("getApprovalbyApprover call");
-      let querydata = `SELECT * FROM approvals WHERE approverDetails->>\'id\' = $1`;
+      let querydata = `SELECT * FROM approvals WHERE approverId = $1`;
       let params = approverId;
       const result: QueryResult = await query(querydata, [params]);
 
@@ -89,7 +106,7 @@ export module approvalService {
 
     let querydata;
     let params: any[] = [];
-    let id = requestParams || requestBody?.id;
+    let id = requestBody?.id || requestParams;
 
     try {
       querydata = `UPDATE approvals SET ${fieldNames
@@ -151,7 +168,7 @@ export module approvalService {
         console.log(newObj1, "newObj");
         const { uuid, ...newObj } = newObj1;
         newObj.status = approvalRec.status;
-        newObj.approval = { id: approvalRecId };
+        // newObj.approval = { id: approvalRecId };
         let updateRegularize =
           await attendanceRegularizeService.updateAttendanceRegularize(
             newObj.id,
@@ -159,37 +176,31 @@ export module approvalService {
           );
         console.log(updateRegularize, "updateRegularize");
         //send notification mail
+        
+        let updateAttendanceResult;
 
-        //update attendance
-        let updateAttendanceResult = await updateAttendance(
-          newObj,
-          "attendanceRegularize"
-        );
-        console.log(updateAttendanceResult, "updateAttendanceResult");
+        if(updateRegularize.status ===200){
+          console.log("updateRegularize.status",updateRegularize.status);
+           //update attendance
+          updateAttendanceResult = await updateAttendance(
+            newObj,
+            "attendanceRegularize"
+          );
+          console.log(updateAttendanceResult, "updateAttendanceResult");
+
+        }
+        
+        if(updateAttendanceResult.status===200){
+          //update Leave Balance record
+          return updateAttendanceResult
+
+        }
+        
       } catch (error) {
         console.log(error.message, "error updateParentResult");
       }
     } else if (approvalRec.type === "leave") {
-      // try{
-      //     let getLeaveRecord = await leaveService.getSingleLeaves(approvalRec.parentId || approvalRec.parentid)
-      //     console.log(getLeaveRecord,"getRegularzeRecord");
-      //     let newObj1 = {...getLeaveRecord[0]}
-      //     console.log(newObj1,"newObj");
-      //     const { uuid, ...newObj } = newObj1;
-      //     newObj.status = approvalRec.status
-      //     // newObj.approval = {id:approvalRecId}
-      //     let updateLeave = await leaveService.upsertLeaves(newObj)
-      //     console.log(updateLeave,"updateRegularize");
-      //     //send notification mail
-
-      //     //update attendance
-      //         let updateAttendanceResult = await updateAttendance(newObj,"leave")
-
-      //         console.log(updateAttendanceResult,"updateAttendanceResult");
-
-      // }catch(error){
-      //     console.log(error.message,"error updateParentResult");
-      // }
+      
       console.log("inside leave updateParentRecord");
       try {
         let getLeaveRecord = await leaveService.getSingleLeaves(
@@ -220,6 +231,12 @@ export module approvalService {
   }
 
   const updateAttendance = async (attendanceRecord, updateType) => {
+    console.log("inside updateAttendance");
+    console.log(attendanceRecord);
+    console.log("*****");
+    console.log(updateType);
+    console.log("*****");
+
     try {
       let { userid, date, fromdate, todate, ...other } = attendanceRecord;
       let params;
@@ -241,14 +258,27 @@ export module approvalService {
 
       console.log(updatedAttendanceRecord, "updatedAttendanceRecord");
       // Modify the record based on the update type
+
+      let calculatedWorkingHours = await calculateAttendance({signIn:other.shiftstart,signOut:other.shiftend},updatedAttendanceRecord)
+      console.log(calculatedWorkingHours,"calculatedWorkingHours result");
       if (updateType === "attendanceRegularize") {
-        updatedAttendanceRecord.signin.data = [
+
+        let status =attendanceRecord?.status.toLowerCase().includes('approve')?true :attendanceRecord?.status.toLowerCase().includes('reject') ? false :false
+
+
+        updatedAttendanceRecord.signin.data = status ?  [
           { lat: null, lng: null, timeStamp: other.shiftstart },
-        ];
-        updatedAttendanceRecord.signout.data = [
+        ] : updatedAttendanceRecord.signin.data ;
+        updatedAttendanceRecord.signout.data = status ? [
           { lat: null, lng: null, timeStamp: other.shiftend },
-        ];
+        ] : updatedAttendanceRecord.signout.data;
+
         updatedAttendanceRecord.isregularized = true;
+        updatedAttendanceRecord.status = status ? "present" :"LOP"
+        updatedAttendanceRecord.workinghours = status ? calculatedWorkingHours.workinghours :updatedAttendanceRecord.workinghours 
+        updatedAttendanceRecord.session = status ? calculatedWorkingHours.session :updatedAttendanceRecord.session 
+
+
       } else if (updateType === "leave") {
         updatedAttendanceRecord.status = {
           label: other.status,
@@ -264,9 +294,9 @@ export module approvalService {
           params,
           updatedAttendanceRecord
         );
-        console.log(result, "result");
-        if (result.message > "Attendance upserted successfully") {
-          return { status: 200 };
+        console.log(result, "updateAttendance result");
+        if (result.status ===200 ) {
+          return result;
         }
       } catch (error) {
         console.log(error, "error in updateAttendance");
@@ -277,7 +307,7 @@ export module approvalService {
   };
 
   const updateLeaveBalance = async (leaveRec) => {
-    console.log(leaveRec, "leaveRec");
+    console.log(leaveRec, "updateLeaveBalance leaveRec");
     let leaveBalance = await leaveBalanceService.getLeaveBalanceByUsers(
       leaveRec.userid
     );
@@ -310,3 +340,92 @@ export module approvalService {
     console.log(upsertLeaveBalance);
   };
 }
+
+
+  const calculateAttendance = async (signinDates,updatedAttendanceRecord)=>{
+    console.log("inside calculateAttendance");
+    console.log("inside calculateAttendance updatedAttendanceRecord",updatedAttendanceRecord);
+    console.log("inside calculateAttendance signinDates",signinDates);
+    let signIns = signinDates.signIn
+    let signOuts = signinDates.signOut
+    console.log("*******");
+    console.log(signIns,"signIns");
+    console.log(signOuts,"signOuts");
+    console.log("*******");
+    let dateA: any = new Date(Number(signIns));
+    let dateB: any = new Date(Number(signOuts));
+ 
+    let timeDifference = dateB - dateA;
+
+    // Convert the time difference to hours
+
+    let totalHours = Math.floor(timeDifference / (1000 * 60 * 60));
+    let totalMinutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+
+    console.log(totalHours, totalMinutes, "&&&&&&&&&")
+    updatedAttendanceRecord.workinghours = {
+        firstIn: signIns, lastOut: signOuts,
+        totalWorkHours: {
+            hours: totalHours,
+            minutes: totalMinutes
+        }
+    }
+
+    //session calculation
+
+    let sessionDate = new Date(Number(updatedAttendanceRecord.date))
+    console.log(sessionDate, "sessionDate");
+    sessionDate.setHours(13, 1, 0, 0)//set time as 13:01
+
+    const session1EndTime = sessionDate.getTime();
+    const signOutTime = dateB.getTime();
+    const signInTime = dateA.getTime();
+
+    console.log(session1EndTime, "session1EndTime sessioncalculation");
+    console.log(signOutTime, "signOutTime sessioncalculation");
+    console.log(signInTime, "signInTime sessioncalculation");
+
+    if (signOutTime <= session1EndTime) {
+        console.log("if signOutTime");
+        updatedAttendanceRecord.session = {
+            'session 1': {
+                sessionTimings: '09:00 - 13:00',
+                firstIn: signIns,
+                lastOut: signOuts
+            },
+            'session 2': { sessionTimings: '13:01 - 18:00', firstIn: null, lastOut: null }
+        };
+    }
+    else if (signInTime >= session1EndTime) {
+        console.log("else if");
+        updatedAttendanceRecord.session = {
+            'session 1': {
+                sessionTimings: '09:00 - 13:00',
+                firstIn: null,
+                lastOut: null
+            },
+            'session 2': {
+                sessionTimings: '13:01 - 18:00',
+                firstIn: signIns,
+                lastOut: signOuts
+            }
+        }
+    }
+    else {
+        console.log("else signOutTime");
+        updatedAttendanceRecord.session = {
+            'session 1': {
+                sessionTimings: '09:00 - 13:00',
+                firstIn: signIns,
+                lastOut: null
+            },
+            'session 2': {
+                sessionTimings: '13:01 - 18:00',
+                firstIn: null,
+                lastOut: signOuts
+            }
+        };
+    }
+    console.log(updatedAttendanceRecord,"updatedAttendanceRecord after change");
+      return updatedAttendanceRecord;
+  }

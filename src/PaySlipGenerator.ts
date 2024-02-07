@@ -4,7 +4,7 @@ import fs from "fs";
 import path from "path";
 import { exec } from "child_process";
 import util from "util";
-import { convertCurrencyToWords } from "./utils/CurrencyToWords.js";
+import { convertCurrencyToWords } from "./utils/HRMS/CurrencyToWords.js";
 
 // const PizZip = require("pizzip");
 // const Docxtemplater = require("docxtemplater");

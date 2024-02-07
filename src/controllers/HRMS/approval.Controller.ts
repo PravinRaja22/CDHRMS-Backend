@@ -18,6 +18,15 @@ export async function insertApprovals(request:any,reply:any) {
     }
 }
 
+export async function getApprovalsById(request:any,reply:any) {
+    try{
+        console.log("********",request.params);
+        let result = await approvalService.getApprovalsById(request.params.id)
+        reply.send(result)
+    }catch(error){
+        reply.status(500).send(error.message)
+    }  
+}
 export async function getApprovalbyApprover(request:any,reply:any) {
     try{
         let result = await approvalService.getApprovalbyApprover(request.params.approverId)
