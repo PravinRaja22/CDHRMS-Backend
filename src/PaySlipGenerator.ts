@@ -1,17 +1,11 @@
 import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
-import fs from "fs";
+import fs from "fs/promises";
 import path from "path";
 import { exec } from "child_process";
 import util from "util";
 import { convertCurrencyToWords } from "./utils/HRMS/CurrencyToWords.js";
 
-// const PizZip = require("pizzip");
-// const Docxtemplater = require("docxtemplater");
-// const fs = require("fs");
-// const path = require("path");
-// const { exec } = require("child_process");
-// const util = require("util");
 const execAsync = util.promisify(exec);
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
@@ -27,8 +21,7 @@ export module payslipService {
 }
 
 const fileGeneration = async (data) => {
-  //   const currentEpochTimeInSeconds = Math.floor(Date.now() / 1000);
-  const content = fs.readFileSync(
+  const content = await fs.readFile(
     path.resolve("src/services/Hrms/CD_paySlip.docx"),
     "binary"
   );
@@ -56,19 +49,22 @@ const fileGeneration = async (data) => {
     `${data.name}_PaySlip_${data.paySlipMonth}_${data.paySlipYear}.docx`
   );
 
-  fs.writeFileSync(docxFilePath, buf);
+  await fs.writeFile(docxFilePath, buf);
 
   await convertToPdf(docxFilePath, pdfFilePath);
 };
 
 const convertToPdf = async (docxFilePath, pdfFilePath) => {
   try {
-    const command = `soffice --headless --convert-to pdf "${docxFilePath}" --outdir ""`;
-    const { stdout, stderr } = await execAsync(command);
-    console.log("PDF Generated Successfully", stdout);
-    if (stderr) {
-      console.error("Stderr:", stderr);
-    }
+    const libre = require("libreoffice-convert");
+    libre.convertAsync = util.promisify(libre.convert);
+
+    // const command = `soffice --headless --convert-to pdf "${docxFilePath}" --outdir ""`;
+    // const { stdout, stderr } = await execAsync(command);
+    // console.log('PDF Generated Successfully', stdout);
+    // if (stderr) {
+    //   console.error('Stderr:', stderr);
+    // }
   } catch (error) {
     console.error("Error:", error);
   }

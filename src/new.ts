@@ -1,47 +1,60 @@
 import fastify from "fastify";
 import oauthPlugin from "@fastify/oauth2";
-import cors from '@fastify/cors';
+import cors from "@fastify/cors";
+import fastifyStatic from "@fastify/static";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+console.log("test");
+console.log(__dirname, "Directot name");
 // import { connection } from "./database/postgress.js";
 import Routes from "./routes/HRMS/routeshrms.js";
+import path from "path";
 const server = fastify({
-  logger:false,
+  logger: false,
 });
-await server.register(cors)
-
+await server.register(cors);
 server.register(Routes);
+server.register(fastifyStatic, {
+  root: path.join(__dirname, "uploads"),
+  prefix: "/paySlip",
+});
 
- server.register(oauthPlugin, {
-    name: 'msOAuth2',
-    credentials: {
-      client: {
-        id: 'ea82ec5f-8eed-4bcd-a8a9-a23281ed90df',
-        secret: '67030a96-ed24-4883-bc54-ec3698cdc7ff'
-      },
-      auth: oauthPlugin.MICROSOFT_CONFIGURATION
+server.register(oauthPlugin, {
+  name: "msOAuth2",
+  credentials: {
+    client: {
+      id: "ea82ec5f-8eed-4bcd-a8a9-a23281ed90df",
+      secret: "67030a96-ed24-4883-bc54-ec3698cdc7ff",
     },
-    // register a fastify url to start the redirect flow
-    startRedirectPath: '/login/facebook',
-    // facebook redirect here after the user login
-    callbackUri: 'http://localhost:3000/login/facebook/callback'
-  })
-  // let postgressconnection = connection();
-  // console.log(postgressconnection)
-  server.get('/login/ms/callback', async function (request, reply) {
-    const { token } = await (this as any).msOAuth2.getAccessTokenFromAuthorizationCodeFlow(request)
-  
-    console.log(token.access_token)
-  
-    // if later you need to refresh the token you can use
-    // const { token: newToken } = await this.getNewAccessTokenUsingRefreshToken(token)
-  
-    reply.send({ access_token: token.access_token })
-  })
+    auth: oauthPlugin.MICROSOFT_CONFIGURATION,
+  },
+  // register a fastify url to start the redirect flow
+  startRedirectPath: "/login/facebook",
+  // facebook redirect here after the user login
+  callbackUri: "http://localhost:3000/login/facebook/callback",
+});
+// let postgressconnection = connection();
+// console.log(postgressconnection)
+server.get("/login/ms/callback", async function (request, reply) {
+  const { token } = await (
+    this as any
+  ).msOAuth2.getAccessTokenFromAuthorizationCodeFlow(request);
 
-  server.listen({ port: 8000 }, (err, address) => {
-    if (err) {
-      console.error(err)
-      // process.exit(1)
-    }
-    console.log(`Server listening at ${address}`)
-  })
+  console.log(token.access_token);
+
+  // if later you need to refresh the token you can use
+  // const { token: newToken } = await this.getNewAccessTokenUsingRefreshToken(token)
+
+  reply.send({ access_token: token.access_token });
+});
+
+server.listen({ port: 8000 }, (err, address) => {
+  if (err) {
+    console.error(err);
+    // process.exit(1)
+  }
+  console.log(`Server listening at ${address}`);
+});
