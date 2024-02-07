@@ -151,6 +151,9 @@ const Routes = function (
   //   reply.send("yes ");
   // });
   fastify.post("/signup", { preHandler: [authVerify] }, getAuthorizeduser);
+  fastify.get("/", (req, res) => {
+    res.send("Hi Man");
+  });
 
   //User Object Routes
   fastify.get("/users", getUser);
