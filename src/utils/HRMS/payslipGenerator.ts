@@ -1,38 +1,34 @@
-import fs from "fs";
-import path from "path";
-import util from "util";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
 import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
-import libre from "libreoffice-convert";
-import { convertCurrencyToWords } from "./CurrencyToWords.js";
+import fs from "fs";
+import path from "path";
 import { exec } from "child_process";
-
+import util from "util";
+import { convertCurrencyToWords } from "./CurrencyToWords.js";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+// const PizZip = require("pizzip");
+// const Docxtemplater = require("docxtemplater");
+// const fs = require("fs");
+// const path = require("path");
+// const { exec } = require("child_process");
+// const util = require("util");
 const execAsync = util.promisify(exec);
-const libreConvertAsync = util.promisify(libre.convert);
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
 export const generatePayslipFile = async (data) => {
-  console.log(data, "generatePayslipFile data");
-  const result = [];
-
+  console.log(data, "data is");
   for (const e of data) {
     e.netPayInWords = await convertCurrencyToWords(e.netPay);
     console.log(e);
-    let payslipData = await fileGeneration(e);
-    result.push(payslipData);
+    await fileGeneration(e);
   }
-
-  return result;
 };
 
 const fileGeneration = async (data) => {
-  console.log(__dirname, "directory Name");
+  //   const currentEpochTimeInSeconds = Math.floor(Date.now() / 1000);
   const content = fs.readFileSync(
-    path.resolve(__dirname, "../../CD_paySlip.docx"),
+    path.resolve("src/CD_paySlip.docx"),
     "binary"
   );
   const zip = new PizZip(content);
@@ -51,9 +47,14 @@ const fileGeneration = async (data) => {
     compression: "DEFLATE",
   });
 
-  const timestamp = new Date().getTime();
-  const pdfFileName = `${timestamp}_tesr_PaySlip_${data.paySlipMonth}_${data.paySlipYear}.pdf`;
-  const docxFileName = `${timestamp}_tesr_PaySlip_${data.paySlipMonth}_${data.paySlipYear}.docx`;
+  const docxFilePath = path.resolve(
+    __dirname,
+    "..",
+    "..",
+    "..",
+    "uploads",
+    `${data.name}_PaySlip_${data.paySlipMonth}_${data.paySlipYear}.docx`
+  );
 
   const pdfFilePath = path.resolve(
     __dirname,
@@ -61,37 +62,24 @@ const fileGeneration = async (data) => {
     "..",
     "..",
     "uploads",
-    pdfFileName
+    `${data.name}_PaySlip_${data.paySlipMonth}_${data.paySlipYear}.pdf`
   );
-  const docxFilePath = path.resolve(
-    __dirname,
-    "..",
-    "..",
-    "..",
-    "uploads",
-    docxFileName
-  );
-  console.log(docxFilePath, "docxfilepath");
+
   fs.writeFileSync(docxFilePath, buf);
 
-  let payslipUrl = await convertToPDF(docxFilePath);
-
-  return {
-    userName: data.name,
-    payslipUrl: payslipUrl,
-  };
+  await convertToPdf(docxFilePath, pdfFilePath);
 };
 
-const convertToPDF = async (docxFilePath) => {
+const convertToPdf = async (docxFilePath, pdfFilePath) => {
   try {
-    const pdfFilePath = docxFilePath.replace(/\.docx$/, ".pdf");
-    const input = fs.readFileSync(docxFilePath);
-    const pdfBuffer = await libreConvertAsync(input, ".pdf", undefined);
-    fs.writeFileSync(pdfFilePath, pdfBuffer);
-    console.log("PDF Generated Successfully");
-    return pdfFilePath;
+    const pdfDirectory = path.dirname(pdfFilePath);
+    const command = `soffice --headless --convert-to pdf "${docxFilePath}" --outdir "${pdfDirectory}"`;
+    const { stdout, stderr } = await execAsync(command);
+    console.log("PDF Generated Successfully", stdout);
+    if (stderr) {
+      console.error("Stderr:", stderr);
+    }
   } catch (error) {
     console.error("Error:", error);
-    throw error;
   }
 };
