@@ -4,6 +4,8 @@ import {
   getAuthorizeduser,
   getSingleUser,
   getUser,
+  getUsersBankdetails,
+  getUsersPFdetails,
   upsertUser,
 } from "../../controllers/HRMS/user.Controller.js";
 import {
@@ -144,6 +146,11 @@ import {
   getPaySlip,
 } from "../../controllers/HRMS/payslip.Controller.js";
 import { generatePayslipFile } from "../../utils/HRMS/payslipGenerator.js";
+import {
+  getMedicalInsurances,
+  getMedicalInsurancesById,
+  upsertMedicalInsurances,
+} from "../../controllers/HRMS/medicalInsurance.Controller.js";
 
 const Routes = function (
   fastify: FastifyInstance,
@@ -165,6 +172,10 @@ const Routes = function (
   fastify.get("/users/:id", getSingleUser);
   fastify.post("/users", upsertUser);
   fastify.delete("/users/:id", deleteUser);
+
+  fastify.get("/users/:id/bank-details", getUsersBankdetails);
+  fastify.get("/users/:id/PF-details", getUsersPFdetails);
+  fastify.get("/users/:id/medical-insurences", getUsersBankdetails);
 
   //Leave Object Routes
   fastify.get("/leaves", getLeaveData);
@@ -245,6 +256,13 @@ const Routes = function (
   fastify.get("/pf-details", getPFDetails);
   fastify.get("/pf-details/:id", getIndividualPFDetails);
   fastify.delete("/pf-details/:id", deletePFDetails);
+
+  //medical
+
+  fastify.get("/medical-insurences", getMedicalInsurances);
+  fastify.post("/medical-insurences", upsertMedicalInsurances);
+  fastify.get("/medical-insurences/:id", getMedicalInsurancesById);
+  fastify.delete("/medical-insurences/:id", deletePFDetails);
 
   //eightyC
   fastify.post("/eightyC", upsertEightyCData);

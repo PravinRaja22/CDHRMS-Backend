@@ -74,3 +74,32 @@ export async function deleteUser(request: any, reply: any) {
 
 
 
+export const getUsersBankdetails =async(request:any,reply:any)=>{
+  try{
+    console.log(request.params,"request");
+    let result = await userService.getUsersBankdetails(request.params.id)
+    return result
+  }catch(error){
+    reply.status(500).send(error.message)
+  }
+}
+
+export const getUsersPFdetails =async(request:any,reply:any)=>{
+  try{
+    console.log(request.params,"request");
+    let result = await userService.getUsersPFdetails(request.params.id)
+    return result
+  }catch(error){
+    reply.status(500).send(error.message)
+  }
+}
+
+export const getUsersMedicalInsurence =async(request:any,reply:any)=>{
+  try{
+    console.log(request.params,"request");
+    let result = await userService.getUsersMedicalInsurence(request.params.id)
+    return result
+  }catch(error){
+    reply.status(500).send(error.message)
+  }
+}
