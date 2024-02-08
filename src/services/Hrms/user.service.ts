@@ -42,8 +42,6 @@ export module userService {
             const result: QueryResult = await query(joinQuery,[]);
             console.log(result, "query results");
 
-            // let resultObj = usersHandler(result.rows)
-
             return result.rows
 
         } catch (error) {
@@ -55,7 +53,36 @@ export module userService {
     export const getAuthorizedUserdata = async (username) => {
         try {
             console.log(username, 'data in userName')
-            let data: any = await query('SELECT * FROM users WHERE username = $1', [username])
+
+            let joinQuery =`SELECT  users.*,
+            jsonb_build_object(
+                'id', pfdetails.id,
+                'uan', pfdetails.uan,
+                'pfnumber', pfdetails.pfnumber,
+                'pfcontribution', pfdetails.pfcontribution,
+                'pfemployercontribution', pfdetails.pfemployercontribution,
+                'pfemployeecontribution', pfdetails.pfemployeecontribution
+            ) AS "pfDetails",
+            jsonb_build_object(
+                'id', bankdetails.id,
+                'accountnumber', bankdetails.accountnumber,
+                'bankname', bankdetails.bankname,
+                'branch', bankdetails.branch,
+                'ifsccode', bankdetails.ifsccode,
+                'accountholdername', bankdetails.accountholdername,
+                'attachment', bankdetails.attachment
+            ) AS "bankDetails" 
+            FROM
+            users
+            INNER JOIN pfdetails ON pfdetails.userid = users.id
+            INNER JOIN bankdetails ON bankdetails.userid = users.id
+            WHERE users.username =$1
+            `
+            let params = [username]
+
+
+            let data: any = await query(joinQuery,params)
+            console.log(data,"data joinquery result");
             console.log('999',data.rows.length, 'data')
             if (data.rows.length > 0) {
                 return { status: 'sucess', result: data.rows }
@@ -152,13 +179,44 @@ export module userService {
             return (error.message);
         }
     }
+
+    export const getUsersBankdetails = async (userId:any)=>{
+        console.log("getUsersBankdetails call");
+        try{
+            let querySQL = `SELECT  * FROM bankdetails WHERE userId = ${userId}`
+            let result = await query(querySQL,{})
+            console.log(result,"result getUsersBankdetails");
+            return result.rows
+        }catch(error){
+            return error.message
+        }
+    }
+
+    export const getUsersPFdetails = async (userId:any)=>{
+        console.log("getUsersPFdetails call");
+        try{
+            let querySQL = `SELECT  * FROM pfdetails WHERE userId = ${userId}`
+            let result = await query(querySQL,{})
+            console.log(result,"result getUsersPFdetails");
+            return result.rows
+        }catch(error){
+            return error.message
+        }
+    }
+    export const getUsersMedicalInsurence = async (userId:any)=>{
+        console.log("getUsersMedicalInsurence call");
+        try{
+            let querySQL = `SELECT  * FROM medicalInsurances WHERE userId = ${userId}`
+            let result = await query(querySQL,{})
+            console.log(result,"result getUsersMedicalInsurence");
+            return result.rows
+        }catch(error){
+            return error.message
+        }
+    }
+
+    
+
 }
 
 
-const usersHandler = async(records)=>{
-
-    records.map(i=>{
-        
-    })
-
-}
