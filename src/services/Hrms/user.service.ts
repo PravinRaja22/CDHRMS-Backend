@@ -109,11 +109,38 @@ export module userService {
         }
     }
 
-    export const getSingleUser = async (recId: string) => {
+    export const getSingleUser = async (recId: any) => {
         try {
             console.log("Get single Users");
             console.log(recId, "getSingleUser params id");
-            const result = await query('SELECT * FROM users WHERE id = $1', [recId]);
+            
+            let joinQuery =`SELECT  users.*,
+            jsonb_build_object(
+                'id', pfdetails.id,
+                'uan', pfdetails.uan,
+                'pfnumber', pfdetails.pfnumber,
+                'pfcontribution', pfdetails.pfcontribution,
+                'pfemployercontribution', pfdetails.pfemployercontribution,
+                'pfemployeecontribution', pfdetails.pfemployeecontribution
+            ) AS "pfDetails",
+            jsonb_build_object(
+                'id', bankdetails.id,
+                'accountnumber', bankdetails.accountnumber,
+                'bankname', bankdetails.bankname,
+                'branch', bankdetails.branch,
+                'ifsccode', bankdetails.ifsccode,
+                'accountholdername', bankdetails.accountholdername,
+                'attachment', bankdetails.attachment
+            ) AS "bankDetails" 
+            FROM
+            users
+            INNER JOIN pfdetails ON pfdetails.userid = users.id
+            INNER JOIN bankdetails ON bankdetails.userid = users.id
+            WHERE users.id =$1
+            `
+            let params = [recId]
+            const result = await query(joinQuery,params);
+            // const result = await query('SELECT * FROM users WHERE id = $1', [recId]);
             console.log(result.rows, "result getSingleUser");
             return result.rows
         } catch (error) {

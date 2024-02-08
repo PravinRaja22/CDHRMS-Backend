@@ -1,5 +1,7 @@
+import { array } from "joi";
 import { query } from "../../database/postgress.js";
 import { generatePayslipFile } from "../../utils/HRMS/payslipGenerator.js";
+import { userService } from "./user.service.js";
 export module PayslipServices {
   export async function generatePayslip(request: any) {
     const { month, year, utcSec, userId } = request.params;
@@ -76,6 +78,83 @@ export module PayslipServices {
     }
   }
 
+  export async function generateBulkPayslip(request: any) {
+    console.log("generateBulkPayslip control");
+    console.log("generateBulkPayslip",request);
+    const { month, year, utcSec } = request.params; 
+
+    let startDate;
+    let endDate;
+    let totalNumberOfDays;
+
+    if (month && year) {
+      const months = [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+      ];
+      const monthIndex = months.indexOf(month);
+      console.log(monthIndex,"monthIndex");
+      if (monthIndex !== -1) {
+        startDate = new Date(year, monthIndex, 1);
+        endDate = new Date(year, monthIndex + 1, 0);
+        totalNumberOfDays = endDate.getDate();
+      }
+    } else if (utcSec) {
+      const utcDate = new Date(utcSec);
+      startDate = new Date(utcDate.getUTCFullYear(), utcDate.getUTCMonth(), 1);
+      endDate = new Date(
+        utcDate.getUTCFullYear(),
+        utcDate.getUTCMonth() + 1,
+        0
+      );
+      totalNumberOfDays = endDate.getDate();
+    } else {
+      console.log("Invalid parameters");
+      return;
+    }
+
+    const startTime = startDate.setHours(0, 0, 0, 0);
+    const endTime = endDate.setHours(23, 59, 59, 999);
+    console.log(startDate, "* startDate");
+    console.log(endDate, "* endDate");   
+    console.log(endTime, "* endTime *startTime",startTime);
+
+    try {
+      let result = await query(`SELECT id, joiningdate, userName FROM users
+                                  WHERE joiningDate < ${endTime}`, {});
+      console.log(result,"result users*** ");
+      
+      if (result.rowCount > 0) {
+        let payslipAmounts = []; // Array to store payslip amounts
+        
+        for (const item of result.rows) {
+          console.log(item,"item ***");
+          let queryData = `SELECT * FROM attendances WHERE userId = ${item.id} AND date>= ${startTime} AND date<=${endTime}` 
+          console.log(queryData,"queryData");
+          
+          let getAttendance = await query(queryData, {});
+          console.log(getAttendance,"getAttendance");
+
+          if (getAttendance.rowCount > 0) {
+            let payslipAmount = await calculatePayslip(getAttendance.rows, totalNumberOfDays, request);
+            console.log(payslipAmount,"payslipAmount");
+            payslipAmounts.push(payslipAmount);
+          } else {
+            payslipAmounts.push([]);
+          }
+        }
+        
+        return payslipAmounts; // Return array of payslip amounts
+      } else {
+        return [];
+      }
+    } catch (error) {
+      console.log(error.message, "getAttendance error");
+      return error.message;
+    }
+}
+
+
   const calculatePayslip = async (
     attendanceRecords,
     totalNumberOfDaysMonth,
@@ -84,36 +163,41 @@ export module PayslipServices {
     // console.log(attendanceRecords, "attendanceRecords calculatePayslip");
     // console.log(request.params, "request.params calculatePayslip");
     // Net salary = Basic salary + HRA + Allowances – Income Tax – EPF – Professional Tax
-    const { month, year, utcSec, userId } = request.params;
+    const { month, year, utcSec } = request.params;
+    const {userid,...otherFields} = attendanceRecords[0]
 
+    console.log(attendanceRecords,"calculatePayslip attendanceRecords");
     //GET Users Records
-
+// console.log(object);
     try {
-      let getUsers = await query(`SELECT * FROM users WHERE id =$1`, [userId]);
-      console.log(getUsers, "Data is ");
-      let getuserPF = await query(`SELECT * FROM pfdetails WHERE userId=$1`, [
-        userId,
-      ]);
-      let getUserBank = await query(
-        `SELECT * FROM bankdetails WHERE userId=$1`,
-        [userId]
-      );
-
+      let joinUsersResult:any = await userService.getSingleUser(userid)
+      // let getUsers = await query(`SELECT * FROM users WHERE id =$1`, [userid]);
+      // console.log(getUsers, "Data is ");
+      // let getuserPF = await query(`SELECT * FROM pfdetails WHERE userId=$1`, [
+      //   userid,
+      // ]);
+      // let getUserBank = await query(
+      //   `SELECT * FROM bankdetails WHERE userId=$1`,
+      //   [userid]
+      // );
+      
+        console.log("*******",joinUsersResult,"*********");
+ 
       let userRecord;
-      let pfRecord;
-      let bankRecord;
+      // let pfRecord;
+      // let bankRecord;
 
-      if (getUsers.rowCount > 0) {
-        userRecord = getUsers.rows[0];
+      if (joinUsersResult.length > 0) {
+        userRecord = joinUsersResult[0];
       }
-      if (getuserPF.rowCount > 0) {
-        pfRecord = getuserPF.rows[0];
-        // console.log(getuserPF.rows, "pfRecord");
-      }
-      if (getUserBank.rowCount > 0) {
-        bankRecord = getUserBank.rows[0];
-        // console.log(getUserBank.rows, "bankRecord");
-      }
+      // if (getuserPF.rowCount > 0) {
+      //   pfRecord = getuserPF.rows[0];
+      //   // console.log(getuserPF.rows, "pfRecord");
+      // }
+      // if (getUserBank.rowCount > 0) {
+      //   bankRecord = getUserBank.rows[0];
+      //   // console.log(getUserBank.rows, "bankRecord");
+      // }
       //need to pf,profetinal tax,income tax from user, now value is hardcoded,need to work
       let currentCTC = Number(userRecord?.ctc);
       let currentPF = (currentCTC / 12) * 0.03;
@@ -171,15 +255,15 @@ export module PayslipServices {
         location: userRecord?.location,
         effectiveWorkDays: noOfPresentDays,
         lopDays: noOfLOPDays,
-        bankName: bankRecord?.bankname,
-        bankAccNo: bankRecord?.accountnumber,
-        panNo: pfRecord?.pfnumber,
-        pfUan: pfRecord?.uan,
+        bankName: userRecord?.bankDetails?.bankname,
+        bankAccNo: userRecord?.bankDetails?.accountnumber,
+        panNo: userRecord?.pfDetails?.pfnumber,
+        pfUan: userRecord?.pfDetails?.uan,
         earnings: { totalEarnings, basics, HRA, otherAllowance },
         deductions: { LOP, currentPF, currentIT, currentPT, totalDeduction },
         netPay: netPay,
       };
-      //   console.log(obj, "obj");
+       console.log(obj, "obj");
 
       // let final = await generatePayslipFile([obj]);
       // console.log(final, "final is #####");
