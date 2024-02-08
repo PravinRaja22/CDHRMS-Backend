@@ -139,7 +139,11 @@ import {
   getSingleDeclaredTaxAmountData,
   upsertDeclaredTaxAmountData,
 } from "../../controllers/HRMS/declaredTaxAmount.Controller.js";
-import { generatePayslip } from "../../controllers/HRMS/payslip.Controller.js";
+import {
+  generatePayslip,
+  getPaySlip,
+} from "../../controllers/HRMS/payslip.Controller.js";
+import { generatePayslipFile } from "../../utils/HRMS/payslipGenerator.js";
 
 const Routes = function (
   fastify: FastifyInstance,
@@ -195,15 +199,16 @@ const Routes = function (
   //Payslip
 
   fastify.get("/payslip/:userId/:month/:year", generatePayslip);
+  fastify.post("/payslip/file", generatePayslipFile);
+  fastify.get("/payslip/file/:userId/:month/:year", getPaySlip);
 
   //Approval
 
   fastify.get("/approval", getAllApprovals);
   fastify.post("/approval", insertApprovals);
-  fastify.get("/approval/:id",getApprovalsById);
+  fastify.get("/approval/:id", getApprovalsById);
   fastify.put("/approval/:id", updateApprovals);
   fastify.get("/approval/aprover/:approverId", getApprovalbyApprover);
-
 
   //loan
   fastify.get("/loan", getLoans);

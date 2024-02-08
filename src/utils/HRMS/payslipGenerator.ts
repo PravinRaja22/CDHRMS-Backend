@@ -7,6 +7,8 @@ import util from "util";
 import { convertCurrencyToWords } from "./CurrencyToWords.js";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
+import { payslipService } from "../../PaySlipGenerator.js";
+import { PayslipServices } from "../../services/Hrms/payslip.service.js";
 // const PizZip = require("pizzip");
 // const Docxtemplater = require("docxtemplater");
 // const fs = require("fs");
@@ -16,16 +18,35 @@ import { dirname } from "path";
 const execAsync = util.promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-export const generatePayslipFile = async (data) => {
-  console.log(data, "data is");
+export const generatePayslipFile = async (request, reply) => {
+  const data = request.body;
+  // console.log(data, "data is");
+  const result = [];
   for (const e of data) {
     e.netPayInWords = await convertCurrencyToWords(e.netPay);
     console.log(e);
-    await fileGeneration(e);
+    let payslipData = await fileGeneration(
+      e,
+      request.protocol,
+      request.headers.host
+    );
+    // let fileurl =
+    //   request.protocol +
+    //   "://" +
+    //   request.headers.host +
+    //   "/" +
+    //   payslipData.payslipUrl;
+    // console.log(fileurl, "File Url is ");
+    // payslipData.url = fileurl;
+    let insertPaysloip = await PayslipServices.insertpaySlip(payslipData);
+    console.log(insertPaysloip, "Data inserted ?????????");
+    console.log(payslipData, " final Pay slip data ");
+    result.push(payslipData);
   }
+  return result;
 };
 
-const fileGeneration = async (data) => {
+const fileGeneration = async (data, protocol, host) => {
   //   const currentEpochTimeInSeconds = Math.floor(Date.now() / 1000);
   const content = fs.readFileSync(
     path.resolve("src/CD_paySlip.docx"),
@@ -66,8 +87,16 @@ const fileGeneration = async (data) => {
   );
 
   fs.writeFileSync(docxFilePath, buf);
+  let payslipUrl = await convertToPdf(docxFilePath, pdfFilePath);
 
-  await convertToPdf(docxFilePath, pdfFilePath);
+  return {
+    userId: data.userId,
+    fileName: payslipUrl,
+    paySlipMonth: data.paySlipMonth,
+    paySlipYear: data.paySlipYear,
+    url: protocol + "://" + host + "/" + payslipUrl,
+  };
+  // await convertToPdf(docxFilePath, pdfFilePath);
 };
 
 const convertToPdf = async (docxFilePath, pdfFilePath) => {
@@ -79,6 +108,11 @@ const convertToPdf = async (docxFilePath, pdfFilePath) => {
     if (stderr) {
       console.error("Stderr:", stderr);
     }
+    const lastSlashIndex = pdfFilePath.lastIndexOf("\\");
+    const fileName = pdfFilePath.substring(lastSlashIndex + 1);
+
+    console.log(fileName, "file name in pdf");
+    return fileName;
   } catch (error) {
     console.error("Error:", error);
   }
