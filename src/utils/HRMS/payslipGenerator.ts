@@ -4,6 +4,8 @@ import fs from "fs";
 import path from "path";
 import { exec } from "child_process";
 import util from "util";
+import { promisify } from "util";
+import libre from "libreoffice-convert";
 import { convertCurrencyToWords } from "./CurrencyToWords.js";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
@@ -15,12 +17,13 @@ import { PayslipServices } from "../../services/Hrms/payslip.service.js";
 // const path = require("path");
 // const { exec } = require("child_process");
 // const util = require("util");
+const libreConvertAsync = promisify(libre.convert);
 const execAsync = util.promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export const generatePayslipFile = async (request, reply) => {
-  const data = request.body ||request;
+  const data = request.body || request;
   console.log(data, "data is generatePayslipFile");
   const result = [];
   for (const e of data) {
@@ -74,7 +77,6 @@ export const generateBulkPayslipFile = async (request, payslipJSON) => {
   }
   return result;
 };
-
 
 const fileGeneration = async (data, protocol, host) => {
   //   const currentEpochTimeInSeconds = Math.floor(Date.now() / 1000);
@@ -131,13 +133,18 @@ const fileGeneration = async (data, protocol, host) => {
 
 const convertToPdf = async (docxFilePath, pdfFilePath) => {
   try {
-    const pdfDirectory = path.dirname(pdfFilePath);
-    const command = `soffice --headless --convert-to pdf "${docxFilePath}" --outdir "${pdfDirectory}"`;
-    const { stdout, stderr } = await execAsync(command);
-    console.log("PDF Generated Successfully", stdout);
-    if (stderr) {
-      console.error("Stderr:", stderr);
-    }
+    // const pdfDirectory = path.dirname(pdfFilePath);
+    // const command = `soffice --headless --convert-to pdf "${docxFilePath}" --outdir "${pdfDirectory}"`;
+    // const { stdout, stderr } = await execAsync(command);
+    // console.log("PDF Generated Successfully", stdout);
+    // if (stderr) {
+    //   console.error("Stderr:", stderr);
+    // }
+    const pdfFilePath = docxFilePath.replace(/\.docx$/, ".pdf");
+    const input = fs.readFileSync(docxFilePath);
+    const pdfBuffer = await libreConvertAsync(input, ".pdf", undefined);
+    fs.writeFileSync(pdfFilePath, pdfBuffer);
+    console.log("PDF Generated Successfully");
     const lastSlashIndex = pdfFilePath.lastIndexOf("\\");
     const fileName = pdfFilePath.substring(lastSlashIndex + 1);
 
