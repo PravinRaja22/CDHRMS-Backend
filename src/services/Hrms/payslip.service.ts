@@ -80,8 +80,8 @@ export module PayslipServices {
 
   export async function generateBulkPayslip(request: any) {
     console.log("generateBulkPayslip control");
-    console.log("generateBulkPayslip",request);
-    const { month, year, utcSec } = request.params; 
+    console.log("generateBulkPayslip", request);
+    const { month, year, utcSec } = request.params;
 
     let startDate;
     let endDate;
@@ -89,11 +89,21 @@ export module PayslipServices {
 
     if (month && year) {
       const months = [
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
       ];
       const monthIndex = months.indexOf(month);
-      console.log(monthIndex,"monthIndex");
+      console.log(monthIndex, "monthIndex");
       if (monthIndex !== -1) {
         startDate = new Date(year, monthIndex, 1);
         endDate = new Date(year, monthIndex + 1, 0);
@@ -116,36 +126,46 @@ export module PayslipServices {
     const startTime = startDate.setHours(0, 0, 0, 0);
     const endTime = endDate.setHours(23, 59, 59, 999);
     console.log(startDate, "* startDate");
-    console.log(endDate, "* endDate");   
-    console.log(endTime, "* endTime *startTime",startTime);
+    console.log(endDate, "* endDate");
+    console.log(endTime, "* endTime *startTime", startTime);
 
     try {
-      let result = await query(`SELECT id, joiningdate, userName FROM users
-                                  WHERE joiningDate < ${endTime}`, {});
-      console.log(result,"result users*** ");
-      
+      let result = await query(
+        `SELECT id, joiningdate, userName FROM users
+                                  WHERE joiningDate < ${endTime}`,
+        {}
+      );
+      console.log(result, "result users*** ");
+
       if (result.rowCount > 0) {
         let payslipAmounts = []; // Array to store payslip amounts
-        
+
         for (const item of result.rows) {
-          console.log(item,"item ***");
-          let queryData = `SELECT * FROM attendances WHERE userId = ${item.id} AND date>= ${startTime} AND date<=${endTime}` 
-          console.log(queryData,"queryData");
-          
+          console.log(item, "item ***");
+          let queryData = `SELECT * FROM attendances WHERE userId = ${item.id} AND date>= ${startTime} AND date<=${endTime}`;
+          console.log(queryData, "queryData");
+
           let getAttendance = await query(queryData, {});
-          console.log(getAttendance,"getAttendance");
+          console.log(getAttendance, "getAttendance");
 
           if (getAttendance.rowCount > 0) {
-            let payslipAmount = await calculatePayslip(getAttendance.rows, totalNumberOfDays, request);
-            console.log(payslipAmount,"payslipAmount");
+            let payslipAmount = await calculatePayslip(
+              getAttendance.rows,
+              totalNumberOfDays,
+              request
+            );
+            console.log(payslipAmount, "payslipAmount");
             payslipAmounts.push(payslipAmount);
           } else {
             payslipAmounts.push([]);
           }
         }
-        
-       let payslipFile = await  generateBulkPayslipFile (request,payslipAmounts)
- console.log(payslipFile,"payslipFile *******");
+
+        let payslipFile = await generateBulkPayslipFile(
+          request,
+          payslipAmounts
+        );
+        console.log(payslipFile, "payslipFile *******");
         return payslipAmounts; // Return array of payslip amounts
       } else {
         return [];
@@ -154,8 +174,7 @@ export module PayslipServices {
       console.log(error.message, "getAttendance error");
       return error.message;
     }
-}
-
+  }
 
   const calculatePayslip = async (
     attendanceRecords,
@@ -166,13 +185,13 @@ export module PayslipServices {
     // console.log(request.params, "request.params calculatePayslip");
     // Net salary = Basic salary + HRA + Allowances – Income Tax – EPF – Professional Tax
     const { month, year, utcSec } = request.params;
-    const {userid,...otherFields} = attendanceRecords[0]
+    const { userid, ...otherFields } = attendanceRecords[0];
 
-    console.log(attendanceRecords,"calculatePayslip attendanceRecords");
+    console.log(attendanceRecords, "calculatePayslip attendanceRecords");
     //GET Users Records
-// console.log(object);
+    // console.log(object);
     try {
-      let joinUsersResult:any = await userService.getSingleUser(userid)
+      let joinUsersResult: any = await userService.getSingleUser(userid);
       // let getUsers = await query(`SELECT * FROM users WHERE id =$1`, [userid]);
       // console.log(getUsers, "Data is ");
       // let getuserPF = await query(`SELECT * FROM pfdetails WHERE userId=$1`, [
@@ -182,9 +201,9 @@ export module PayslipServices {
       //   `SELECT * FROM bankdetails WHERE userId=$1`,
       //   [userid]
       // );
-      
-        console.log("*******",joinUsersResult,"*********");
- 
+
+      console.log("*******", joinUsersResult, "*********");
+
       let userRecord;
       // let pfRecord;
       // let bankRecord;
@@ -265,7 +284,7 @@ export module PayslipServices {
         deductions: { LOP, currentPF, currentIT, currentPT, totalDeduction },
         netPay: netPay,
       };
-       console.log(obj, "obj");
+      console.log(obj, "obj");
 
       // let final = await generatePayslipFile([obj]);
       // console.log(final, "final is #####");
@@ -291,54 +310,30 @@ export module PayslipServices {
       let queryParams = [data.paySlipMonth, data.paySlipYear];
       let findMatchingdata = await query(querydata2, queryParams);
       console.log(findMatchingdata.rows, " Rows Length");
-      if (findMatchingdata.rows.length > 0) {
-        console.log("ID IFF FLKS ");
-        return findMatchingdata.rows;
-        // const { id, uuid, ...upsertFields } = findMatchingdata.rows[0];
-        // // console.log(request, "upsertUser Request body");
-        // console.log("Update payslips ", upsertFields);
-        // const fieldNames = Object.keys(data);
-        // const fieldValues = Object.values(data);
-        // console.log(fieldNames, "upsert  payslips fieldNames");
-        // console.log(fieldValues, "upsert  payslips fieldValues");
-        // let querydata;
-        // let params: any[] = [];
-        // // If id is not provided, insert a new user
-        // querydata = `UPDATE payslips SET ${fieldNames
-        //   .map((field, index) => `${field} = $${index + 1}`)
-        //   .join(", ")} WHERE id = $${fieldNames.length + 1}`;
-        // params = [...fieldValues, id];
-        // console.log(querydata, "upsert payslip query");
-        // console.log(params, "upsert payslip params");
-        // let result = await query(querydata, params);
-        // console.log(result, "Result is data set ");
-        // // let result = await pool.query(querydata,params)
-        // let message = `payslip updated`;
-        // return { message };
-      } else {
-        console.log("else");
-        const { id, ...upsertFields } = data;
 
-        const fieldNames = Object.keys(upsertFields);
-        const fieldValues = Object.values(upsertFields);
+      console.log("else");
+      console.log(data);
+      const { id, ...upsertFields } = data;
 
-        let querydata;
-        let params = [];
+      const fieldNames = Object.keys(upsertFields);
+      const fieldValues = Object.values(upsertFields);
 
-        // If id is not provided, insert a new scheduled interview
-        querydata = `INSERT INTO payslips (${fieldNames.join(
-          ", "
-        )}) VALUES (${fieldValues
-          .map((_, index) => `$${index + 1}`)
-          .join(", ")}) RETURNING *`;
-        params = fieldValues;
+      let querydata;
+      let params = [];
 
-        const result = await query(querydata, params);
+      // If id is not provided, insert a new scheduled interview
+      querydata = `INSERT INTO payslips (${fieldNames.join(
+        ", "
+      )}) VALUES (${fieldValues
+        .map((_, index) => `$${index + 1}`)
+        .join(", ")}) RETURNING *`;
+      params = fieldValues;
 
-        return {
-          message: `${result.rowCount} payslips inserted`,
-        };
-      }
+      const result = await query(querydata, params);
+
+      return {
+        message: `${result.rowCount} payslips inserted`,
+      };
     } catch (error) {
       console.log("error in insert data payslip ");
       return error.message;
