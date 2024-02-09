@@ -21,7 +21,7 @@ const pool = new pkg.Pool({
   // database: "postgres",
   user: "postgres",
   password: "admin",
-  host: "192.168.0.123",
+  host: "192.168.0.127",
   port: 5432,
   database: "HRMS",
 });

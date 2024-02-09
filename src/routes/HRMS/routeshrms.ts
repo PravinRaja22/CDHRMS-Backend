@@ -213,6 +213,7 @@ const Routes = function (
   fastify.get("/payslip/:userId/:month/:year", generatePayslip);
   fastify.get("/payslip/bulk/:month/:year", generateBulkPayslip);
   fastify.post("/payslip/file", generatePayslipFile);
+  
   fastify.get("/payslip/file/:userId/:month/:year", getPaySlip);
 
   //Approval

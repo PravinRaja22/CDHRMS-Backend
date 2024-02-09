@@ -18,9 +18,10 @@ import { PayslipServices } from "../../services/Hrms/payslip.service.js";
 const execAsync = util.promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
 export const generatePayslipFile = async (request, reply) => {
-  const data = request.body;
-  // console.log(data, "data is");
+  const data = request.body ||request;
+  console.log(data, "data is generatePayslipFile");
   const result = [];
   for (const e of data) {
     e.netPayInWords = await convertCurrencyToWords(e.netPay);
@@ -45,6 +46,35 @@ export const generatePayslipFile = async (request, reply) => {
   }
   return result;
 };
+
+export const generateBulkPayslipFile = async (request, payslipJSON) => {
+  const data = payslipJSON;
+  console.log(data, "data is generatePayslipFile");
+  const result = [];
+  for (const e of data) {
+    e.netPayInWords = await convertCurrencyToWords(e.netPay);
+    console.log(e);
+    let payslipData = await fileGeneration(
+      e,
+      request.protocol,
+      request.headers.host
+    );
+    // let fileurl =
+    //   request.protocol +
+    //   "://" +
+    //   request.headers.host +
+    //   "/" +
+    //   payslipData.payslipUrl;
+    // console.log(fileurl, "File Url is ");
+    // payslipData.url = fileurl;
+    let insertPaysloip = await PayslipServices.insertpaySlip(payslipData);
+    console.log(insertPaysloip, "Data inserted ?????????");
+    console.log(payslipData, " final Pay slip data ");
+    result.push(payslipData);
+  }
+  return result;
+};
+
 
 const fileGeneration = async (data, protocol, host) => {
   //   const currentEpochTimeInSeconds = Math.floor(Date.now() / 1000);

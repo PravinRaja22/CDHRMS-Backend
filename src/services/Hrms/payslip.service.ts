@@ -1,6 +1,6 @@
 import { array } from "joi";
 import { query } from "../../database/postgress.js";
-import { generatePayslipFile } from "../../utils/HRMS/payslipGenerator.js";
+import { generateBulkPayslipFile } from "../../utils/HRMS/payslipGenerator.js";
 import { userService } from "./user.service.js";
 export module PayslipServices {
   export async function generatePayslip(request: any) {
@@ -144,6 +144,8 @@ export module PayslipServices {
           }
         }
         
+       let payslipFile = await  generateBulkPayslipFile (request,payslipAmounts)
+ console.log(payslipFile,"payslipFile *******");
         return payslipAmounts; // Return array of payslip amounts
       } else {
         return [];
