@@ -319,31 +319,32 @@ export module PayslipServices {
       let findMatchingdata = await query(querydata2, queryParams);
       console.log(findMatchingdata.rows, " Rows Length");
 
-        let existPayslipRecords =findMatchingdata.rows
+        let existPayslipRecords =findMatchingdata.rows[0]
 console.log("*******");
 console.log(existPayslipRecords);
 console.log("*******");
       if(findMatchingdata.rows.length>0){
         console.log("if");
         console.log(data);
-        const { id, ...upsertFields } = data;
-  
-        const fieldNames = Object.keys(upsertFields);
-        const fieldValues = Object.values(upsertFields);
+        const mergedData = { ...existPayslipRecords, ...data } ;
+        console.log(mergedData,"mergedData");
+        const fieldNames = Object.keys(mergedData);
+        const fieldValues = Object.values(mergedData);
   
         let querydata;
         let params = [];
-  
+        let existPayslipRecord =existPayslipRecords[0]
         // If id is not provided, insert a new scheduled interview
-        querydata = `UPSERT INTO payslips (${fieldNames.join(
+
+        querydata = `UPDATE  payslips SET(${fieldNames.join(
           ", "
         )}) VALUES (${fieldValues
           .map((_, index) => `$${index + 1}`)
-          .join(", ")}) WHERE id = ${id}  RETURNING *`;
+          .join(", ")}) WHERE id = ${mergedData.id}  RETURNING *`;
         params = fieldValues;
   
         const result = await query(querydata, params);
-  
+  console.log(querydata,"********** querydata result");
         return {
           message: `${result.rowCount} payslips Updated`,
         };

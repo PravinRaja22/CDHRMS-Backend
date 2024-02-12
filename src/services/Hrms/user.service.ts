@@ -56,6 +56,8 @@ export module userService {
         try {
             console.log(username, 'data in userName')
 
+            let userNameLowercase = username.toLowerCase()
+
             let joinQuery =`SELECT  users.*,
             jsonb_build_object(
                 'id', pfdetails.id,
@@ -82,7 +84,7 @@ export module userService {
             INNER JOIN bankdetails ON bankdetails.userid = users.id
             WHERE users.username =$1
             `
-            let params = [username]
+            let params = [userNameLowercase]
 
 
             let data: any = await query(joinQuery,params)

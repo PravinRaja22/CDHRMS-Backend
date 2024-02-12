@@ -54,26 +54,33 @@ export const generateBulkPayslipFile = async (request, payslipJSON) => {
   const data = payslipJSON;
   console.log(data, "data is generatePayslipFile");
   const result = [];
-  for (const e of data) {
-    e.netPayInWords = await convertCurrencyToWords(e.netPay);
-    console.log(e);
-    let payslipData = await fileGeneration(
-      e,
-      request.protocol,
-      request.headers.host
-    );
-    // let fileurl =
-    //   request.protocol +
-    //   "://" +
-    //   request.headers.host +
-    //   "/" +
-    //   payslipData.payslipUrl;
-    // console.log(fileurl, "File Url is ");
-    // payslipData.url = fileurl;
-    let insertPaysloip = await PayslipServices.insertpaySlip(payslipData);
-    console.log(insertPaysloip, "Data inserted ?????????");
-    console.log(payslipData, " final Pay slip data ");
-    result.push(payslipData);
+  try{
+    for (const e of data) {
+      e.netPayInWords = await convertCurrencyToWords(e.netPay);
+      console.log(e);
+      let payslipData = await fileGeneration(
+        e,
+        request.protocol,
+        request.headers.host
+      );
+      
+      // let fileurl =
+      //   request.protocol +
+      //   "://" +
+      //   request.headers.host +
+      //   "/" +
+      //   payslipData.payslipUrl;
+      // console.log(fileurl, "File Url is ");
+      // payslipData.url = fileurl;
+      let insertPaysloip = await PayslipServices.insertpaySlip(payslipData);
+      console.log(insertPaysloip, "Data inserted ?????????");
+      console.log(payslipData, " final Pay slip data ");
+      result.push(payslipData);
+    }
+  }
+  catch(error){
+    console.log(error.message,"generateBulkPayslipFile catch");
+    return error.message
   }
   return result;
 };
