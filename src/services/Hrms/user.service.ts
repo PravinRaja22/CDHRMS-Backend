@@ -22,7 +22,8 @@ export module userService {
                 'pfnumber', pfdetails.pfnumber,
                 'pfcontribution', pfdetails.pfcontribution,
                 'pfemployercontribution', pfdetails.pfemployercontribution,
-                'pfemployeecontribution', pfdetails.pfemployeecontribution
+                'pfemployeecontribution', pfdetails.pfemployeecontribution,
+                'userid', pfdetails.userId
             ) AS "pfDetails",
             jsonb_build_object(
                 'id', bankdetails.id,
@@ -31,7 +32,8 @@ export module userService {
                 'branch', bankdetails.branch,
                 'ifsccode', bankdetails.ifsccode,
                 'accountholdername', bankdetails.accountholdername,
-                'attachment', bankdetails.attachment
+                'attachment', bankdetails.attachment,
+                'userid', bankdetails.userId
             ) AS "bankDetails" 
             FROM
             users
@@ -61,7 +63,8 @@ export module userService {
                 'pfnumber', pfdetails.pfnumber,
                 'pfcontribution', pfdetails.pfcontribution,
                 'pfemployercontribution', pfdetails.pfemployercontribution,
-                'pfemployeecontribution', pfdetails.pfemployeecontribution
+                'pfemployeecontribution', pfdetails.pfemployeecontribution,
+                'userid',pfdetails.userId
             ) AS "pfDetails",
             jsonb_build_object(
                 'id', bankdetails.id,
@@ -70,7 +73,8 @@ export module userService {
                 'branch', bankdetails.branch,
                 'ifsccode', bankdetails.ifsccode,
                 'accountholdername', bankdetails.accountholdername,
-                'attachment', bankdetails.attachment
+                'attachment', bankdetails.attachment,
+                'userid',bankdetails.userId
             ) AS "bankDetails" 
             FROM
             users
@@ -121,7 +125,8 @@ export module userService {
                 'pfnumber', pfdetails.pfnumber,
                 'pfcontribution', pfdetails.pfcontribution,
                 'pfemployercontribution', pfdetails.pfemployercontribution,
-                'pfemployeecontribution', pfdetails.pfemployeecontribution
+                'pfemployeecontribution', pfdetails.pfemployeecontribution,
+                'userid',pfdetails.userId
             ) AS "pfDetails",
             jsonb_build_object(
                 'id', bankdetails.id,
@@ -130,7 +135,8 @@ export module userService {
                 'branch', bankdetails.branch,
                 'ifsccode', bankdetails.ifsccode,
                 'accountholdername', bankdetails.accountholdername,
-                'attachment', bankdetails.attachment
+                'attachment', bankdetails.attachment,
+                'userid',bankdetails.userId
             ) AS "bankDetails" 
             FROM
             users

@@ -157,16 +157,22 @@ export module PayslipServices {
             console.log(payslipAmount, "payslipAmount");
             payslipAmounts.push(payslipAmount);
           } else {
-            payslipAmounts.push([]);
+            // payslipAmounts.push([]);
           }
         }
+        let payslipFile ;
+        if(payslipAmounts.length>0){
+          payslipFile = await generateBulkPayslipFile(
+            request,
+            payslipAmounts
+          );
+          console.log(payslipFile, "payslipFile *******");
+          return payslipFile;  //payslipAmounts 
+               // Return array of payslip amounts OR paylsipFile inserted file
+        }else{
+          return payslipAmounts
+        }
 
-        let payslipFile = await generateBulkPayslipFile(
-          request,
-          payslipAmounts
-        );
-        console.log(payslipFile, "payslipFile *******");
-        return payslipAmounts; // Return array of payslip amounts
       } else {
         return [];
       }
@@ -304,36 +310,70 @@ export module PayslipServices {
 
   export async function insertpaySlip(data: any) {
     console.log(data, "Insert Pay slip Data");
-
+      let {paySlipMonth,paySlipYear,userId,...otherFields} = data
+      userId = Number(userId);
     try {
-      let querydata2 = `SELECT * FROM payslips WHERE paySlipMonth = $1 AND payslipyear = $2`;
-      let queryParams = [data.paySlipMonth, data.paySlipYear];
+      let querydata2 = `SELECT * FROM payslips WHERE paySlipMonth = $1 AND payslipyear = $2 AND userId = $3 `;
+
+      let queryParams = [paySlipMonth,paySlipYear,userId];
       let findMatchingdata = await query(querydata2, queryParams);
       console.log(findMatchingdata.rows, " Rows Length");
 
-      console.log("else");
-      console.log(data);
-      const { id, ...upsertFields } = data;
+        let existPayslipRecords =findMatchingdata.rows
+console.log("*******");
+console.log(existPayslipRecords);
+console.log("*******");
+      if(findMatchingdata.rows.length>0){
+        console.log("if");
+        console.log(data);
+        const { id, ...upsertFields } = data;
+  
+        const fieldNames = Object.keys(upsertFields);
+        const fieldValues = Object.values(upsertFields);
+  
+        let querydata;
+        let params = [];
+  
+        // If id is not provided, insert a new scheduled interview
+        querydata = `UPSERT INTO payslips (${fieldNames.join(
+          ", "
+        )}) VALUES (${fieldValues
+          .map((_, index) => `$${index + 1}`)
+          .join(", ")}) WHERE id = ${id}  RETURNING *`;
+        params = fieldValues;
+  
+        const result = await query(querydata, params);
+  
+        return {
+          message: `${result.rowCount} payslips Updated`,
+        };
+      }else{
+        console.log("else ***");
+        console.log(data);
+        const { id, ...upsertFields } = data;
+  
+        const fieldNames = Object.keys(upsertFields);
+        const fieldValues = Object.values(upsertFields);
+  
+        let querydata;
+        let params = [];
+  
+        // If id is not provided, insert a new scheduled interview
+        querydata = `INSERT INTO payslips (${fieldNames.join(
+          ", "
+        )}) VALUES (${fieldValues
+          .map((_, index) => `$${index + 1}`)
+          .join(", ")}) RETURNING *`;
+        params = fieldValues;
+  
+        const result = await query(querydata, params);
+  
+        return {
+          message: `${result.rowCount} payslips inserted`,
+        };
+      }
 
-      const fieldNames = Object.keys(upsertFields);
-      const fieldValues = Object.values(upsertFields);
-
-      let querydata;
-      let params = [];
-
-      // If id is not provided, insert a new scheduled interview
-      querydata = `INSERT INTO payslips (${fieldNames.join(
-        ", "
-      )}) VALUES (${fieldValues
-        .map((_, index) => `$${index + 1}`)
-        .join(", ")}) RETURNING *`;
-      params = fieldValues;
-
-      const result = await query(querydata, params);
-
-      return {
-        message: `${result.rowCount} payslips inserted`,
-      };
+     
     } catch (error) {
       console.log("error in insert data payslip ");
       return error.message;
