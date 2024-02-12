@@ -160,16 +160,16 @@ export module PayslipServices {
             // payslipAmounts.push([]);
           }
         }
-        let payslipFile ;
-        if(payslipAmounts.length>0){
+        let payslipFile;
+        if (payslipAmounts.length > 0) {
           payslipFile = await generateBulkPayslipFile(
             request,
             payslipAmounts
           );
           console.log(payslipFile, "payslipFile *******");
           return payslipFile;  //payslipAmounts 
-               // Return array of payslip amounts OR paylsipFile inserted file
-        }else{
+          // Return array of payslip amounts OR paylsipFile inserted file
+        } else {
           return payslipAmounts
         }
 
@@ -310,30 +310,30 @@ export module PayslipServices {
 
   export async function insertpaySlip(data: any) {
     console.log(data, "Insert Pay slip Data");
-      let {paySlipMonth,paySlipYear,userId,...otherFields} = data
-      userId = Number(userId);
+    let { payslipmonth, payslipyear, userId, ...otherFields } = data
+    userId = Number(userId);
     try {
       let querydata2 = `SELECT * FROM payslips WHERE paySlipMonth = $1 AND payslipyear = $2 AND userId = $3 `;
 
-      let queryParams = [paySlipMonth,paySlipYear,userId];
+      let queryParams = [payslipmonth, payslipyear, userId];
       let findMatchingdata = await query(querydata2, queryParams);
-      console.log(findMatchingdata.rows, " Rows Length");
+      console.log(findMatchingdata.rows, "findMatchingdata row");
 
-        let existPayslipRecords =findMatchingdata.rows[0]
-console.log("*******");
-console.log(existPayslipRecords);
-console.log("*******");
-      if(findMatchingdata.rows.length>0){
+      let existPayslipRecords = findMatchingdata.rows[0]
+      console.log("*******");
+      console.log(existPayslipRecords);
+      console.log("*******");
+      if (findMatchingdata.rows.length > 0) {
         console.log("if");
         console.log(data);
-        const mergedData = { ...existPayslipRecords, ...data } ;
-        console.log(mergedData,"mergedData");
+        const mergedData = { ...existPayslipRecords, ...data };
+        console.log(mergedData, "mergedData");
         const fieldNames = Object.keys(mergedData);
         const fieldValues = Object.values(mergedData);
-  
+
         let querydata;
         let params = [];
-        let existPayslipRecord =existPayslipRecords[0]
+        let existPayslipRecord = existPayslipRecords[0]
         // If id is not provided, insert a new scheduled interview
 
         querydata = `UPDATE  payslips SET(${fieldNames.join(
@@ -342,23 +342,23 @@ console.log("*******");
           .map((_, index) => `$${index + 1}`)
           .join(", ")}) WHERE id = ${mergedData.id}  RETURNING *`;
         params = fieldValues;
-  
+
         const result = await query(querydata, params);
-  console.log(querydata,"********** querydata result");
+        console.log(querydata, "********** querydata result");
         return {
           message: `${result.rowCount} payslips Updated`,
         };
-      }else{
+      } else {
         console.log("else ***");
         console.log(data);
         const { id, ...upsertFields } = data;
-  
+
         const fieldNames = Object.keys(upsertFields);
         const fieldValues = Object.values(upsertFields);
-  
+
         let querydata;
         let params = [];
-  
+
         // If id is not provided, insert a new scheduled interview
         querydata = `INSERT INTO payslips (${fieldNames.join(
           ", "
@@ -366,15 +366,15 @@ console.log("*******");
           .map((_, index) => `$${index + 1}`)
           .join(", ")}) RETURNING *`;
         params = fieldValues;
-  
+
         const result = await query(querydata, params);
-  
+
         return {
           message: `${result.rowCount} payslips inserted`,
         };
       }
 
-     
+
     } catch (error) {
       console.log("error in insert data payslip ");
       return error.message;

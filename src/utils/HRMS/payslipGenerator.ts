@@ -63,7 +63,7 @@ export const generateBulkPayslipFile = async (request, payslipJSON) => {
         request.protocol,
         request.headers.host
       );
-      
+
       // let fileurl =
       //   request.protocol +
       //   "://" +
@@ -131,8 +131,8 @@ const fileGeneration = async (data, protocol, host) => {
   return {
     userId: data.userId,
     fileName: payslipUrl,
-    paySlipMonth: data.paySlipMonth,
-    paySlipYear: data.paySlipYear,
+    payslipmonth: data.paySlipMonth,
+    payslipyear: data.paySlipYear,
     url: protocol + "://" + host + "/" + payslipUrl,
   };
   // await convertToPdf(docxFilePath, pdfFilePath);

@@ -37,8 +37,8 @@ export module userService {
             ) AS "bankDetails" 
             FROM
             users
-            INNER JOIN pfdetails ON pfdetails.userid = users.id
-            INNER JOIN bankdetails ON bankdetails.userid = users.id
+            FULL JOIN pfdetails ON pfdetails.userid = users.id
+            FULL JOIN bankdetails ON bankdetails.userid = users.id
             `
                 let usersQuery = `SELECT * FROM users`
             const result: QueryResult = await query(joinQuery,[]);
