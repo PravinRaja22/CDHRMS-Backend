@@ -87,10 +87,11 @@ export const generateBulkPayslipFile = async (request, payslipJSON) => {
 
 const fileGeneration = async (data, protocol, host) => {
   //   const currentEpochTimeInSeconds = Math.floor(Date.now() / 1000);
-  const content = fs.readFileSync(
+  const content = await fs.promises.readFile(
     path.resolve("src/CD_paySlip.docx"),
     "binary"
   );
+
   const zip = new PizZip(content);
   const doc = new Docxtemplater(zip, {
     paragraphLoop: true,
@@ -125,7 +126,7 @@ const fileGeneration = async (data, protocol, host) => {
     `${data.name}_PaySlip_${data.paySlipMonth}_${data.paySlipYear}.pdf`
   );
 
-  fs.writeFileSync(docxFilePath, buf);
+  await fs.promises.writeFile(docxFilePath, buf);
   let payslipUrl = await convertToPdf(docxFilePath, pdfFilePath);
 
   return {
@@ -150,7 +151,7 @@ const convertToPdf = async (docxFilePath, pdfFilePath) => {
     const pdfFilePath = docxFilePath.replace(/\.docx$/, ".pdf");
     const input = fs.readFileSync(docxFilePath);
     const pdfBuffer = await libreConvertAsync(input, ".pdf", undefined);
-    fs.writeFileSync(pdfFilePath, pdfBuffer);
+    fs.promises.writeFile(pdfFilePath, pdfBuffer);
     console.log("PDF Generated Successfully");
     const lastSlashIndex = pdfFilePath.lastIndexOf("\\");
     const fileName = pdfFilePath.substring(lastSlashIndex + 1);
