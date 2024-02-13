@@ -152,8 +152,8 @@ import {
   getMedicalInsurancesById,
   upsertMedicalInsurances,
 } from "../../controllers/HRMS/medicalInsurance.Controller.js";
-import filePreHanler from "../../utils/filePreHandler.js";
-import { filesUpload } from "../../utils/Multer.js";
+import { filesUpload,Multer } from "../../multer/Multer.js";
+import { testing } from "../../controllers/HRMS/testing.controller.js";
 
 const Routes = function (
   fastify: FastifyInstance,
@@ -183,8 +183,13 @@ const Routes = function (
   //Leave Object Routes
   fastify.get("/leaves", getLeaveData);
   fastify.get("/leaves/:id", getSingleLeaves);
-  fastify.post("/leaves",{preHandler:filesUpload}
-, upsertLeaves);
+  // fastify.post("/leaves", { preHandler: filesUpload }
+  //   , testing);
+  fastify.post("/leaves", { preHandler: (request,reply,done)=>{
+    console.log(request.url);
+    filesUpload(request,reply,done)
+  } }
+    , testing);
 
 
   fastify.get("/leaves/user/:userId", getLeavesByUsers);
@@ -218,7 +223,7 @@ const Routes = function (
   fastify.get("/payslip/:userId/:month/:year", generatePayslip);
   fastify.get("/payslip/bulk/:month/:year", generateBulkPayslip);
   fastify.post("/payslip/file", generatePayslipFile);
-  
+
   fastify.get("/payslip/file/:userId/:month/:year", getPaySlip);
 
   //Approval

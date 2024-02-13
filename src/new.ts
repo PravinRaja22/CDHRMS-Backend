@@ -4,6 +4,7 @@ import cors from "@fastify/cors";
 import fastifyStatic from '@fastify/static';
 import { fileURLToPath } from 'url';
 import { dirname, join,resolve  } from 'path';
+import Multer from 'fastify-multer';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -19,6 +20,7 @@ const server = fastify({
   logger: false,
 });
 await server.register(cors);
+server.register(Multer.contentParser)
 server.register(Routes);
 server.register(fastifyStatic, {
   root: join(parentDir, "uploads"),
