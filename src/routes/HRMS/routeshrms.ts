@@ -152,6 +152,8 @@ import {
   getMedicalInsurancesById,
   upsertMedicalInsurances,
 } from "../../controllers/HRMS/medicalInsurance.Controller.js";
+import filePreHanler from "../../utils/filePreHandler.js";
+import { filesUpload } from "../../utils/Multer.js";
 
 const Routes = function (
   fastify: FastifyInstance,
@@ -181,7 +183,10 @@ const Routes = function (
   //Leave Object Routes
   fastify.get("/leaves", getLeaveData);
   fastify.get("/leaves/:id", getSingleLeaves);
-  fastify.post("/leaves", upsertLeaves);
+  fastify.post("/leaves",{preHandler:filesUpload}
+, upsertLeaves);
+
+
   fastify.get("/leaves/user/:userId", getLeavesByUsers);
   fastify.get("/leaves/approver/:approverId", getLeavesByApprover);
 
