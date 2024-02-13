@@ -3,7 +3,7 @@ import { leaveBalanceService } from "../../services/Hrms/leaveBalance.service.js
 export async function getLeaveBalanceByUsers(request : any , reply : any){
     try {
         let queryParams:any = request.params.userId
-        let result = await leaveBalanceService.getLeaveBalanceByUsers(queryParams)
+        let result = await leaveBalanceService.getLeaveBalanceByUsers(Number(queryParams))
         reply.send(result)
       } catch (error: any) {
         reply.status(500).send(error.message);

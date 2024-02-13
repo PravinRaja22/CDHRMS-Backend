@@ -6,7 +6,6 @@ export module PayslipServices {
   export async function generatePayslip(request: any) {
     const { month, year, utcSec, userId } = request.params;
     console.log(request.params, "****** params");
-    // const userId = request.params.userId;
 
     let startDate;
     let endDate;
@@ -198,33 +197,14 @@ export module PayslipServices {
     // console.log(object);
     try {
       let joinUsersResult: any = await userService.getSingleUser(userid);
-      // let getUsers = await query(`SELECT * FROM users WHERE id =$1`, [userid]);
-      // console.log(getUsers, "Data is ");
-      // let getuserPF = await query(`SELECT * FROM pfdetails WHERE userId=$1`, [
-      //   userid,
-      // ]);
-      // let getUserBank = await query(
-      //   `SELECT * FROM bankdetails WHERE userId=$1`,
-      //   [userid]
-      // );
-
+      
       console.log("*******", joinUsersResult, "*********");
 
       let userRecord;
-      // let pfRecord;
-      // let bankRecord;
 
       if (joinUsersResult.length > 0) {
         userRecord = joinUsersResult[0];
       }
-      // if (getuserPF.rowCount > 0) {
-      //   pfRecord = getuserPF.rows[0];
-      //   // console.log(getuserPF.rows, "pfRecord");
-      // }
-      // if (getUserBank.rowCount > 0) {
-      //   bankRecord = getUserBank.rows[0];
-      //   // console.log(getUserBank.rows, "bankRecord");
-      // }
       //need to pf,profetinal tax,income tax from user, now value is hardcoded,need to work
       let currentCTC = Number(userRecord?.ctc);
       let currentPF = (currentCTC / 12) * 0.03;
