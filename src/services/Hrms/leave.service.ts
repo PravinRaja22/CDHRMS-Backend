@@ -99,7 +99,7 @@ export module leaveService {
             console.log("getLeavesByUsers");
             //   const result: QueryResult = await query(`SELECT * FROM leaves WHERE (recordOwner->>\'userId\') = ${userId}`);
             const result: QueryResult = await query(
-                "SELECT * FROM leaves WHERE (recordOwner->>'userId') = $1",
+                "SELECT * FROM leaves WHERE userId = $1",
                 [userId]
             );
             console.log(result.rows, "query results");
@@ -113,7 +113,7 @@ export module leaveService {
         try {
             console.log("getLeavesByApprover");
             const result: QueryResult = await query(
-                "SELECT * FROM leaves WHERE (applyingTo->>'userId') = $1",
+                "SELECT * FROM leaves WHERE applyingtoid = $1",
                 [approverId]
             );
             console.log(result.rows, "query results");
@@ -122,4 +122,30 @@ export module leaveService {
             return error.message;
         }
     }
+
+    export async function getLeavesByUsersQuery(userId: any,reqQuery:any) {
+        console.log(reqQuery, "reqQuery getLeavesByUsersQuery");
+        let keys = Object.keys(reqQuery)
+        let values = Object.values(reqQuery)
+        console.log(keys, values, "getLeavesByUsersQuery");
+       
+        const conditions = keys.map((key, index) => `LOWER(${key}) LIKE LOWER($${index + 1})`).join(' AND ');
+        let params = values.map(value => `%${value}%`);
+        try{
+            let querydata = `SELECT * FROM leaves WHERE ${conditions} AND userId = $${keys.length+1}`
+            let newParams = [...params,userId]
+            console.log("$$$$$$$$$$");
+            console.log(querydata);
+            console.log(newParams);
+            const result: QueryResult = await query(
+                querydata,newParams
+            );
+            console.log(result.rows, "query results");
+            return result.rows
+        }catch(error){
+            console.log("ERROR leaves APPROVAL");
+            return error.message;
+        }
+    }
 }
+
