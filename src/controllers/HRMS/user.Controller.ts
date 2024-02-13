@@ -1,12 +1,24 @@
 import { userService } from '../../services/Hrms/user.service.js';
 import { v4 as uuidv4 } from 'uuid';
 export async function getUser(request: any, reply: any) {
+  
+ console.log(request.query,"getUser query");
+ if(Object.keys(request.query).length>0){
+  try {
+    let result = await userService.getUsersByQueries(request.query)
+    reply.send(result)
+  } catch (error: any) {
+    reply.status(500).send(error.message);
+  }
+ }else{
   try {
     let result = await userService.getAllUsers()
     reply.send(result)
   } catch (error: any) {
     reply.status(500).send(error.message);
   }
+ }
+ 
 }
 
 export async function getAuthorizeduser(request, reply) {

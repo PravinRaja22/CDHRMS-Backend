@@ -1,5 +1,5 @@
 
-import {query} from "../../database/postgress.js";
+import { query } from "../../database/postgress.js";
 import { QueryResult } from 'pg';
 import pool from "../../database/postgress.js";
 
@@ -40,8 +40,8 @@ export module userService {
             FULL JOIN pfdetails ON pfdetails.userid = users.id
             FULL JOIN bankdetails ON bankdetails.userid = users.id
             `
-                let usersQuery = `SELECT * FROM users`
-            const result: QueryResult = await query(joinQuery,[]);
+            let usersQuery = `SELECT * FROM users`
+            const result: QueryResult = await query(joinQuery, []);
             console.log(result, "query results");
 
             return result.rows
@@ -56,9 +56,9 @@ export module userService {
         try {
             console.log(username, 'data in userName')
 
-            let userNameLowercase = username.toLowerCase()
+            let userNameLowercase = username
 
-            let joinQuery =`SELECT  users.*,
+            let joinQuery = `SELECT  users.*,
             jsonb_build_object(
                 'id', pfdetails.id,
                 'uan', pfdetails.uan,
@@ -82,14 +82,14 @@ export module userService {
             users
             INNER JOIN pfdetails ON pfdetails.userid = users.id
             INNER JOIN bankdetails ON bankdetails.userid = users.id
-            WHERE users.username =$1
+            WHERE LOWER(users.username) = LOWER($1)
             `
             let params = [userNameLowercase]
 
 
-            let data: any = await query(joinQuery,params)
-            console.log(data,"data joinquery result");
-            console.log('999',data.rows.length, 'data')
+            let data: any = await query(joinQuery, params)
+            console.log(data, "data joinquery result");
+            console.log('999', data.rows.length, 'data')
             if (data.rows.length > 0) {
                 return { status: 'sucess', result: data.rows }
             }
@@ -119,8 +119,8 @@ export module userService {
         try {
             console.log("Get single Users");
             console.log(recId, "getSingleUser params id");
-            
-            let joinQuery =`SELECT  users.*,
+
+            let joinQuery = `SELECT  users.*,
             jsonb_build_object(
                 'id', pfdetails.id,
                 'uan', pfdetails.uan,
@@ -147,7 +147,7 @@ export module userService {
             WHERE users.id =$1
             `
             let params = [recId]
-            const result = await query(joinQuery,params);
+            const result = await query(joinQuery, params);
             // const result = await query('SELECT * FROM users WHERE id = $1', [recId]);
             console.log(result.rows, "result getSingleUser");
             return result.rows
@@ -160,7 +160,7 @@ export module userService {
         try {
             const { id, ...upsertFields } = request;
             // console.log(request, "upsertUser Request body");
-            console.log("Update Users ",request);
+            console.log("Update Users ", request);
             const fieldNames = Object.keys(upsertFields);
             const fieldValues = Object.values(upsertFields);
             console.log(fieldNames, "upsertUser fieldNames");
@@ -215,42 +215,69 @@ export module userService {
         }
     }
 
-    export const getUsersBankdetails = async (userId:any)=>{
+    export const getUsersBankdetails = async (userId: any) => {
         console.log("getUsersBankdetails call");
-        try{
+        try {
             let querySQL = `SELECT  * FROM bankdetails WHERE userId = ${userId}`
-            let result = await query(querySQL,{})
-            console.log(result,"result getUsersBankdetails");
+            let result = await query(querySQL, {})
+            console.log(result, "result getUsersBankdetails");
             return result.rows
-        }catch(error){
+        } catch (error) {
             return error.message
         }
     }
 
-    export const getUsersPFdetails = async (userId:any)=>{
+    export const getUsersPFdetails = async (userId: any) => {
         console.log("getUsersPFdetails call");
-        try{
+        try {
             let querySQL = `SELECT  * FROM pfdetails WHERE userId = ${userId}`
-            let result = await query(querySQL,{})
-            console.log(result,"result getUsersPFdetails");
+            let result = await query(querySQL, {})
+            console.log(result, "result getUsersPFdetails");
             return result.rows
-        }catch(error){
+        } catch (error) {
             return error.message
         }
     }
-    export const getUsersMedicalInsurence = async (userId:any)=>{
+    export const getUsersMedicalInsurence = async (userId: any) => {
         console.log("getUsersMedicalInsurence call");
-        try{
+        try {
             let querySQL = `SELECT  * FROM medicalInsurances WHERE userId = ${userId}`
-            let result = await query(querySQL,{})
-            console.log(result,"result getUsersMedicalInsurence");
+            let result = await query(querySQL, {})
+            console.log(result, "result getUsersMedicalInsurence");
             return result.rows
-        }catch(error){
+        } catch (error) {
             return error.message
         }
     }
 
-    
+    export const getUsersByQueries = async (reqQuery: any) => {
+        console.log(reqQuery, "reqQuery getUsersByQueries");
+        let keys = Object.keys(reqQuery)
+        let values = Object.values(reqQuery)
+        console.log(keys, values, "getUsersByQueries");
+
+
+        try {
+            // let querySQL = `SELECT  * FROM users WHERE ${keys.map((i,index)=>`${i} = $${index+1}`)}`
+            // SELECT  * FROM users WHERE firstname = $1,designation = $2 querySQL
+            // const conditions = keys.map((key, index) => `${key} = $${index + 1}`).join(' AND ');
+            // SELECT  * FROM users WHERE firstname = $1 AND designation = $2 querySQL
+           
+            const conditions = keys.map((key, index) => `LOWER(${key}) LIKE LOWER($${index + 1})`).join(' AND ');
+
+            let querySQL = `SELECT  * FROM users WHERE ${conditions}`
+            let params = values.map(value => `%${value}%`);
+            console.log(querySQL, params, "querySQL");
+            let result = await query(querySQL, params)
+            console.log(result.rows, "result getUsersByQueries");
+            return result.rows
+        } catch (error) {
+            console.log(error.message, "error getUsersByQueries");
+        }
+
+
+
+    }
 
 }
 
