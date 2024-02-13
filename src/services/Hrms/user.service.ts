@@ -80,8 +80,8 @@ export module userService {
             ) AS "bankDetails" 
             FROM
             users
-            INNER JOIN pfdetails ON pfdetails.userid = users.id
-            INNER JOIN bankdetails ON bankdetails.userid = users.id
+            FULL JOIN pfdetails ON pfdetails.userid = users.id
+            FULL JOIN bankdetails ON bankdetails.userid = users.id
             WHERE LOWER(users.username) = LOWER($1)
             `
             let params = [userNameLowercase]
@@ -142,8 +142,8 @@ export module userService {
             ) AS "bankDetails" 
             FROM
             users
-            INNER JOIN pfdetails ON pfdetails.userid = users.id
-            INNER JOIN bankdetails ON bankdetails.userid = users.id
+            FULL JOIN pfdetails ON pfdetails.userid = users.id
+            FULL JOIN bankdetails ON bankdetails.userid = users.id
             WHERE users.id =$1
             `
             let params = [recId]
