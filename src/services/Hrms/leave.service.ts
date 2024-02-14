@@ -26,11 +26,34 @@ export module leaveService {
             return error.message;
         }
     }
-    export async function upsertLeaves(values: any) {
-        try {
-            const { id, ...upsertFields } = values;
-            console.log(values, "upsertLeaves Request body");
+    export async function upsertLeaves(request: any) {
 
+        try {
+            let values = request.body;
+            let files = request.files
+            let url;
+            console.log(files.length,"files");
+            if (files.length>0) {
+                url = request.protocol + "://" + request.headers.host + "/" + request.files[0].filename
+            }
+        
+            console.log("upsertLeaves service");
+            console.log(files, "upsertLeaves service files");
+            console.log(url, "upsertLeaves service url");
+
+            const { id, file, ...upsertFields } = values;
+            console.log(values, "upsertLeaves Request body");
+            for (const field in upsertFields) {
+                console.log(field);
+                console.log(upsertFields[field]);
+                if (field === 'fromDate' || field === 'toDate' || field === "applyingtoid" ||
+                    field === "userId" || field === "noofdays") {
+                    upsertFields[field] = Number(upsertFields[field])
+                }
+            }
+            console.log("*****");
+            console.log(upsertFields);
+            console.log("*******");
             const fieldNames = Object.keys(upsertFields);
             const fieldValues = Object.values(upsertFields);
             console.log(fieldNames, "upsertLeaves fieldNames");
@@ -55,7 +78,7 @@ export module leaveService {
 
             let result = await query(querydata, params);
             console.log(result, "upsert result");
-
+            //even fromDate & endDate change Number insert  as a string  value
             if (result.rowCount > 0 && result.command === 'INSERT') {
 
                 const leaveRecord: any = result.rows[0]
@@ -86,8 +109,9 @@ export module leaveService {
                         console.log(error, "update leaves error");
                     }
                 }
+                return ({ status: 200, message: `Leave upserted successfully with record ID ${leaveRecord?.id}` });
             }
-            return ({ message: 'leave upserted successfully' });
+
         } catch (error: any) {
             return (error.message);
         }
@@ -123,26 +147,45 @@ export module leaveService {
         }
     }
 
-    export async function getLeavesByUsersQuery(userId: any,reqQuery:any) {
+    export async function getLeavesByUsersQuery(userId: any, reqQuery: any) {
         console.log(reqQuery, "reqQuery getLeavesByUsersQuery");
         let keys = Object.keys(reqQuery)
         let values = Object.values(reqQuery)
         console.log(keys, values, "getLeavesByUsersQuery");
-       
+
         const conditions = keys.map((key, index) => `LOWER(${key}) LIKE LOWER($${index + 1})`).join(' AND ');
         let params = values.map(value => `%${value}%`);
-        try{
-            let querydata = `SELECT * FROM leaves WHERE ${conditions} AND userId = $${keys.length+1}`
-            let newParams = [...params,userId]
+        try {
+            let querydata = `SELECT * FROM leaves WHERE ${conditions} AND userId = $${keys.length + 1}`
+            let newParams = [...params, userId]
             console.log("$$$$$$$$$$");
             console.log(querydata);
             console.log(newParams);
             const result: QueryResult = await query(
-                querydata,newParams
+                querydata, newParams
             );
             console.log(result.rows, "query results");
             return result.rows
-        }catch(error){
+        } catch (error) {
+            console.log("ERROR leaves APPROVAL");
+            return error.message;
+        }
+    }
+    export async function getLeavesByUsersExcludePending(userId: any, reqQuery: any) {
+        console.log(reqQuery, "reqQuery getLeavesByUsersExcludePending");
+
+        try {
+            let querydata = `SELECT * FROM leaves WHERE userId = $${1} AND status != $${2}`
+            let newParams = [ userId,'pending']
+            console.log("$$$$$$$$$$");
+            console.log(querydata);
+            console.log(newParams);
+            const result: QueryResult = await query(
+                querydata, newParams
+            );
+            console.log(result.rows, "query results");
+            return result.rows
+        } catch (error) {
             console.log("ERROR leaves APPROVAL");
             return error.message;
         }

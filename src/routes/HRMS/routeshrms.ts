@@ -185,11 +185,7 @@ const Routes = function (
   fastify.get("/leaves/:id", getSingleLeaves);
   // fastify.post("/leaves", { preHandler: filesUpload }
   //   , testing);
-  fastify.post("/leaves", { preHandler: (request,reply,done)=>{
-    console.log(request.url);
-    filesUpload(request,reply,done)
-  } }
-    , testing);
+  fastify.post("/leaves", { preHandler: filesUpload} , upsertLeaves);
 
 
   fastify.get("/leaves/user/:userId", getLeavesByUsers);
