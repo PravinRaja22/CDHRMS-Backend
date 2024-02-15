@@ -47,7 +47,7 @@ export module leaveBalanceService {
 
       console.log(result.rows, "rows updated");
       console.log(result, "rows updated");
-      let message = `${requestBody.userId.userName} leaveBalance Updated successfully`;
+      // let message = `${requestBody.userId.userName} leaveBalance Updated successfully`;
       //check the query result has record or not
       if (result.rowCount === 0) {
         let resultInsert = await query(
@@ -58,7 +58,7 @@ export module leaveBalanceService {
           [requestBody.userId, requestBody.balance]
         );
         console.log(resultInsert, "resultInsert");
-        let message = `${requestBody.userId.userName} leaveBalance inserted successfully`;
+        // let message = `${requestBody.userId.userName} leaveBalance inserted successfully`;
 
         //     return message;
         //   } else {

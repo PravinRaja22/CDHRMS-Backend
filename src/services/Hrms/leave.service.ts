@@ -157,12 +157,31 @@ export module leaveService {
         let params = values.map(value => `%${value}%`);
         try {
             let querydata = `SELECT * FROM leaves WHERE ${conditions} AND userId = $${keys.length + 1}`
+            let innerQuery =`SELECT  leaves.*,
+            jsonb_build_object(
+                'id', users.id,
+                'firstname', users.firstname,
+                  'lastname', users.lastname,
+                    'employeeid', users.employeeid
+            ) AS "users",
+            jsonb_build_object(  
+                'id', leavebalances.id,
+                'userid', leavebalances.userId,    
+                'balance', leavebalances.balance     
+                  
+            ) AS "leavebalances"
+            FROM
+            leaves
+            INNER JOIN users ON users.id = leaves.applyingtoid 
+            INNER JOIN leavebalances ON leavebalances.userId = leaves.userid			
+            WHERE ${conditions} AND leaves.userId = $${keys.length + 1}`
+
             let newParams = [...params, userId]
             console.log("$$$$$$$$$$");
-            console.log(querydata);
+            console.log(innerQuery);
             console.log(newParams);
             const result: QueryResult = await query(
-                querydata, newParams
+                innerQuery, newParams
             );
             console.log(result.rows, "query results");
             return result.rows
@@ -176,12 +195,29 @@ export module leaveService {
 
         try {
             let querydata = `SELECT * FROM leaves WHERE userId = $${1} AND status != $${2}`
+            let innerQuery =`SELECT  leaves.*,
+            jsonb_build_object(
+                'id', users.id,
+                'firstname', users.firstname,
+                  'lastname', users.lastname,
+                    'employeeid', users.employeeid
+            ) AS "users",
+            jsonb_build_object(        
+                'id', leavebalances.id,
+                'userid', leavebalances.userId,     
+                'balance', leavebalances.balance  
+            ) AS "leavebalances"
+            FROM
+            leaves
+            INNER JOIN users ON users.id = leaves.applyingtoid 
+            INNER JOIN leavebalances ON leavebalances.userId = leaves.userid				
+            WHERE leaves.userId = $${1} AND status != $${2}`
             let newParams = [ userId,'pending']
             console.log("$$$$$$$$$$");
-            console.log(querydata);
+            console.log(innerQuery);
             console.log(newParams);
             const result: QueryResult = await query(
-                querydata, newParams
+                innerQuery, newParams
             );
             console.log(result.rows, "query results");
             return result.rows
