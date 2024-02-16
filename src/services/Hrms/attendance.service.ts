@@ -1,13 +1,7 @@
 import { forEach } from "lodash";
-<<<<<<< Updated upstream
-import {query} from "../../database/postgress.js";
-import {QueryResult } from 'pg';
-import { getStartandEndTIme } from "../../utils/HRMS/getStarttimeandEndTIme.js";
-=======
 import { query } from "../../database/postgress.js";
 import { QueryResult } from 'pg';
 import { getMonthAndYearFromUTC } from "../../utils/HRMS/getMonthandYearFromutc.js";
->>>>>>> Stashed changes
 export module attendanceService {
     export async function getAttendanceData() {
         try {
@@ -150,15 +144,8 @@ export module attendanceService {
     export async function upsertBulkAttendance(values: any) {
         try {
             console.log("inside upsertBulkAttendance", values);
-<<<<<<< Updated upstream
           
             const { month, year, userId ,utcsec} = values;
-=======
-
-            const { month, year, utcSec, userId } = values;
-            // const startDate = new Date('2024-01-01T00:05:00Z'); 
-            // const endDate = new Date('2024-01-31T23:59:59Z'); 
->>>>>>> Stashed changes
             let startDate;
             let endDate;
             const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -166,7 +153,6 @@ export module attendanceService {
     
             startDate = new Date(year, monthIndex, 1);
             endDate = new Date(year, monthIndex + 1, 0);
-<<<<<<< Updated upstream
     
             console.log("^^^^^^^^");
             console.log(startDate, "startDate");
@@ -181,12 +167,6 @@ export module attendanceService {
             while (currentDate <= endDate) {
                 const dateInMillis = currentDate.getTime();
     
-=======
-
-            while (startDate <= endDate) {
-                const dateInMillis = startDate.getTime();
-
->>>>>>> Stashed changes
                 const record = {
                     userId,
                     date: dateInMillis,
@@ -208,7 +188,6 @@ export module attendanceService {
                             },
                         ],
                     },
-<<<<<<< Updated upstream
                     isweekend: currentDate.getDay() === 0 || currentDate.getDay() === 6, // Sunday or Saturday
                     status: currentDate.getDay() === 0 || currentDate.getDay() === 6 ? "weekoff" : "present",
                     shift: {
@@ -219,28 +198,10 @@ export module attendanceService {
                 };
     
                 await upsertAttendanceRecord(record);    
-=======
-                    isweekend: startDate.getUTCDay() === 0 || startDate.getUTCDay() === 6, // Sunday or Saturday
-                    status: startDate.getUTCDay() === 0 || startDate.getUTCDay() === 6 ? "weekoff" : "present",
-                    shift: {
-                        "shiftType": "GS",
-                        "shiftStart": "09:00",
-                        "shiftEnd": "18:00"
-                    }
-                };
-
-
-                await upsertAttendanceRecord(record);
-
->>>>>>> Stashed changes
                 // Move to the next day
                 currentDate.setDate(currentDate.getDate() + 1);
             }
-<<<<<<< Updated upstream
             return ar;
-=======
-
->>>>>>> Stashed changes
         } catch (error) {
             return error.message;
         }
@@ -256,11 +217,7 @@ export module attendanceService {
         let querydata = `INSERT INTO attendances (${fieldNames.join(', ')}) VALUES (${fieldValues.map((_, index) => `$${index + 1}`).join(', ')}) RETURNING *`;
         let params = fieldValues;
         const result = await query(querydata, params);
-<<<<<<< Updated upstream
-        console.log(result.rows[0],"record insert result");
-=======
         console.log(result.command, "record insert result");
->>>>>>> Stashed changes
 
     }
 
@@ -560,13 +517,8 @@ export module attendanceService {
                     } else {
                         console.log("inside else");
                         let obj: any = {
-<<<<<<< Updated upstream
                             date: Number(newDateUTC),
                             userId:  user.id,
-=======
-                            date: newDateUTC,
-                            userId: user.id,
->>>>>>> Stashed changes
                             signIn: { data: [{ "timeStamp": null, "lat": null, "lng": null }] },
                             signOut: { data: [{ "timeStamp": null, "lat": null, "lng": null }] },
                             shift: { "shiftType": "GS", "shiftStart": "09:00", "shiftEnd": "18:00" },
