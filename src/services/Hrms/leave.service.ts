@@ -16,10 +16,35 @@ export module leaveService {
     export async function getSingleLeaves(recId: string) {
         console.log(recId, "getSingleLeave callback request");
         try {
+
+            let query1 = `SELECT * from leaves WHERE id=$1`
+
+            let joinQuery = `SELECT leaves.*,
+                            jsonb_build_object(
+                                'id', u1.id,
+                                'firstname', u1.firstname,
+                                'lastname', u1.lastname,
+                                'employeeid', u1.employeeid
+                            ) AS users,
+                            jsonb_build_object(
+                                'id', u2.id,
+                                'firstname', u2.firstname,
+                                'lastname', u2.lastname,
+                                'employeeid', u2.employeeid
+                            ) AS approverusers
+                            FROM
+                            leaves
+                            INNER JOIN users u1 ON u1.id = leaves.userid
+                            INNER JOIN users u2 ON u2.id = leaves.applyingtoid
+                            WHERE leaves.id = $1
+                            `
+               let  params =[recId]
             console.log(recId, "getSingleLeave params id");
-            const result = await query("SELECT * FROM leaves WHERE id = $1", [
-                recId,
-            ]);
+            // const result = await query("SELECT * FROM leaves WHERE id = $1", [
+            //     recId,
+            // ]);
+            const result = await query(joinQuery,params)
+
             console.log(result.rows, "result getSingleLeave");
             return result.rows;
         } catch (error: any) {
@@ -30,10 +55,10 @@ export module leaveService {
 
         try {
             let values = request.body;
-            let files = request.files
+            let files = request?.files ||[]
             let url;
-            console.log(files.length,"files");
-            if (files.length>0) {
+            console.log(files?.length,"files");
+            if (files?.length>0) {
                 url = request.protocol + "://" + request.headers.host + "/" + request.files[0].filename
             }
         
@@ -43,6 +68,7 @@ export module leaveService {
 
             const { id, file, ...upsertFields } = values;
             console.log(values, "upsertLeaves Request body");
+            console.log(upsertFields,"upsertFields");
             for (const field in upsertFields) {
                 console.log(field);
                 console.log(upsertFields[field]);
@@ -50,6 +76,12 @@ export module leaveService {
                     field === "userId" || field === "noofdays") {
                     upsertFields[field] = Number(upsertFields[field])
                 }
+                // if(field === 'createdby' || field === 'modifiedby'){
+                  
+                //     console.log(JSON.parse(upsertFields[field]));
+                //     // console.log(JSON.parse(upsertFields[field]));
+                //     // upsertFields[field] = (upsertFields[field])
+                // }
             }
             console.log("*****");
             console.log(upsertFields);
@@ -66,7 +98,7 @@ export module leaveService {
                 // If id is provided, update the existing user
                 querydata = `UPDATE leaves SET ${fieldNames
                     .map((field, index) => `${field} = $${index + 1}`)
-                    .join(", ")} WHERE id = $${fieldNames.length + 1}`;
+                    .join(", ")} WHERE id = $${fieldNames.length + 1} RETURNING *`;
                 params = [...fieldValues, id];
             } else {
                 // If id is not provided, insert a new user
@@ -110,6 +142,41 @@ export module leaveService {
                     }
                 }
                 return ({ status: 200, message: `Leave upserted successfully with record ID ${leaveRecord?.id}` });
+            }else if(result.rowCount >0 && result.command === 'UPDATE'){
+                let upsertLeave: any = result.rows[0]
+                if(upsertLeave.status.toLowerCase().includes('withdraw')){
+                    console.log("if");
+                    //Delete the approval record or change status
+                    let approvalId = upsertLeave?.approvalid
+                    let approvalRecord;
+                    try{
+                        let result = await approvalService.getApprovalsById(approvalId)
+                        console.log(result,"approval record");
+                        if(result.length>0){
+                             approvalRecord = result[0]
+                        //update approval record status
+                            let {uuid,...otherfields} = approvalRecord
+                            otherfields.status = upsertLeave.status //change status
+
+                            console.log(otherfields,"otherfields after change");
+
+                            let approvalResult = await approvalService.updateApprovals(otherfields,otherfields.id)
+                            console.log(approvalResult,"approvalResult");
+                            if(approvalResult.success){
+                                return approvalResult.message
+                            }
+                        }
+
+                    }catch(error){
+
+                    }
+                    // return ({ status: 200, message: `Leave upserted successfully with record ID ${leaveRecord?.id}` });
+                    
+
+                }else{
+                    console.log("else");
+                }
+
             }
 
         } catch (error: any) {

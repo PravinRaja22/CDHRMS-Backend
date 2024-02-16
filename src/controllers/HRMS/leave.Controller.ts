@@ -18,6 +18,7 @@ export async function getSingleLeaves(request: any, reply: any) {
 export async function upsertLeaves(request: any, reply: any) {
   try {
     let result = await leaveService.upsertLeaves(request)
+    console.log(result,"upsertLeaves control");
     reply.send(result)
   } catch (error: any) {
     reply.status(500).send(error.message);
