@@ -124,20 +124,28 @@ export module attendanceService {
         try {
             console.log("inside upsertBulkAttendance", values);
           
-            const { month, year, utcSec ,userId } = values;
-            // const startDate = new Date('2024-01-01T00:05:00Z'); 
-            // const endDate = new Date('2024-01-31T23:59:59Z'); 
+            const { month, year, userId ,utcsec} = values;
             let startDate;
             let endDate;
             const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
             const monthIndex = months.indexOf(month);
-
+    
             startDate = new Date(year, monthIndex, 1);
             endDate = new Date(year, monthIndex + 1, 0);
-            
-            while (startDate <= endDate) {
-                const dateInMillis = startDate.getTime();
-  
+    
+            console.log("^^^^^^^^");
+            console.log(startDate, "startDate");
+            console.log(endDate, "endDate");
+            console.log("^^^^^^^^");
+            const today = new Date();
+            today.getMonth() 
+
+            let ar = [];
+            let currentDate = new Date(startDate); // Initialize currentDate with startDate
+    
+            while (currentDate <= endDate) {
+                const dateInMillis = currentDate.getTime();
+    
                 const record = {
                     userId,
                     date: dateInMillis,
@@ -159,26 +167,25 @@ export module attendanceService {
                             },
                         ],
                     },
-                    isweekend: startDate.getUTCDay() === 0 || startDate.getUTCDay() === 6, // Sunday or Saturday
-                    status : startDate.getUTCDay() === 0 || startDate.getUTCDay() === 6 ? "weekoff" :"present",
+                    isweekend: currentDate.getDay() === 0 || currentDate.getDay() === 6, // Sunday or Saturday
+                    status: currentDate.getDay() === 0 || currentDate.getDay() === 6 ? "weekoff" : "present",
                     shift: {
-                        "shiftType": "GS",
-                        "shiftStart": "09:00",
-                        "shiftEnd": "18:00"
-                      }
+                        shiftType: "GS",
+                        shiftStart: "09:00",
+                        shiftEnd: "18:00"
+                    }
                 };
     
-               
-                await upsertAttendanceRecord(record);
-    
+                await upsertAttendanceRecord(record);    
                 // Move to the next day
-                startDate.setDate(startDate.getDate() + 1);
+                currentDate.setDate(currentDate.getDate() + 1);
             }
-           
+            return ar;
         } catch (error) {
-            return error.message
+            return error.message;
         }
     }
+    
 
     async function upsertAttendanceRecord(record: any) {
         // Your upsert or insert logic goes here
@@ -189,7 +196,7 @@ export module attendanceService {
         let querydata = `INSERT INTO attendances (${fieldNames.join(', ')}) VALUES (${fieldValues.map((_, index) => `$${index + 1}`).join(', ')}) RETURNING *`;
         let params = fieldValues;
         const result = await query(querydata, params);
-        console.log(result.command,"record insert result");
+        console.log(result.rows[0],"record insert result");
 
     }
 
@@ -467,11 +474,14 @@ export module attendanceService {
             let newDate = new Date();
             newDate.setHours(0, 5, 0, 0);
             let newDateUTC = newDate.getTime();
+            console.log("*******");
             console.log(newDateUTC);
-
+            console.log(typeof(newDateUTC));
+            console.log("*******");
             for (const user of allUsers.rows) {
                 try {
                     // Check if attendance record already exists for the user and date
+                //    existingRecord
                     const existingRecord = await query(
                         'SELECT * FROM attendances WHERE userId = $1 AND date = $2',
                         [user.id, newDateUTC]
@@ -485,7 +495,7 @@ export module attendanceService {
                     } else {
                         console.log("inside else");
                         let obj: any = {
-                            date: newDateUTC,
+                            date: Number(newDateUTC),
                             userId:  user.id,
                             signIn: { data: [{ "timeStamp": null, "lat": null, "lng": null }] },
                             signOut: { data: [{ "timeStamp": null, "lat": null, "lng": null }] },
@@ -507,6 +517,10 @@ export module attendanceService {
                         let params = fieldValues;
                         const result = await query(querydata, params);
 
+                        console.log("&&&&&&&&&&");
+                        console.log(result,"result");
+                          console.log("&&&&&&&&&&");
+                        console.log(result.rows,"result");
                         if (result.command === 'INSERT' || result.command === 'UPDATE') {
                             console.log(`Attendance record inserted for user ${user.id}`);
                             successInsert++;

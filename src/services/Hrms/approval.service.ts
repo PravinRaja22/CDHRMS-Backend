@@ -118,13 +118,19 @@ export module approvalService {
       if (result.command === "UPDATE" && result.rowCount > 0) {
         //update the parent record
         let approvalRec = result.rows[0];
-        let updateParent = await updateParentRecord(approvalRec, requestParams);
-        console.log(updateParent, "updateParent");
+        let updateParent ;
+        if(approvalRec.status.toLowerCase().includes("withdraw")){
+             // we already update leave so no need to call parent from here
+        }else{
+          updateParent = await updateParentRecord(approvalRec, requestParams);
+          console.log(updateParent, "updateParent");
+        }
+      
         return {
-          message: `${requestBody.type} ${requestBody.status} Successfully`,
+          message: `${requestBody.type} ${requestBody.status} Successfully`,success:true
         };
       } else {
-        return { message: "Approval Update Failure" };
+        return { message: "Approval Update Failure" ,success:false};
       }
     } catch (error) {
       return { error: error.message };
@@ -167,7 +173,9 @@ export module approvalService {
         let newObj1 = { ...getRegularzeRecord[0] };
         console.log(newObj1, "newObj");
         const { uuid, ...newObj } = newObj1;
+
         newObj.status = approvalRec.status;
+        // newObj.modifiedby = {id:}
         // newObj.approval = { id: approvalRecId };
         let updateRegularize =
           await attendanceRegularizeService.updateAttendanceRegularize(
@@ -206,13 +214,15 @@ export module approvalService {
         let getLeaveRecord = await leaveService.getSingleLeaves(
           approvalRec.parentId || approvalRec.parentid
         );
+        console.log(getLeaveRecord,"getLeaveRecord");
         let newLeave1 = { ...getLeaveRecord[0] };
 
-        let { uuid, ...newLeave } = newLeave1;
+        let { uuid, users,approverusers,...newLeave } = newLeave1;
 
         console.log(newLeave, "newLeave");
         newLeave.status = approvalRec.status;
-        // newLeave.approval = { id: approvalRecId };
+        newLeave.modifiedby = { id: approverusers.id ,name: `${approverusers.firstname} ${approverusers.lastname}`,timeStamp:new Date().getTime() };
+        console.log(newLeave, "newLeave");
         let updateLeave = await leaveService.upsertLeaves(newLeave);
         console.log(updateLeave, "updateLeave");
 

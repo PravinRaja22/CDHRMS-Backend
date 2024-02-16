@@ -2,7 +2,7 @@ import { PayslipServices } from "../../services/Hrms/payslip.service.js";
 
 export async function generatePayslip(request: any, reply: any) {
   //generate payslip for single user request body has userId,Month,year
-
+  console.log("generatePayslip");
   try {
     let result = await PayslipServices.generatePayslip(request);
     return result;

@@ -52,15 +52,15 @@ export module PayslipServices {
 
     // console.log(startDate, "* startDate");
     // console.log(endDate, "* endDate");
-    // console.log(startTime, "* startTime");
-    // console.log(endTime, "* endTime");
+    console.log(startTime, "* startTime");
+    console.log(endTime, "* endTime");
 
     try {
       let queryData = `SELECT * FROM attendances WHERE userId = ${userId} AND date>= ${startTime} AND date<=${endTime}`;
       //   console.log(queryData);
       let getAttendance = await query(queryData, {});
-
-      //   console.log(getAttendance, "getAttendance result1");
+      console.log("%%%%%%%%%%%%%");
+        // console.log(getAttendance, "getAttendance result1");
       if (getAttendance.rowCount > 0) {
         let payslipAmount = calculatePayslip(
           getAttendance.rows,
