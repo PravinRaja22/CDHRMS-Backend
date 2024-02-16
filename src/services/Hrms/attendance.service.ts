@@ -1,6 +1,7 @@
 import { forEach } from "lodash";
 import {query} from "../../database/postgress.js";
 import {QueryResult } from 'pg';
+import { getStartandEndTIme } from "../../utils/HRMS/getStarttimeandEndTIme.js";
 export module attendanceService {
     export async function getAttendanceData() {
         try {
@@ -528,6 +529,21 @@ export module attendanceService {
             return { success: 0, failure: allUsers.rows.length };
         }
       
+    }
+
+
+    export async function getAttendaceForMonthandYear(userId,Month,Year) {
+        try {
+            console.log(userId , Month ,Year)
+            console.log("attendanceService call");
+            let data : any =await getStartandEndTIme(Month,Year)
+            console.log(data.startTime)
+            const result: QueryResult = await query(`SELECT * FROM attendances where date >= ${ data.startTime} And date <=${data.endTime} And userId = ${Number(userId)}`,[]);
+             console.log(result.rows, "query results");
+              return result.rows
+        } catch (error) {
+            return error.message
+        }
     }
 }
 

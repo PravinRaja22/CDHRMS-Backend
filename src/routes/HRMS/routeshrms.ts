@@ -27,6 +27,7 @@ import {
   updateAttendanceStatus,
   getsingleAttendance,
   upsertBulkAttendance,
+  getAttendaceForMonthandYear,
 } from "../../controllers/HRMS/attendance.Controller.js";
 import {
   deleteLoan,
@@ -193,6 +194,7 @@ const Routes = function (
   fastify.get("/attendance", getAttendanceDate);
   fastify.post("/attendance", upsertAttendance);
   fastify.get("/attendance/:userId/:attendanceDate", getAttendanceByUserIdDate);
+  fastify.get("/attendance/:userId/:month/:year",getAttendaceForMonthandYear);
   fastify.put("/attendance/:userId/:attendanceDate", updateAttendance);
   fastify.put("/attendance/:attendanceDate", updateAttendanceStatus);
   fastify.get("/attendance/:id", getsingleAttendance);

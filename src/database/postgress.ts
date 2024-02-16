@@ -15,10 +15,10 @@ import pkg from "pg";
 
 const pool = new pkg.Pool({
   // user: "postgres",
-  // password: "admin",
+  // password: "Maples71",
   // host: "localhost",
-  // port: 5432',
-  // database: "postgres",
+  // port: 5432,
+  // database: "hrms"
   user: "postgres",
   password: "admin",
   host: "192.168.0.127",

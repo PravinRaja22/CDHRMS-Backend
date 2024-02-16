@@ -64,3 +64,15 @@ export async function upsertBulkAttendance(request:any,reply:any){
         reply.status(500).send(error.message)
     }
 }
+
+export async function getAttendaceForMonthandYear(requst:any , reply:any){
+    try{
+        const {userId,month,year} = requst.params
+        console.log(requst.params)
+        let Result = await attendanceService.getAttendaceForMonthandYear(userId,month,year)
+        reply.send(Result)
+    }
+    catch(error){
+        reply.status(500).send(error.message)
+    }
+}

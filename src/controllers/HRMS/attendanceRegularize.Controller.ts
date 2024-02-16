@@ -20,6 +20,7 @@ export async function getAttendanceRegularizebyId(request:any,reply:any){
 
 export async function insertAttendanceRegularize(request:any,reply:any) {
     try{
+        console.log(request.body ,'insert Regulariize Check')
         let result = await attendanceRegularizeService.insertAttendanceRegularize(request.body)
         reply.send(result)
     }catch(error){
