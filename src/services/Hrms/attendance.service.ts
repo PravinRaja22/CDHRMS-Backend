@@ -1,12 +1,18 @@
 import { forEach } from "lodash";
+<<<<<<< Updated upstream
 import {query} from "../../database/postgress.js";
 import {QueryResult } from 'pg';
 import { getStartandEndTIme } from "../../utils/HRMS/getStarttimeandEndTIme.js";
+=======
+import { query } from "../../database/postgress.js";
+import { QueryResult } from 'pg';
+import { getMonthAndYearFromUTC } from "../../utils/HRMS/getMonthandYearFromutc.js";
+>>>>>>> Stashed changes
 export module attendanceService {
     export async function getAttendanceData() {
         try {
             console.log("attendanceService call");
-            const result: QueryResult = await query('SELECT * FROM attendances',[]);
+            const result: QueryResult = await query('SELECT * FROM attendances', []);
             console.log(result, "query results");
             return result.rows
         } catch (error) {
@@ -52,6 +58,27 @@ export module attendanceService {
 
     }
 
+    export async function getAttendanceByUserIdMonth(params: any) {
+        try {
+            console.log(params)
+            const { userId, month, year } = params
+            console.log(month)
+            console.log(year)
+            let result = await getMonthAndYearFromUTC(month, year)
+            console.log('test')
+            console.log(result)
+            const queryData: any = await query(
+                `SELECT * FROM attendances WHERE userId = $1 AND date >=${result.startTime} AND date <= ${result.endTime}`,
+                [userId]
+            )
+             console.log(queryData.rows.length)
+            return queryData.rows;
+
+        } catch (error) {
+
+        }
+    }
+
     export async function updateAttendance(params: any, body: any) {
         console.log(params, "params updateAttendance service");
         console.log(body, "body updateAttendance service");
@@ -87,7 +114,7 @@ export module attendanceService {
                 let result = await query(querydata, params);
                 console.log(result, "upsert result");
                 let message = result.command === 'UPDATE' && result.rowCount > 0 ? 'Attendance upserted successfully' : 'Attendance upserte failure'
-                return ({ status:200, message });
+                return ({ status: 200, message });
 
             } catch (error) {
                 console.log(error.message, "upsert error");
@@ -101,19 +128,19 @@ export module attendanceService {
 
     }
 
-    export async function getsingleAttendance(recId:any){
-        console.log("getsingleAttendance",recId);
+    export async function getsingleAttendance(recId: any) {
+        console.log("getsingleAttendance", recId);
 
-        try{
+        try {
             const result: any = await query(
-                `SELECT * FROM attendances WHERE id = ${recId}`,[]
+                `SELECT * FROM attendances WHERE id = ${recId}`, []
             )
-            console.log(result,"findRecord");
-            if(result.rowCount=1){
+            console.log(result, "findRecord");
+            if (result.rowCount = 1) {
                 return result.rows
             }
-            
-        }catch(error){
+
+        } catch (error) {
             return error.message
         }
 
@@ -123,8 +150,15 @@ export module attendanceService {
     export async function upsertBulkAttendance(values: any) {
         try {
             console.log("inside upsertBulkAttendance", values);
+<<<<<<< Updated upstream
           
             const { month, year, userId ,utcsec} = values;
+=======
+
+            const { month, year, utcSec, userId } = values;
+            // const startDate = new Date('2024-01-01T00:05:00Z'); 
+            // const endDate = new Date('2024-01-31T23:59:59Z'); 
+>>>>>>> Stashed changes
             let startDate;
             let endDate;
             const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -132,6 +166,7 @@ export module attendanceService {
     
             startDate = new Date(year, monthIndex, 1);
             endDate = new Date(year, monthIndex + 1, 0);
+<<<<<<< Updated upstream
     
             console.log("^^^^^^^^");
             console.log(startDate, "startDate");
@@ -146,6 +181,12 @@ export module attendanceService {
             while (currentDate <= endDate) {
                 const dateInMillis = currentDate.getTime();
     
+=======
+
+            while (startDate <= endDate) {
+                const dateInMillis = startDate.getTime();
+
+>>>>>>> Stashed changes
                 const record = {
                     userId,
                     date: dateInMillis,
@@ -153,7 +194,7 @@ export module attendanceService {
                         data: [
                             {
                                 timeStamp: dateInMillis + 9 * 60 * 60 * 1000, // 9:00 AM UTC
-                                lat: 0, 
+                                lat: 0,
                                 lng: 0,
                             },
                         ],
@@ -162,11 +203,12 @@ export module attendanceService {
                         data: [
                             {
                                 timeStamp: dateInMillis + 18 * 60 * 60 * 1000, // 6:00 PM UTC
-                                lat: 0, 
-                                lng: 0, 
+                                lat: 0,
+                                lng: 0,
                             },
                         ],
                     },
+<<<<<<< Updated upstream
                     isweekend: currentDate.getDay() === 0 || currentDate.getDay() === 6, // Sunday or Saturday
                     status: currentDate.getDay() === 0 || currentDate.getDay() === 6 ? "weekoff" : "present",
                     shift: {
@@ -177,10 +219,28 @@ export module attendanceService {
                 };
     
                 await upsertAttendanceRecord(record);    
+=======
+                    isweekend: startDate.getUTCDay() === 0 || startDate.getUTCDay() === 6, // Sunday or Saturday
+                    status: startDate.getUTCDay() === 0 || startDate.getUTCDay() === 6 ? "weekoff" : "present",
+                    shift: {
+                        "shiftType": "GS",
+                        "shiftStart": "09:00",
+                        "shiftEnd": "18:00"
+                    }
+                };
+
+
+                await upsertAttendanceRecord(record);
+
+>>>>>>> Stashed changes
                 // Move to the next day
                 currentDate.setDate(currentDate.getDate() + 1);
             }
+<<<<<<< Updated upstream
             return ar;
+=======
+
+>>>>>>> Stashed changes
         } catch (error) {
             return error.message;
         }
@@ -191,12 +251,16 @@ export module attendanceService {
         // Your upsert or insert logic goes here
         console.log("Upserting record:", record);
         let fieldNames = Object.keys(record)
-        let fieldValues =Object.values(record)
+        let fieldValues = Object.values(record)
 
         let querydata = `INSERT INTO attendances (${fieldNames.join(', ')}) VALUES (${fieldValues.map((_, index) => `$${index + 1}`).join(', ')}) RETURNING *`;
         let params = fieldValues;
         const result = await query(querydata, params);
+<<<<<<< Updated upstream
         console.log(result.rows[0],"record insert result");
+=======
+        console.log(result.command, "record insert result");
+>>>>>>> Stashed changes
 
     }
 
@@ -269,37 +333,37 @@ export module attendanceService {
     export async function updateAttendanceStatus(params: any) {
         console.log(params, "updateAttendanceStatus params");
         let attendanceDate = params.attendanceDate;
-        
+
         try {
             let updatesqlCount = 0;
             let failuresqlCount = 0;
             let returnValue = {};
-            
-            let result = await query(`SELECT * FROM attendances WHERE date = ${attendanceDate}`,{});
+
+            let result = await query(`SELECT * FROM attendances WHERE date = ${attendanceDate}`, {});
             console.log(result, "attendanceRecords");
             console.log('***********');
             console.log(result.rows);
             console.log('***********');
-            
+
             if (result.rowCount > 0) {
                 let attendanceRecords = result.rows;
-                
+
                 // Use Promise.all to wait for all asynchronous operations to complete
                 const updatePromises = attendanceRecords.map(async (i: any) => {
                     console.log(i, "______________");
                     let updatedRecord1: any = await calculateAttendance(i)
                     console.log(updatedRecord1, "calculateAttendance result");
-                    
+
                     if (updatedRecord1) {
                         let { uuid, ...updatedRecord } = updatedRecord1;
                         return sqlUpdate(updatedRecord);
                     }
 
-                    
+
                 });
-    
+
                 const updateResults = await Promise.all(updatePromises);
-    
+
                 // Aggregate results
                 updateResults.forEach(result => {
                     if (result.statusCode === 200) {
@@ -310,9 +374,9 @@ export module attendanceService {
                         failuresqlCount += result.count;
                     }
                 });
-    
+
                 console.log(updatesqlCount, "updatesqlCount", failuresqlCount);
-                
+
                 returnValue = {
                     success: updatesqlCount,
                     failure: failuresqlCount,
@@ -321,13 +385,13 @@ export module attendanceService {
                             failuresqlCount ? `${failuresqlCount} Attendance Update Failure` :
                                 "No Records Found"
                 };
-    
+
             } else {
                 return { message: "No Records Found" };
             }
-    
+
             return returnValue;
-    
+
         } catch (error) {
             console.log(error.message, "error updateAttendanceStatus");
         }
@@ -464,9 +528,10 @@ export module attendanceService {
         return item;
     }
 
+
     async function generateAttendanceData(values: any) {
         console.log(values, "generateAttendanceData");
-        const allUsers: QueryResult = await query('SELECT * FROM users',[]);
+        const allUsers: QueryResult = await query('SELECT * FROM users', []);
         console.log(allUsers, "allUsers get results");
         try {
             let successInsert = 0;
@@ -495,8 +560,13 @@ export module attendanceService {
                     } else {
                         console.log("inside else");
                         let obj: any = {
+<<<<<<< Updated upstream
                             date: Number(newDateUTC),
                             userId:  user.id,
+=======
+                            date: newDateUTC,
+                            userId: user.id,
+>>>>>>> Stashed changes
                             signIn: { data: [{ "timeStamp": null, "lat": null, "lng": null }] },
                             signOut: { data: [{ "timeStamp": null, "lat": null, "lng": null }] },
                             shift: { "shiftType": "GS", "shiftStart": "09:00", "shiftEnd": "18:00" },
@@ -542,7 +612,7 @@ export module attendanceService {
             console.log(error, "catch error");
             return { success: 0, failure: allUsers.rows.length };
         }
-      
+
     }
 
 
