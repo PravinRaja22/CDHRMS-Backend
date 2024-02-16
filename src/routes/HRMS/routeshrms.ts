@@ -27,11 +27,7 @@ import {
   updateAttendanceStatus,
   getsingleAttendance,
   upsertBulkAttendance,
-<<<<<<< Updated upstream
   getAttendaceForMonthandYear,
-=======
-  getAttendanceByUserIdMonth,
->>>>>>> Stashed changes
 } from "../../controllers/HRMS/attendance.Controller.js";
 import {
   deleteLoan,

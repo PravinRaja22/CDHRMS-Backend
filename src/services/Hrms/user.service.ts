@@ -56,15 +56,9 @@ export module userService {
         try {
             console.log(username, 'data in userName')
 
-<<<<<<< Updated upstream
-            let userNameLowercase = username
-
-            let joinQuery = `SELECT  users.*,
-=======
             let userNameLowercase = username.toLowerCase()
 console.log(userNameLowercase ,"User Name lower case Checking ")
             let joinQuery =`SELECT  users.*,
->>>>>>> Stashed changes
             jsonb_build_object(
                 'id', pfdetails.id,
                 'uan', pfdetails.uan,
