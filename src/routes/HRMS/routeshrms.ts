@@ -75,6 +75,7 @@ import {
   getAttendanceRegularizebyUser,
   updateAttendanceRegularize,
   getAttendanceRegularizebyId,
+  getRegularizeByUsers,
 } from "../../controllers/HRMS/attendanceRegularize.Controller.js";
 import {
   deleteEightyCData,
@@ -204,11 +205,7 @@ const Routes = function (
   fastify.get("/attendance", getAttendanceDate);
   fastify.post("/attendance", upsertAttendance);
   fastify.get("/attendance/:userId/:attendanceDate", getAttendanceByUserIdDate);
-<<<<<<< Updated upstream
   fastify.get("/attendance/:userId/:month/:year",getAttendaceForMonthandYear);
-=======
-  fastify.get("/attendance/:userId/:month/:year", getAttendanceByUserIdMonth);
->>>>>>> Stashed changes
   fastify.put("/attendance/:userId/:attendanceDate", updateAttendance);
   fastify.put("/attendance/:attendanceDate", updateAttendanceStatus);
   fastify.get("/attendance/:id", getsingleAttendance);
@@ -223,6 +220,7 @@ const Routes = function (
   );
   fastify.get("/attendance-regularize/:id", getAttendanceRegularizebyId);
   fastify.put("/attendance-regularize/:id", updateAttendanceRegularize);
+  fastify.get("/attendance-regularize/user/:userId", getRegularizeByUsers);
 
   //Payslip
 

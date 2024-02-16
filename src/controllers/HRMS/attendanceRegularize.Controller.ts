@@ -45,3 +45,12 @@ export async function updateAttendanceRegularize(request:any,reply:any){
         reply.status(500).send(error.message)
     }
 }
+export async function getRegularizeByUsers(request:any,reply:any){
+    try{
+        console.log(request.params)
+        // let result = await attendanceRegularizeService.updateAttendanceRegularize(request.params.id,request.body)
+        reply.send("result")
+    }catch(error){
+        reply.status(500).send(error.message)
+    }
+}
