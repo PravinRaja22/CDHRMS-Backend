@@ -29,6 +29,7 @@ export async function getLeavesByUsers(request: any, reply: any) {
   console.log(request.query, "getUser testquery");
   
   if (Object.keys(request.query).length > 0) {
+    
     if(request.query.excludePending){
       console.log("testquery if ! pending");
       try {

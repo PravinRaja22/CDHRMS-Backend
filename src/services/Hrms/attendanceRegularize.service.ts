@@ -41,7 +41,6 @@ export module attendanceRegularizeService {
                     console.log(requestConvert, "****** requestConvert");
                 let fieldNames = Object.keys(requestConvert);
                 let fieldValues = Object.values(requestConvert);
-
                 let querydata = `INSERT INTO attendanceRegularizations (${fieldNames.join(', ')}) VALUES (${fieldNames.map((_, index) => `$${index + 1}`).join(', ')}) RETURNING *`;
                 let params = fieldValues;
                 let result = await query(querydata, params);
@@ -57,32 +56,23 @@ export module attendanceRegularizeService {
                     if (approvalInsert.status = 200) {
                         console.log("approvalInsert inside if");
                         let { uuid, id, ...attendanceRegu } = attendanceReguRecord
-                        console.log(attendanceRegu);
-                        console.log(attendanceRegu.approvalid);
                         attendanceRegu.approvalid = approvalInsert.approvalId;
-
-                        console.log("******");
-                        console.log(attendanceRegu, "attendanceRegu after change");
                         const fieldNames = Object.keys(attendanceRegu);
                         const fieldValues = Object.values(attendanceRegu);
-                        console.log(fieldNames);
-                        console.log(fieldValues);
                         querydata = `UPDATE attendanceRegularizations SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(', ')} WHERE id = $${fieldNames.length + 1}`;
                         params = [...fieldValues, id];
                         try {
                             let result = await query(querydata, params);
                             console.log(result, "upsert result with approval");
+                            return ({ message: 'Attendance Regularize Insert successfully' });
                         } catch (error) {
                             console.log(error, "update leaves error");
                         }
                     }
-
-
-                    return ({ message: 'Attendance Regularize Insert successfully' });
                 } else {
                     return ({ message: "Attendance Regularize Insert Failure" })
                 }
-             })
+            })
 
 
         } catch (error) {
@@ -95,6 +85,19 @@ export module attendanceRegularizeService {
             const result: QueryResult = await query(
                 'SELECT * FROM attendanceRegularizations WHERE userId= $1',
                 [requestParams]
+            );
+            // let result :QueryResult = await pool.query(`SELECT * FROM attendanceRegularizations WHERE userDetails->>'id' =${requestParams}`)
+            console.log(result, "QueryResult");
+            return result.rows
+        } catch (error) {
+            return error.message
+        }
+    }
+    export async function getRegularizeByUsers(requestParam) {
+        try {
+            const result: QueryResult = await query(
+                'SELECT * FROM attendanceRegularizations WHERE userId= $1',
+                [requestParam]
             );
             // let result :QueryResult = await pool.query(`SELECT * FROM attendanceRegularizations WHERE userDetails->>'id' =${requestParams}`)
             console.log(result, "QueryResult");

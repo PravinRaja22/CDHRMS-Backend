@@ -2,6 +2,7 @@ import { forEach } from "lodash";
 import { query } from "../../database/postgress.js";
 import { QueryResult } from 'pg';
 import { getMonthAndYearFromUTC } from "../../utils/HRMS/getMonthandYearFromutc.js";
+import { getStartandEndTIme } from "../../utils/HRMS/getStarttimeandEndTIme.js";
 export module attendanceService {
     export async function getAttendanceData() {
         try {
