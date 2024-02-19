@@ -230,13 +230,13 @@ export module leaveService {
                 'firstname', users.firstname,
                   'lastname', users.lastname,
                     'employeeid', users.employeeid
-            ) AS "users",
+            ) AS "jsonApplyingtoid",
             jsonb_build_object(  
                 'id', leavebalances.id,
                 'userid', leavebalances.userId,    
                 'balance', leavebalances.balance     
                   
-            ) AS "leavebalances"
+            ) AS "jsonLeavebalances"
             FROM
             leaves
             INNER JOIN users ON users.id = leaves.applyingtoid 
