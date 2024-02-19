@@ -1,4 +1,4 @@
-import {query} from "../../database/postgress.js";
+import { query } from "../../database/postgress.js";
 
 export module eightyCService {
   export async function getAllEightyCData() {
@@ -6,9 +6,9 @@ export module eightyCService {
       console.log(`Fetching all 80C data for all employees`);
       const querydata = `SELECT * FROM eightyC`;
       console.log(querydata, "getAllEightyCData query");
-      const result = await query(query,[]);
-      console.log(`Fetched all 80C Data Result:`, result.rows);
-      return result.rows;
+      const result = await query(query, []);
+      console.log(`Fetched all 80C Data Result:`, result);
+      return result;
     } catch (error) {
       console.error("Error in getAllEightyCData:", error.message);
       throw error;
@@ -18,9 +18,7 @@ export module eightyCService {
   export async function getEightyCDataById(id) {
     try {
       console.log(`Fetching 80C data for userId: ${id}`);
-      const result = await query("SELECT * FROM eightyC WHERE id = $1", [
-        id,
-      ]);
+      const result = await query("SELECT * FROM eightyC WHERE id = $1", [id]);
       console.log("Fetched 80C Data:", result.rows);
       return result.rows;
     } catch (error) {
@@ -31,10 +29,9 @@ export module eightyCService {
   export async function getEightyCDataByUserId(userId) {
     try {
       console.log(`Fetching 80C data for userId: ${userId}`);
-      const result = await query(
-        "SELECT * FROM eightyC WHERE userDetails->>'id' = $1",
-        [userId]
-      );
+      const result = await query("SELECT * FROM eightyC WHERE userid = $1", [
+        userId,
+      ]);
       console.log("Fetched 80C Data:", result.rows);
       return result.rows;
     } catch (error) {
@@ -76,13 +73,10 @@ export module eightyCService {
       console.log(querydata, "upsertEightyCData query");
       console.log(params, "upsertEightyCData params");
 
-      let result = await query(query, params);
-      let message =
-        result.command === "UPDATE"
-          ? `${result.rowCount} EightyC Data Updated successfully`
-          : `${result.rowCount} EightyC Data Inserted successfully`;
+      let result = await query(querydata, params);
+      let message = `EightyC Data Upserted successfully`;
 
-      console.log(message);
+      console.log(result, "result querydata");
       return { message };
     } catch (error) {
       console.error("Error in upsertEightyCData:", error.message);

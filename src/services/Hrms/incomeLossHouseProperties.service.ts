@@ -1,4 +1,4 @@
-import {query} from "../../database/postgress.js";
+import { query } from "../../database/postgress.js";
 
 export module incomeLossHousePropertiesService {
   export async function getAllIncomeLossHousePropertiesData() {
@@ -11,7 +11,7 @@ export module incomeLossHousePropertiesService {
 
       console.log(querydata, "getAllIncomeLossHousePropertiesData query");
 
-      const result = await query(querydata);
+      const result = await query(querydata, {});
 
       console.log(
         `Fetched all Income Loss House Properties Data Result:`,
@@ -52,7 +52,7 @@ export module incomeLossHousePropertiesService {
         `Fetching income loss house properties data for userId: ${userId}`
       );
       const result = await query(
-        "SELECT * FROM incomeLossHouseProperties WHERE userDetails->>'id' = $1",
+        "SELECT * FROM incomeLossHouseProperties WHERE userId = $1",
         [userId]
       );
       console.log("Fetched Income Loss House Properties Data:", result.rows);

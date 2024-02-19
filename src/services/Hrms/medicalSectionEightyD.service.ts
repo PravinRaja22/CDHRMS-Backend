@@ -1,4 +1,4 @@
-import {query} from "../../database/postgress.js";
+import { query } from "../../database/postgress.js";
 
 export module medicalSectionEightyDService {
   export async function getAllMedicalSectionEightyDData() {
@@ -9,7 +9,7 @@ export module medicalSectionEightyDService {
 
       console.log(querydata, "getAllMedicalSectionEightyDData query");
 
-      const result = await query(querydata,[]);
+      const result = await query(querydata, []);
 
       console.log(`Fetched all Medical Section 80D Data Result:`, result.rows);
 
@@ -39,7 +39,7 @@ export module medicalSectionEightyDService {
     try {
       console.log(`Fetching Medical Section 80D data for userId: ${userId}`);
       const result = await query(
-        "SELECT * FROM medicalSectionEightyD WHERE userDetails->>'id' = $1",
+        "SELECT * FROM medicalSectionEightyD WHERE userId = $1",
         [userId]
       );
       console.log("Fetched Medical Section 80D Data:", result.rows);
@@ -99,7 +99,6 @@ export module medicalSectionEightyDService {
 
   export async function deleteMedicalSectionEightyDData(id) {
     try {
-      
       console.log(`Deleting Medical Section 80D data for id: ${id}`);
       const result = await query(
         "DELETE FROM medicalSectionEightyD WHERE id = $1 RETURNING *",
