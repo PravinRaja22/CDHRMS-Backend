@@ -154,7 +154,7 @@ import {
   getMedicalInsurancesById,
   upsertMedicalInsurances,
 } from "../../controllers/HRMS/medicalInsurance.Controller.js";
-import { filesUpload,Multer } from "../../multer/Multer.js";
+import { filesUpload, Multer } from "../../multer/Multer.js";
 import { testing } from "../../controllers/HRMS/testing.controller.js";
 
 const Routes = function (
@@ -187,8 +187,7 @@ const Routes = function (
   fastify.get("/leaves/:id", getSingleLeaves);
   // fastify.post("/leaves", { preHandler: filesUpload }
   //   , testing);
-  fastify.post("/leaves", { preHandler: filesUpload} , upsertLeaves);
-
+  fastify.post("/leaves", { preHandler: filesUpload }, upsertLeaves);
 
   fastify.get("/leaves/user/:userId", getLeavesByUsers);
   fastify.get("/leaves/approver/:approverId", getLeavesByApprover);
@@ -201,7 +200,7 @@ const Routes = function (
   fastify.get("/attendance", getAttendanceDate);
   fastify.post("/attendance", upsertAttendance);
   fastify.get("/attendance/:userId/:attendanceDate", getAttendanceByUserIdDate);
-  fastify.get("/attendance/:userId/:month/:year",getAttendaceForMonthandYear);
+  fastify.get("/attendance/:userId/:month/:year", getAttendaceForMonthandYear);
   fastify.put("/attendance/:userId/:attendanceDate", updateAttendance);
   fastify.put("/attendance/:attendanceDate", updateAttendanceStatus);
   fastify.get("/attendance/:id", getsingleAttendance);
@@ -307,55 +306,57 @@ const Routes = function (
   );
   //otherChapters
 
-  fastify.post("/otherChapters", upsertOtherChaptersData);
-  fastify.get("/otherChapters", getAllOtherChaptersData);
-  fastify.get("/otherChapters/:id", getSingleOtherChaptersData);
-  fastify.get("/otherChapters/user/:userId", getOtherChaptersDataByUserId);
-  fastify.delete("/otherChapters/:id", deleteOtherChaptersData);
+  fastify.post("/other-chapters", upsertOtherChaptersData);
+  fastify.get("/other-chapters", getAllOtherChaptersData);
+  fastify.get("/other-chapters/:id", getSingleOtherChaptersData);
+  fastify.get("/other-chapters/user/:userId", getOtherChaptersDataByUserId);
+  fastify.delete("/other-chapters/:id", deleteOtherChaptersData);
 
   //houseRentAllowance
 
-  fastify.post("/houseRentAllowance", upsertHouseRentAllowanceData);
-  fastify.get("/houseRentAllowance", getAllHouseRentAllowanceData);
-  fastify.get("/houseRentAllowance/:id", getSingleHouseRentAllowanceData);
+  fastify.post("/house-rent-allowance", upsertHouseRentAllowanceData);
+  fastify.get("/house-rent-allowance", getAllHouseRentAllowanceData);
+  fastify.get("/house-rent-allowance/:id", getSingleHouseRentAllowanceData);
   fastify.get(
-    "/houseRentAllowance/user/:userId",
+    "/house-rent-allowance/user/:userId",
     getHouseRentAllowanceDataByUserId
   );
-  fastify.delete("/houseRentAllowance/:id", deleteHouseRentAllowanceData);
+  fastify.delete("/house-rent-allowance/:id", deleteHouseRentAllowanceData);
 
   //medicalSectionEightyD
 
-  fastify.post("/medicalSectionEightyD", {}, upsertMedicalSectionEightyDData);
-  fastify.get("/medicalSectionEightyD", getAllMedicalSectionEightyDData);
-  fastify.get("/medicalSectionEightyD/:id", getMedicalSectionEightyDDataById);
+  fastify.post("/medical-section-eightyd", upsertMedicalSectionEightyDData);
+  fastify.get("/medical-section-eightyd", getAllMedicalSectionEightyDData);
+  fastify.get("/medical-section-eightyd/:id", getMedicalSectionEightyDDataById);
   fastify.get(
-    "/medicalSectionEightyD/user/:userId",
+    "/medical-section-eightyd/user/:userId",
     getMedicalSectionEightyDDataByUserId
   );
-  fastify.delete("/medicalSectionEightyD/:id", deleteMedicalSectionEightyDData);
+  fastify.delete(
+    "/medical-section-eightyd/:id",
+    deleteMedicalSectionEightyDData
+  );
 
   //incomeLossHouseProperties
 
   fastify.post(
-    "/incomeLossHouseProperties",
-    {},
+    "/income-loss-house-properties",
     upsertIncomeLossHousePropertiesData
   );
   fastify.get(
-    "/incomeLossHouseProperties",
+    "/income-loss-house-properties",
     getAllIncomeLossHousePropertiesData
   );
   fastify.get(
-    "/incomeLossHouseProperties/:id",
+    "/income-loss-house-properties/:id",
     getSingleIncomeLossHousePropertiesData
   );
   fastify.get(
-    "/incomeLossHouseProperties/user/:userId",
+    "/income-loss-house-properties/user/:userId",
     getIncomeLossHousePropertiesDataByUserId
   );
   fastify.delete(
-    "/incomeLossHouseProperties/:id",
+    "/income-loss-house-properties/:id",
     deleteIncomeLossHousePropertiesData
   );
 

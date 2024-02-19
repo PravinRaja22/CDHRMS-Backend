@@ -1,4 +1,4 @@
-import {query} from "../../database/postgress.js";
+import { query } from "../../database/postgress.js";
 
 export module otherChaptersService {
   export async function getAllOtherChaptersData() {
@@ -9,7 +9,7 @@ export module otherChaptersService {
 
       console.log(querydata, "getAllOtherChaptersData query");
 
-      const result = await query(querydata,[]);
+      const result = await query(querydata, []);
 
       console.log(`Fetched all Other Chapters Data Result:`, result.rows);
 
@@ -23,10 +23,9 @@ export module otherChaptersService {
   export async function getOtherChaptersDataById(id) {
     try {
       console.log(`Fetching Other Chapters data for userId: ${id}`);
-      const result = await query(
-        "SELECT * FROM otherChapters WHERE id = $1",
-        [id]
-      );
+      const result = await query("SELECT * FROM otherChapters WHERE id = $1", [
+        id,
+      ]);
       console.log("Fetched Other Chapters Data:", result.rows);
       return result.rows;
     } catch (error) {
@@ -39,7 +38,7 @@ export module otherChaptersService {
     try {
       console.log(`Fetching Other Chapters data for userId: ${userId}`);
       const result = await query(
-        "SELECT * FROM otherChapters WHERE userDetails->>'id' = $1",
+        "SELECT * FROM otherChapters WHERE userId = $1",
         [userId]
       );
       console.log("Fetched Other Chapters Data:", result.rows);
@@ -52,6 +51,7 @@ export module otherChaptersService {
 
   export async function upsertOtherChaptersData(request: any) {
     try {
+      console.log(request, "Requesitng Data set");
       const { id, ...upsertFields } = request;
       console.log(request, "upsertOtherChaptersData Request body");
       console.log("Update or Insert Other Chapters Data");
@@ -63,20 +63,22 @@ export module otherChaptersService {
 
       let querydata;
       let params: any[] = [];
-
+      console.log(id, "ID IS ");
       if (id) {
         // If id is provided, update the existing Other Chapters data
+        console.log("inside if ,id - updata");
         querydata = `UPDATE otherChapters SET ${fieldNames
           .map((field, index) => `${field} = $${index + 1}`)
           .join(", ")} WHERE id = $${fieldNames.length + 1}`;
         params = [...fieldValues, id];
       } else {
         // If id is not provided, insert a new Other Chapters data
+        console.log("inside else ,NO -id - INSERT");
         querydata = `INSERT INTO otherChapters (${fieldNames.join(
           ", "
         )}) VALUES (${fieldNames
           .map((_, index) => `$${index + 1}`)
-          .join(", ")})`;
+          .join(", ")}) RETURNING *`;
         params = fieldValues;
       }
 
@@ -84,11 +86,12 @@ export module otherChaptersService {
       console.log(params, "upsertOtherChaptersData params");
 
       let result = await query(querydata, params);
+      console.log(result, " Resulting Data ");
       let message =
         result.command === "UPDATE"
           ? `${result.rowCount} Other Chapters Data Updated successfully`
           : `${result.rowCount} Other Chapters Data Inserted successfully`;
-
+      console.log(result.rows, "result rows from upsert otherchapters data");
       console.log(message);
       return { message };
     } catch (error) {

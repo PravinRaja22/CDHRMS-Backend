@@ -1,4 +1,4 @@
-import {query} from "../../database/postgress.js";
+import { query } from "../../database/postgress.js";
 
 export module houseRentAllowanceService {
   export async function getAllHouseRentAllowanceData() {
@@ -6,7 +6,7 @@ export module houseRentAllowanceService {
       console.log(`Fetching all House Rent Allowance data for all employees`);
       const querydata = `SELECT * FROM houseRentAllowance`;
       console.log(querydata, "getAllHouseRentAllowanceData query");
-      const result = await query(querydata,[]);
+      const result = await query(querydata, []);
       console.log(`Fetched all House Rent Allowance Data Result:`, result.rows);
       return result.rows;
     } catch (error) {
@@ -34,7 +34,7 @@ export module houseRentAllowanceService {
     try {
       console.log(`Fetching House Rent Allowance data for userId: ${userId}`);
       const result = await query(
-        "SELECT * FROM houseRentAllowance WHERE userDetails->>'id' = $1",
+        "SELECT * FROM houseRentAllowance WHERE userId = $1",
         [userId]
       );
       console.log("Fetched House Rent Allowance Data:", result.rows);
@@ -78,14 +78,14 @@ export module houseRentAllowanceService {
       console.log(querydata, "upsertHouseRentAllowanceData query");
       console.log(params, "upsertHouseRentAllowanceData params");
 
-      let result = await query(querydata,params);
+      let result = await query(querydata, params);
       let message =
         result.command === "UPDATE"
           ? `${result.rowCount} House Rent Allowance Data Updated successfully`
           : `${result.rowCount} House Rent Allowance Data Inserted successfully`;
 
       console.log(message);
-      return {message};
+      return { message };
     } catch (error) {
       console.error("Error in upsertHouseRentAllowanceData:", error.message);
       return { error: error.message };
