@@ -174,7 +174,7 @@ export module attendanceService {
                     signin: {
                         data: [
                             {
-                                timeStamp: dateInMillis + 9 * 60 * 60 * 1000, // 9:00 AM UTC
+                                timeStamp: currentDate.getDay() === 0 || currentDate.getDay() === 6 ?  null : dateInMillis + 9 * 60 * 60 * 1000,
                                 lat: 0,
                                 lng: 0,
                             },
@@ -183,7 +183,7 @@ export module attendanceService {
                     signout: {
                         data: [
                             {
-                                timeStamp: dateInMillis + 18 * 60 * 60 * 1000, // 6:00 PM UTC
+                                timeStamp: currentDate.getDay() === 0 || currentDate.getDay() === 6 ? null : dateInMillis + 18 * 60 * 60 * 1000 ,
                                 lat: 0,
                                 lng: 0,
                             },
