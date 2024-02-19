@@ -93,7 +93,7 @@ export module attendanceRegularizeService {
     export async function getAttendanceRegularizebyUser(requestParams) {
         try {
             const result: QueryResult = await query(
-                'SELECT * FROM attendanceRegularizations WHERE (userDetails->>\'id\') = $1',
+                'SELECT * FROM attendanceRegularizations WHERE userId= $1',
                 [requestParams]
             );
             // let result :QueryResult = await pool.query(`SELECT * FROM attendanceRegularizations WHERE userDetails->>'id' =${requestParams}`)
