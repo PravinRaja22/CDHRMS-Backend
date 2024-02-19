@@ -30,6 +30,7 @@ export async function insertAttendanceRegularize(request:any,reply:any) {
 
 export async function getAttendanceRegularizebyUser(request:any,reply:any){
     try{
+        //
         let result = await attendanceRegularizeService.getAttendanceRegularizebyUser(request.params.userId)
         reply.send(result)
     }catch(error){
