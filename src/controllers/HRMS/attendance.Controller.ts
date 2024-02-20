@@ -88,3 +88,15 @@ export async function getAttendaceForMonthandYear(requst:any , reply:any){
         reply.status(500).send(error.message)
     }
 }
+export async function upsertAttendancetime(requst:any , reply:any){
+    try{
+        console.log(requst.body)
+        console.log(requst.params);
+        const {userId} = requst.params
+        let Result = await attendanceService.upsertAttendanceTime(requst.body,userId)
+        reply.send(Result)
+    }
+    catch(error){
+        reply.status(500).send(error.message)
+    }
+}

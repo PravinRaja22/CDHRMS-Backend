@@ -1,4 +1,3 @@
-import { forEach } from "lodash";
 import { query } from "../../database/postgress.js";
 import { QueryResult } from 'pg';
 import { getMonthAndYearFromUTC } from "../../utils/HRMS/getMonthandYearFromutc.js";
@@ -66,7 +65,7 @@ export module attendanceService {
                 `SELECT * FROM attendances WHERE userId = $1 AND date >=${result.startTime} AND date <= ${result.endTime}`,
                 [userId]
             )
-             console.log(queryData.rows.length)
+            console.log(queryData.rows.length)
             return queryData.rows;
 
         } catch (error) {
@@ -145,36 +144,38 @@ export module attendanceService {
     export async function upsertBulkAttendance(values: any) {
         try {
             console.log("inside upsertBulkAttendance", values);
-          
-            const { month, year, userId ,utcsec} = values;
+
+            const { month, year, userId, utcsec } = values;
             let startDate;
             let endDate;
             const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
             const monthIndex = months.indexOf(month);
-    
             startDate = new Date(year, monthIndex, 1);
             endDate = new Date(year, monthIndex + 1, 0);
-    
+
             console.log("^^^^^^^^");
             console.log(startDate, "startDate");
             console.log(endDate, "endDate");
+            console.log(new Date(startDate).getTime(), "startDate");
+            console.log(new Date(endDate).getTime(), "endDate");
             console.log("^^^^^^^^");
             const today = new Date();
-            today.getMonth() 
+            today.getMonth()
 
             let ar = [];
             let currentDate = new Date(startDate); // Initialize currentDate with startDate
-    
+
             while (currentDate <= endDate) {
                 const dateInMillis = currentDate.getTime();
-    
+
                 const record = {
                     userId,
                     date: dateInMillis,
                     signin: {
                         data: [
                             {
-                                timeStamp: currentDate.getDay() === 0 || currentDate.getDay() === 6 ?  null : dateInMillis + 9 * 60 * 60 * 1000,
+                                // timeStamp: currentDate.getDay() === 0 || currentDate.getDay() === 6 ?  null : dateInMillis + 9 * 60 * 60 * 1000,
+                                timeStamp: currentDate.getDay() === 0 || currentDate.getDay() === 6 ? null : null,
                                 lat: 0,
                                 lng: 0,
                             },
@@ -183,7 +184,8 @@ export module attendanceService {
                     signout: {
                         data: [
                             {
-                                timeStamp: currentDate.getDay() === 0 || currentDate.getDay() === 6 ? null : dateInMillis + 18 * 60 * 60 * 1000 ,
+                                //timeStamp: currentDate.getDay() === 0 || currentDate.getDay() === 6 ? null : dateInMillis + 18 * 60 * 60 * 1000 ,
+                                timeStamp: null,
                                 lat: 0,
                                 lng: 0,
                             },
@@ -197,8 +199,8 @@ export module attendanceService {
                         shiftEnd: "18:00"
                     }
                 };
-    
-                await upsertAttendanceRecord(record);    
+
+                await upsertAttendanceRecord(record);
                 // Move to the next day
                 currentDate.setDate(currentDate.getDate() + 1);
             }
@@ -207,9 +209,9 @@ export module attendanceService {
             return error.message;
         }
     }
-    
 
-    async function upsertAttendanceRecord(record: any) {
+
+    export async function upsertAttendanceRecord(record: any) {
         // Your upsert or insert logic goes here
         console.log("Upserting record:", record);
         let fieldNames = Object.keys(record)
@@ -221,6 +223,7 @@ export module attendanceService {
         console.log(result.command, "record insert result");
 
     }
+
 
     // export async function updateAttendanceStatus(params: any) {
     //     //update all user attendance status,working hours, session timings
@@ -499,12 +502,12 @@ export module attendanceService {
             let newDateUTC = newDate.getTime();
             console.log("*******");
             console.log(newDateUTC);
-            console.log(typeof(newDateUTC));
+            console.log(typeof (newDateUTC));
             console.log("*******");
             for (const user of allUsers.rows) {
                 try {
                     // Check if attendance record already exists for the user and date
-                //    existingRecord
+                    //    existingRecord
                     const existingRecord = await query(
                         'SELECT * FROM attendances WHERE userId = $1 AND date = $2',
                         [user.id, newDateUTC]
@@ -519,7 +522,7 @@ export module attendanceService {
                         console.log("inside else");
                         let obj: any = {
                             date: Number(newDateUTC),
-                            userId:  user.id,
+                            userId: user.id,
                             signIn: { data: [{ "timeStamp": null, "lat": null, "lng": null }] },
                             signOut: { data: [{ "timeStamp": null, "lat": null, "lng": null }] },
                             shift: { "shiftType": "GS", "shiftStart": "09:00", "shiftEnd": "18:00" },
@@ -541,9 +544,9 @@ export module attendanceService {
                         const result = await query(querydata, params);
 
                         console.log("&&&&&&&&&&");
-                        console.log(result,"result");
-                          console.log("&&&&&&&&&&");
-                        console.log(result.rows,"result");
+                        console.log(result, "result");
+                        console.log("&&&&&&&&&&");
+                        console.log(result.rows, "result");
                         if (result.command === 'INSERT' || result.command === 'UPDATE') {
                             console.log(`Attendance record inserted for user ${user.id}`);
                             successInsert++;
@@ -569,15 +572,92 @@ export module attendanceService {
     }
 
 
-    export async function getAttendaceForMonthandYear(userId,Month,Year) {
+    export async function getAttendaceForMonthandYear(userId, Month, Year) {
         try {
-            console.log(userId , Month ,Year)
+            console.log(userId, Month, Year)
             console.log("attendanceService call");
-            let data : any =await getStartandEndTIme(Month,Year)
+            let data: any = await getStartandEndTIme(Month, Year)
             console.log(data.startTime)
-            const result: QueryResult = await query(`SELECT * FROM attendances where date >= ${ data.startTime} And date <=${data.endTime} And userId = ${Number(userId)}`,[]);
-             console.log(result.rows, "query results");
-              return result.rows
+            const result: QueryResult = await query(`SELECT * FROM attendances where date >= ${data.startTime} And date <=${data.endTime} And userId = ${Number(userId)}`, []);
+            console.log(result.rows, "query results");
+            return result.rows
+        } catch (error) {
+            return error.message
+        }
+    }
+
+    const updateAttendaceTimesData = async (updatedRecord) => {
+      
+
+        try {
+            console.log(updatedRecord[0].signin ,'Record data');
+            const {uuid ,...others} = updatedRecord[0]
+            const fieldNames = Object.keys(others);
+            const fieldValues = Object.values(others);
+            console.log(fieldNames, "update Attendance fieldNames");
+            console.log(fieldValues, "update Attendance  fieldValues");
+    
+            let querydata;
+            let params: any[] = [];
+            querydata = `UPDATE attendances SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(', ')} WHERE id = $${fieldNames.length + 1}`;
+            params = [...fieldValues, updatedRecord[0].id];
+
+
+            let result = await query(querydata, params);
+            console.log(result, "upsert result");
+            if (result.command === 'UPDATE' && result.rowCount > 0) {
+                return ({ message: 'Attendance updated successfully', count: result.rowCount, statusCode: 200 });
+            } else {
+                return { message: 'Attendance Update Failure', count: 1, statusCode: 204 }
+            }
+        }
+        catch (error) {
+            return { error: error.message, count: 1 }
+        }
+    }
+
+
+    export async function upsertAttendanceTime(data, userId) {
+        try {
+            console.log(data);
+            console.log(userId);
+            console.log("upsert TIme in Attendance date");
+            console.log(data.date);
+
+            const result: QueryResult = await query(`SELECT * FROM attendances where date = ${data.date} And userId = ${Number(userId)}`, []);
+            console.log(result.rows);
+            result.rows.forEach((e) => {
+                console.log(e);
+                if (data.signIn) {
+                    e.signin.data.forEach((edata) => {
+                        console.log(edata.timeStamp);
+                        // if (edata.timeStamp === null) {
+                            edata.timeStamp = data.signIn
+                        // }
+                    })
+                }
+                else if (data.signOut) {
+                    console.log('else condition data sset ');
+                    e.signout.data.forEach((edata) => {
+                        console.log(edata.timeStamp);
+                        // if (edata.timeStamp === null) {
+                            edata.timeStamp = data.signOut
+                        // }
+
+                    })
+                }
+
+            })
+            const resultdata = await updateAttendaceTimesData(result.rows)
+            return resultdata
+            console.log(result.rows);
+
+            // return result.rows
+            // let data: any = await getStartandEndTIme(Month, Year)
+            // console.log(data.startTime)
+            // const result: QueryResult = await query(`SELECT * FROM attendances where date >= ${data.startTime} And date <=${data.endTime} And userId = ${Number(userId)}`, []);
+            // console.log(result.rows, "query results");
+            // return result.rows
         } catch (error) {
             return error.message
         }
