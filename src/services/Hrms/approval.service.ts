@@ -68,6 +68,8 @@ export module approvalService {
 
     try{
       let querydata = `SELECT * FROM approvals WHERE id = $1`
+      
+
       let params = recId
       const result: QueryResult = await query(querydata, [params]);
       console.log(result.rows,"result rows getApprovalsById ");
@@ -84,8 +86,20 @@ export module approvalService {
     try {
       console.log("getApprovalbyApprover call");
       let querydata = `SELECT * FROM approvals WHERE approverId = $1`;
+      let joinQuery =`SELECT  approvals.*,
+      jsonb_build_object(
+          'id', users.id,
+          'firstname', users.firstname,
+            'lastname', users.lastname,
+              'employeeid', users.employeeid
+      ) AS "jsonApplyUsers"
+      FROM
+      approvals 
+      INNER JOIN users ON users.id = approvals.requesterid  		
+      WHERE  approvals.approverid = $1`
+
       let params = approverId;
-      const result: QueryResult = await query(querydata, [params]);
+      const result: QueryResult = await query(joinQuery, [params]);
 
       console.log(result, "getApprovalbyApprover query results");
       return result.rows;

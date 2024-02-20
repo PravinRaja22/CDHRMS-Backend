@@ -234,7 +234,7 @@ const Routes = function (
   fastify.post("/approval", insertApprovals);
   fastify.get("/approval/:id", getApprovalsById);
   fastify.put("/approval/:id", updateApprovals);
-  fastify.get("/approval/aprover/:approverId", getApprovalbyApprover);
+  fastify.get("/approval/approver/:approverId", getApprovalbyApprover);
 
   //loan
   fastify.get("/loan", getLoans);

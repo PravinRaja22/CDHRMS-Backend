@@ -19,13 +19,25 @@ export async function insertApprovals(request:any,reply:any) {
 }
 
 export async function getApprovalsById(request:any,reply:any) {
-    try{
-        console.log("********",request.params);
-        let result = await approvalService.getApprovalsById(request.params.id)
-        reply.send(result)
-    }catch(error){
-        reply.status(500).send(error.message)
-    }  
+   
+    if (request.query) {
+      try {
+        console.log("if req query", request.query);
+        let result = await approvalService.getApprovalsById(request.params.id);
+        reply.send(result);
+      } catch (error) {
+        reply.status(500).send(error.message);
+      }
+    } else {
+      try {
+        console.log("********", request.params);
+        let result = await approvalService.getApprovalsById(request.params.id);
+        reply.send(result);
+      } catch (error) {
+        reply.status(500).send(error.message);
+      }
+    }
+  
 }
 export async function getApprovalbyApprover(request:any,reply:any) {
     try{
