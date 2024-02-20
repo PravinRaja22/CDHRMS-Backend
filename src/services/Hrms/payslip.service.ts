@@ -60,7 +60,7 @@ export module PayslipServices {
       //   console.log(queryData);
       let getAttendance = await query(queryData, {});
       console.log("%%%%%%%%%%%%%");
-        // console.log(getAttendance, "getAttendance result1");
+      // console.log(getAttendance, "getAttendance result1");
       if (getAttendance.rowCount > 0) {
         let payslipAmount = calculatePayslip(
           getAttendance.rows,
@@ -161,17 +161,13 @@ export module PayslipServices {
         }
         let payslipFile;
         if (payslipAmounts.length > 0) {
-          payslipFile = await generateBulkPayslipFile(
-            request,
-            payslipAmounts
-          );
+          payslipFile = await generateBulkPayslipFile(request, payslipAmounts);
           console.log(payslipFile, "payslipFile *******");
-          return payslipFile;  //payslipAmounts 
+          return payslipFile; //payslipAmounts
           // Return array of payslip amounts OR paylsipFile inserted file
         } else {
-          return payslipAmounts
+          return payslipAmounts;
         }
-
       } else {
         return [];
       }
@@ -197,7 +193,7 @@ export module PayslipServices {
     // console.log(object);
     try {
       let joinUsersResult: any = await userService.getSingleUser(userid);
-      
+
       console.log("*******", joinUsersResult, "*********");
 
       let userRecord;
@@ -250,7 +246,7 @@ export module PayslipServices {
       );
       let obj = {
         userId: `${userRecord?.id}`,
-        name: `${userRecord?.firstname} ${userRecord?.lastname}`,
+        name: `${userRecord?.firstname}_${userRecord?.lastname}`,
         paySlipMonth: month,
         paySlipYear: year,
         employeeNo: userRecord?.employeeid,
@@ -290,7 +286,7 @@ export module PayslipServices {
 
   export async function insertpaySlip(data: any) {
     console.log(data, "Insert Pay slip Data");
-    let { payslipmonth, payslipyear, userId, ...otherFields } = data
+    let { payslipmonth, payslipyear, userId, ...otherFields } = data;
     userId = Number(userId);
     try {
       let querydata2 = `SELECT * FROM payslips WHERE paySlipMonth = $1 AND payslipyear = $2 AND userId = $3 `;
@@ -299,7 +295,7 @@ export module PayslipServices {
       let findMatchingdata = await query(querydata2, queryParams);
       console.log(findMatchingdata.rows, "findMatchingdata row");
 
-      let existPayslipRecords = findMatchingdata.rows[0]
+      let existPayslipRecords = findMatchingdata.rows[0];
       console.log("*******");
       console.log(existPayslipRecords);
       console.log("*******");
@@ -313,7 +309,7 @@ export module PayslipServices {
 
         let querydata;
         let params = [];
-        let existPayslipRecord = existPayslipRecords[0]
+        let existPayslipRecord = existPayslipRecords[0];
         // If id is not provided, insert a new scheduled interview
 
         querydata = `UPDATE  payslips SET(${fieldNames.join(
@@ -346,15 +342,13 @@ export module PayslipServices {
           .map((_, index) => `$${index + 1}`)
           .join(", ")}) RETURNING *`;
         params = fieldValues;
-
+        console.log(querydata, "QueryData Insertion");
         const result = await query(querydata, params);
 
         return {
           message: `${result.rowCount} payslips inserted`,
         };
       }
-
-
     } catch (error) {
       console.log("error in insert data payslip ");
       return error.message;

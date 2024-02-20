@@ -54,7 +54,7 @@ export const generateBulkPayslipFile = async (request, payslipJSON) => {
   const data = payslipJSON;
   console.log(data, "data is generatePayslipFile");
   const result = [];
-  try{
+  try {
     for (const e of data) {
       e.netPayInWords = await convertCurrencyToWords(e.netPay);
       console.log(e);
@@ -77,10 +77,9 @@ export const generateBulkPayslipFile = async (request, payslipJSON) => {
       console.log(payslipData, " final Pay slip data ");
       result.push(payslipData);
     }
-  }
-  catch(error){
-    console.log(error.message,"generateBulkPayslipFile catch");
-    return error.message
+  } catch (error) {
+    console.log(error.message, "generateBulkPayslipFile catch");
+    return error.message;
   }
   return result;
 };
@@ -134,30 +133,34 @@ const fileGeneration = async (data, protocol, host) => {
     fileName: payslipUrl,
     payslipmonth: data.paySlipMonth,
     payslipyear: data.paySlipYear,
-    url: protocol + "://" + host + "/" + payslipUrl,
+    url: protocol + "s://" + host + "/" + payslipUrl,
   };
   // await convertToPdf(docxFilePath, pdfFilePath);
 };
 
+function extractFilenameFromUrl(url) {
+  const filename = path.basename(url);
+  return filename;
+}
+
 const convertToPdf = async (docxFilePath, pdfFilePath) => {
   try {
-    // const pdfDirectory = path.dirname(pdfFilePath);
-    // const command = `soffice --headless --convert-to pdf "${docxFilePath}" --outdir "${pdfDirectory}"`;
-    // const { stdout, stderr } = await execAsync(command);
-    // console.log("PDF Generated Successfully", stdout);
-    // if (stderr) {
-    //   console.error("Stderr:", stderr);
-    // }
-    const pdfFilePath = docxFilePath.replace(/\.docx$/, ".pdf");
-    const input = fs.readFileSync(docxFilePath);
-    const pdfBuffer = await libreConvertAsync(input, ".pdf", undefined);
-    fs.promises.writeFile(pdfFilePath, pdfBuffer);
-    console.log("PDF Generated Successfully");
-    const lastSlashIndex = pdfFilePath.lastIndexOf("\\");
-    const fileName = pdfFilePath.substring(lastSlashIndex + 1);
+    const pdfDirectory = path.dirname(pdfFilePath);
+    const command = `soffice --headless --convert-to pdf "${docxFilePath}" --outdir "${pdfDirectory}"`;
+    const { stdout, stderr } = await execAsync(command);
+    console.log("PDF Generated Successfully", stdout);
+    if (stderr) {
+      console.error("Stderr:", stderr);
+    }
+    // const pdfFilePath = docxFilePath.replace(/\.docx$/, ".pdf");
+    // const input = fs.readFileSync(docxFilePath);
+    // const pdfBuffer = await libreConvertAsync(input, ".pdf", undefined);
+    // fs.promises.writeFile(pdfFilePath, pdfBuffer);
+    // console.log("PDF Generated Successfully");
+    let extractedURL = extractFilenameFromUrl(pdfFilePath);
+    console.log(extractedURL, "extractedURL");
 
-    console.log(fileName, "file name in pdf");
-    return fileName;
+    return extractedURL;
   } catch (error) {
     console.error("Error:", error);
   }
