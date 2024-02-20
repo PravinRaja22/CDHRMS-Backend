@@ -203,9 +203,32 @@ export module leaveService {
     export async function getLeavesByApprover(approverId: string) {
         try {
             console.log("getLeavesByApprover");
+            let innerQuery =`SELECT  leaves.*,
+            jsonb_build_object(
+                'id', users.id,
+                'firstname', users.firstname,
+                  'lastname', users.lastname,
+                    'employeeid', users.employeeid
+            ) AS "jsonUsers",
+            jsonb_build_object(  
+                'id', leavebalances.id,
+                'userid', leavebalances.userId,    
+                'balance', leavebalances.balance     
+                  
+            ) AS "jsonLeavebalances"
+            FROM
+            leaves
+            INNER JOIN users ON users.id = leaves.userid 
+            INNER JOIN leavebalances ON leavebalances.userId = leaves.userid			
+            WHERE  leaves.applyingtoid = $1`
+            
+            let params = [approverId]
+            let query2 = "SELECT * FROM leaves WHERE applyingtoid = $1"
+            // [approverId]
+            console.log(innerQuery)
+            console.log(params)
             const result: QueryResult = await query(
-                "SELECT * FROM leaves WHERE applyingtoid = $1",
-                [approverId]
+                innerQuery,params
             );
             console.log(result.rows, "query results");
             return result.rows;

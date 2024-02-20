@@ -20,10 +20,10 @@ const pool = new pkg.Pool({
   // port: 5432,
   // database: "hrms"
   user: "postgres",
-  password: "admin",
-  host: "192.168.0.127",
-  port: 5432,
-  database: "HRMS",
+  password: "Maples71",
+  host: "5.189.159.233",
+  port: 65432,
+  database: "hrms",
 });
 pool.on("connect", () => {
   console.log("Database connected");
