@@ -590,13 +590,8 @@ export module attendanceService {
     }
 
     const updateAttendaceTimesData = async (updatedRecord) => {
-<<<<<<< Updated upstream
-
-
-=======
       
         console.log("updateAttendaceTimesData",updatedRecord)
->>>>>>> Stashed changes
         try {
             console.log(updatedRecord[0].signin, 'Record data');
             const { uuid, ...others } = updatedRecord[0]

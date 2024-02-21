@@ -456,30 +456,33 @@ export module approvalService {
   const updateAttendanceApprovalReq =async(values)=>{
     console.log(values,"inside updateAttendance")
 
-    let fromDate = new Date(Number(values?.fromdate))
-    let endDate = new Date( Number(values?.enddate))
-    fromDate.setHours(0,0,0,0)
+    let startDate = new Date(Number(values?.fromdate))
+    let endDate = new Date( Number(values?.todate))
+    startDate.setHours(0,0,0,0)
     endDate.setHours(0,0,0,0)
 
-    let fromDay= fromDate.getDate()
+    let startDay= startDate.getDate()
     let endDay= endDate.getDate()
-
-    // let obj = {date:fromDate,leavetype:values.leavetype,userid:values.userid}
+    console.log("^^^^")
+console.log(startDate,endDate)
+console.log(startDay,endDay)
+console.log("^^^^")
+    // let obj = {date:startDate,leavetype:values.leavetype,userid:values.userid}
     // let upsertAttendance = attendanceService.upsertAttendanceforLeaves(obj)
 
     // console.log(upsertAttendance,"upsertAttendance response")
   
 
    /* if(fromDay === endDay){
-      let obj = {date:fromDate,leavetype:values.leavetype,userid:values.userid}
+      let obj = {date:startDate,leavetype:values.leavetype,userid:values.userid}
       let upsertAttendance = attendanceService.upsertAttendanceforLeaves(obj)
   
       console.log(upsertAttendance,"upsertAttendance response")
     }
     else{
       console.log("for loop")
-      for(let day= fromDay ; day <= endDay; day++){
-        let obj = {date:fromDate,leavetype:values.leavetype,userid:values.userid}
+      for(let day= startDay ; day <= endDay; day++){
+        let obj = {date:startDate,leavetype:values.leavetype,userid:values.userid}
       let upsertAttendance = attendanceService.upsertAttendanceforLeaves(obj)
   
       console.log(upsertAttendance,"upsertAttendance response")
