@@ -45,10 +45,10 @@ export module attendanceService {
         if (existingRecord.rows.length === 0) {
             // No attendance record found for the user and date
             console.log(`No attendance record found for user ${params.userId} on ${params.attendanceDate}`);
-            return { success: false, message: 'No attendance record found for the specified user and date.' };
+            return { success: false, data:existingRecord };
         }
         else {
-            return existingRecord
+            return { success: true, data:existingRecord };
         }
 
     }
@@ -671,8 +671,7 @@ export module attendanceService {
       
         console.log("insertUpdateAttendance",updatedRecord)
         try {
-            console.log(updatedRecord[0].signin ,'Record data');
-            const {uuid ,...others} = updatedRecord[0]
+            const {uuid ,...others} = updatedRecord
             const fieldNames = Object.keys(others);
             const fieldValues = Object.values(others);
             console.log(fieldNames, "update Attendance fieldNames");
@@ -684,9 +683,13 @@ export module attendanceService {
                 querydata = `UPDATE attendances SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(', ')} WHERE id = $${fieldNames.length + 1} RETURNING *`;
                 params = [...fieldValues, updatedRecord[0].id];
             }else{
-                querydata = `INSERT attendances SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(', ')}  RETURNING *`;
+                querydata = `INSERT INTO attendances (${fieldNames.join(', ')}) VALUES (${fieldValues.map((_, index) => `$${index + 1}`).join(', ')}) RETURNING *`;
                 params = [...fieldValues];
             }
+            console.log("****")
+            console.log(querydata)
+            console.log(params)
+            console.log("****")
             let result = await query(querydata, params);
             console.log(result, "upsert result");
             if (result.command === 'UPDATE'|| result.command==='INSERT' && result.rowCount > 0) {
@@ -696,6 +699,7 @@ export module attendanceService {
             }
         }
         catch (error) {
+            console.log(error.message,"error")
             return { error: error.message, count: 1 }
         }
     }
@@ -722,8 +726,8 @@ export module attendanceService {
         
         let getExistingAttRecord = await getAttendanceByUserIdDate({userId:values.userid ,attendanceDate:Number(values.date) })
         console.log(getExistingAttRecord,"getExistingAttRecord upsertAttendanceforLeaves")
-        if(getExistingAttRecord.command==='SELECT'&& getExistingAttRecord.rowCount>0){
-            let attRecord = getExistingAttRecord.rows[0]
+        if(getExistingAttRecord.success){
+            let attRecord = getExistingAttRecord.data.rows[0]
                 const {uuid,...otherFields} = attRecord
                 console.log(otherFields,"other fileds ")
                 otherFields.status = values.leavetype
