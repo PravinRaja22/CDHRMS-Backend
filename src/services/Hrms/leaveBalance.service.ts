@@ -41,6 +41,7 @@ export module leaveBalanceService {
                 UPDATE leaveBalances
                 SET balance = $1
                 WHERE userId = $2
+                RETURNING *
             `,
         [requestBody.balance, userId]
       );
@@ -53,16 +54,27 @@ export module leaveBalanceService {
         let resultInsert = await query(
           `
                     INSERT INTO leaveBalances (userId, balance)
-                    VALUES ($1, $2)
+                    VALUES ($1, $2) RETURNING *
                 `,
           [requestBody.userId, requestBody.balance]
         );
         console.log(resultInsert, "resultInsert");
-        // let message = `${requestBody.userId.userName} leaveBalance inserted successfully`;
-
-        //     return message;
+        if(resultInsert.command ==='INSERT'){
+          let message = `${requestBody.userId.userName} leaveBalance inserted successfully`;
+          return {success:true,message, command:resultInsert.command};
+        }else{
+          let message = `${requestBody.userId.userName} leaveBalance inserted Failure`;
+          return {success:false,message, command:resultInsert.command};
+        }
+      
         //   } else {
         //     return message;
+      }
+      else if(result.rowCount ===1 && result.command==='UPDATE'){
+        console.log("leave balamce updated ")
+        let message = `${requestBody.userid} leaveBalance inserted successfully`;
+
+        return {success:true,message, command:result.command};
       }
     } catch (error: any) {
       return error.message;

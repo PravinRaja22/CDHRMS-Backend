@@ -20,7 +20,7 @@ export async function upsertAttendance(request: any, reply: any) {
 
 export async function getAttendanceByUserIdDate(request: any, reply: any) {
     try {
-        let result = await attendanceService.getAttendanceByUserIdDate(request.params)
+        let result = await attendanceService.getAttendanceByUserIdDate(request)
         reply.send(result)
     } catch (error) {
         reply.status(500).send(error.message)

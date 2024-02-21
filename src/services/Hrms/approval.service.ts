@@ -151,30 +151,7 @@ export module approvalService {
     }
   }
 
-  //   async function updateParentRecord(values, approvalRecId) {
-  //     console.log(values, "updateParentRecord values");
-  //     if (values.type.value === "attendanceRegularizations") {
-  //       try {
-  //         let getRegularzeRecord =
-  //           await attendanceRegularizeService.getAttendanceRegularizebyId(
-  //             values.parentId || values.parentid
-  //           );
-  //         console.log(getRegularzeRecord, "getRegularzeRecord");
-  //         let newObj1 = { ...getRegularzeRecord[0] };
-  //         console.log(newObj1, "newObj");
-  //         const { uuid, ...newObj } = newObj1;
-  //         newObj.status = values.status;
-  //         newObj.approval = { id: approvalRecId };
-  //         let updateRegularize =
-  //           await attendanceRegularizeService.updateAttendanceRegularize(
-  //             newObj.id,
-  //             newObj
-  //           );
-  //         console.log(updateRegularize, "updateRegularize");
-  //         //send notification mail
-  //           }
-  //     }
-  // }
+
   async function updateParentRecord(approvalRec, approvalRecId) {
     console.log(approvalRec, "updateParentRecord values");
     if (approvalRec.type === "attendanceRegularizations") {
@@ -236,17 +213,38 @@ export module approvalService {
         console.log(newLeave, "newLeave");
         newLeave.status = approvalRec.status;
         newLeave.modifiedby = { id: approverusers.id ,name: `${approverusers.firstname} ${approverusers.lastname}`,timeStamp:new Date().getTime() };
+        console.log("****")
         console.log(newLeave, "newLeave");
         let updateLeave = await leaveService.upsertLeaves(newLeave);
         console.log(updateLeave, "updateLeave");
+        //expected updateleave is status=200 and record ,if yes update attendance record
+          // need to capture date and attendance record for particular date ,
+          //if date is past update attendance else store in somewere 
+          //and while CRON insert insert this leave data to the particular user
+          //** create attendance record for a particular leave Date
 
-        let updateAttendanceResult = await updateAttendance(newLeave, "leave");
-        console.log(
-          updateAttendanceResult,
-          "updateAttendance from updateParentRecord"
-        );
+    
+          if(updateLeave.status===200 && updateLeave.record.status.toLowerCase().includes("approve")){
 
-        let updateLeaveBalanceResult = await updateLeaveBalance(newLeave);
+            console.log("if try update leave balance")
+            let updateLeaveBalanceResult = await updateLeaveBalance(newLeave);
+            console.log(updateLeaveBalanceResult,"updateLeaveBalanceResult")
+
+            const updateAttendanceResult = await updateAttendanceApprovalReq(newLeave)
+            console.log(updateAttendanceResult,"updateAttendanceResult")
+          /*  let updateAttendanceResult = await updateAttendance(newLeave, "leave");
+            console.log(
+              updateAttendanceResult,
+              "updateAttendance from updateParentRecord"
+            );*/
+    
+            return updateLeave
+          }else{
+            console.log("updateleave no need update attendance and leavebalance")
+            return updateLeave
+          }
+
+   
       } catch (error) {
         console.log(error.message, "error leave updateParentResult");
       }
@@ -361,7 +359,8 @@ export module approvalService {
         leaveRec.userid,
         leaveBalance[0]
       );
-    console.log(upsertLeaveBalance);
+    console.log(upsertLeaveBalance,"upsertLeaveBalance ***");
+    return upsertLeaveBalance
   };
 }
 
@@ -452,4 +451,41 @@ export module approvalService {
     }
     console.log(updatedAttendanceRecord,"updatedAttendanceRecord after change");
       return updatedAttendanceRecord;
+  }
+
+  const updateAttendanceApprovalReq =async(values)=>{
+    console.log(values,"inside updateAttendance")
+
+    let fromDate = new Date(Number(values?.fromdate))
+    let endDate = new Date( Number(values?.enddate))
+    fromDate.setHours(0,0,0,0)
+    endDate.setHours(0,0,0,0)
+
+    let fromDay= fromDate.getDate()
+    let endDay= endDate.getDate()
+
+    // let obj = {date:fromDate,leavetype:values.leavetype,userid:values.userid}
+    // let upsertAttendance = attendanceService.upsertAttendanceforLeaves(obj)
+
+    // console.log(upsertAttendance,"upsertAttendance response")
+  
+
+   /* if(fromDay === endDay){
+      let obj = {date:fromDate,leavetype:values.leavetype,userid:values.userid}
+      let upsertAttendance = attendanceService.upsertAttendanceforLeaves(obj)
+  
+      console.log(upsertAttendance,"upsertAttendance response")
+    }
+    else{
+      console.log("for loop")
+      for(let day= fromDay ; day <= endDay; day++){
+        let obj = {date:fromDate,leavetype:values.leavetype,userid:values.userid}
+      let upsertAttendance = attendanceService.upsertAttendanceforLeaves(obj)
+  
+      console.log(upsertAttendance,"upsertAttendance response")
+      }
+    }*/
+  
+
+
   }

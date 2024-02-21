@@ -54,7 +54,7 @@ export module leaveService {
     export async function upsertLeaves(request: any) {
 
         try {
-            let values = request.body;
+            let values = request.body || request; //or request is params passed from another(approval) method
             let files = request?.files ||[]
             let url;
             console.log(files?.length,"files");
@@ -66,7 +66,7 @@ export module leaveService {
             console.log(files, "upsertLeaves service files");
             console.log(url, "upsertLeaves service url");
 
-            const { id, file, ...upsertFields } = values;
+            const {file, ...upsertFields } = values;
             console.log(values, "upsertLeaves Request body");
             console.log(upsertFields,"upsertFields");
             for (const field in upsertFields) {
@@ -94,19 +94,21 @@ export module leaveService {
             let querydata;
             let params: any[] = [];
 
-            if (id) {
+            if (values.id) {
+                console.log("if upsert leave")
                 // If id is provided, update the existing user
                 querydata = `UPDATE leaves SET ${fieldNames
                     .map((field, index) => `${field} = $${index + 1}`)
                     .join(", ")} WHERE id = $${fieldNames.length + 1} RETURNING *`;
-                params = [...fieldValues, id];
+                params = [...fieldValues, values.id];
             } else {
+                console.log("else insert leave")
                 // If id is not provided, insert a new user
                 querydata = `INSERT INTO leaves (${fieldNames.join(', ')}) VALUES (${fieldNames.map((_, index) => `$${index + 1}`).join(', ')}) RETURNING *`;
                 params = fieldValues;
             }
 
-
+console.log(querydata,"querydata")
 
             let result = await query(querydata, params);
             console.log(result, "upsert result");
@@ -174,7 +176,9 @@ export module leaveService {
                     
 
                 }else{
-                    console.log("else");
+                    console.log("else ****");
+                    return {status:200,record:upsertLeave}
+                    //return update record response
                 }
 
             }

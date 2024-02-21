@@ -32,8 +32,9 @@ export module attendanceService {
         }
     }
 
-    export async function getAttendanceByUserIdDate(params: any) {
+    export async function getAttendanceByUserIdDate(request: any) {
         console.log("getAttendanceByUserIdDate");
+        let params = request.params || request
         console.log(params, "params");
 
         const existingRecord: any = await query(
@@ -47,7 +48,7 @@ export module attendanceService {
             return { success: false, message: 'No attendance record found for the specified user and date.' };
         }
         else {
-            return existingRecord.rows[0]
+            return existingRecord
         }
 
     }
@@ -589,8 +590,13 @@ export module attendanceService {
     }
 
     const updateAttendaceTimesData = async (updatedRecord) => {
+<<<<<<< Updated upstream
 
 
+=======
+      
+        console.log("updateAttendaceTimesData",updatedRecord)
+>>>>>>> Stashed changes
         try {
             console.log(updatedRecord[0].signin, 'Record data');
             const { uuid, ...others } = updatedRecord[0]
@@ -601,7 +607,7 @@ export module attendanceService {
 
             let querydata;
             let params: any[] = [];
-            querydata = `UPDATE attendances SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(', ')} WHERE id = $${fieldNames.length + 1}`;
+            querydata = `UPDATE attendances SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(', ')} WHERE id = $${fieldNames.length + 1} RETURNING *`;
             params = [...fieldValues, updatedRecord[0].id];
 
 
@@ -664,6 +670,81 @@ export module attendanceService {
             return error.message
         }
     }
+
+
+    const insertUpdateAttendance = async (updatedRecord) => {
+      
+        console.log("insertUpdateAttendance",updatedRecord)
+        try {
+            console.log(updatedRecord[0].signin ,'Record data');
+            const {uuid ,...others} = updatedRecord[0]
+            const fieldNames = Object.keys(others);
+            const fieldValues = Object.values(others);
+            console.log(fieldNames, "update Attendance fieldNames");
+            console.log(fieldValues, "update Attendance  fieldValues");
+    
+            let querydata;
+            let params: any[] = [];
+            if(updatedRecord?.id){
+                querydata = `UPDATE attendances SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(', ')} WHERE id = $${fieldNames.length + 1} RETURNING *`;
+                params = [...fieldValues, updatedRecord[0].id];
+            }else{
+                querydata = `INSERT attendances SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(', ')}  RETURNING *`;
+                params = [...fieldValues];
+            }
+            let result = await query(querydata, params);
+            console.log(result, "upsert result");
+            if (result.command === 'UPDATE'|| result.command==='INSERT' && result.rowCount > 0) {
+                return ({ message: `Attendance ${result.command} successfully with Id ${result.rows[0].id}`, count: result.rowCount, statusCode: 200 });
+            } else {
+                return { message: 'Attendance Update Failure', count: 1, statusCode: 204 }
+            }
+        }
+        catch (error) {
+            return { error: error.message, count: 1 }
+        }
+    }
+
+    export async function upsertAttendanceforLeaves(values){
+        console.log("call upsertAttendanceforLeaves", values)
+        let attendanceRecordData;
+
+        let newDate = new Date(values.date)
+        let obj: any = {
+            date: Number(values.date),
+            userId: values.userid,
+            signIn: { data: [{ "timeStamp": null, "lat": null, "lng": null }] },
+            signOut: { data: [{ "timeStamp": null, "lat": null, "lng": null }] },
+            shift: { "shiftType": "GS", "shiftStart": "09:00", "shiftEnd": "18:00" },
+            workingHours: { "firstIn": null, "lastOut": null, "totalWorkHours": null },
+            status: values.leavetype,
+            isWeekend: newDate.getDay() === 0 || newDate.getDay() === 6,
+            isRegularized: false,
+            isHoliday: false,
+            session: '{"session 1":{"sessionTimings":"09:00 - 13:00","firstIn":null,"lastOut":null},"session 2":{"sessionTimings":"13:01 - 18:00","firstIn":null,"lastOut":null}}'
+        };
+       
+        
+        let getExistingAttRecord = await getAttendanceByUserIdDate({userId:values.userid ,attendanceDate:Number(values.date) })
+        console.log(getExistingAttRecord,"getExistingAttRecord upsertAttendanceforLeaves")
+        if(getExistingAttRecord.command==='SELECT'&& getExistingAttRecord.rowCount>0){
+            let attRecord = getExistingAttRecord.rows[0]
+                const {uuid,...otherFields} = attRecord
+                console.log(otherFields,"other fileds ")
+                otherFields.status = values.leavetype
+                console.log(otherFields,"other fileds after change")
+                attendanceRecordData=otherFields
+
+        }else{
+            attendanceRecordData = obj
+        }
+        let upsertResult = await  insertUpdateAttendance(attendanceRecordData)
+        console.log(upsertResult,"upsertResult")
+
+        return upsertResult
+
+    }
+
 }
 
 
