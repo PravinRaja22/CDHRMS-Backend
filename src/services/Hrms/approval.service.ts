@@ -63,22 +63,21 @@ export module approvalService {
     }
   }
 
-  export async function getApprovalsById(recId:any){
-    console.log("getApprovalsById" , recId);
+  export async function getApprovalsById(recId: any) {
+    console.log("getApprovalsById", recId);
 
-    try{
-      let querydata = `SELECT * FROM approvals WHERE id = $1`
-      
+    try {
+      let querydata = `SELECT * FROM approvals WHERE id = $1`;
 
-      let params = recId
+      let params = recId;
       const result: QueryResult = await query(querydata, [params]);
-      console.log(result.rows,"result rows getApprovalsById ");
-      if(result.rowCount>0){
-        return result.rows
+      console.log(result.rows, "result rows getApprovalsById ");
+      if (result.rowCount > 0) {
+        return result.rows;
       }
-    }catch(error){
-        console.log(error.message ,"error getApprovalsById ");
-        return error.message
+    } catch (error) {
+      console.log(error.message, "error getApprovalsById ");
+      return error.message;
     }
   }
 
@@ -86,7 +85,7 @@ export module approvalService {
     try {
       console.log("getApprovalbyApprover call");
       let querydata = `SELECT * FROM approvals WHERE approverId = $1`;
-      let joinQuery =`SELECT  approvals.*,
+      let joinQuery = `SELECT  approvals.*,
       jsonb_build_object(
           'id', users.id,
           'firstname', users.firstname,
@@ -96,7 +95,7 @@ export module approvalService {
       FROM
       approvals 
       INNER JOIN users ON users.id = approvals.requesterid  		
-      WHERE  approvals.approverid = $1`
+      WHERE  approvals.approverid = $1`;
 
       let params = approverId;
       const result: QueryResult = await query(joinQuery, [params]);
@@ -108,43 +107,102 @@ export module approvalService {
     }
   }
 
-  export async function getApprovalsByApproverLeaveQuery(userId:any, reqQuery:any){
-    console.log("getApprovalsByApproverLeaveQuery")
-    let keys = Object.keys(reqQuery)
-    let values = Object.values(reqQuery)
+  export async function getApprovalsByApproverLeaveQuery(
+    userId: any,
+    reqQuery: any
+  ) {
+    console.log("getApprovalsByApproverLeaveQuery");
+    let keys = Object.keys(reqQuery);
+    let values = Object.values(reqQuery);
     console.log(keys, values, "getApprovalsByApproverLeaveQuery");
 
-    const conditions = keys.map((key, index) => `LOWER(${key}) LIKE LOWER($${index + 1})`).join(' AND ');
-    
-    let params = values.map(value => `%${value}%`);
+    const conditions = keys
+      .map((key, index) => `LOWER( approvals.${key}) LIKE LOWER($${index + 1})`)
+      .join(" AND ");
+
+    let params = values.map((value) => `%${value}%`);
 
     try {
-       let innerQuery =`SELECT  approvals.*,
-       jsonb_build_object(
-           'id', users.id,
-           'firstname', users.firstname,
-             'lastname', users.lastname,
-               'employeeid', users.employeeid
-       ) AS "jsonApplyUsers"
-       FROM
-       approvals 
-       INNER JOIN users ON users.id = approvals.requesterid  				
-      WHERE ${conditions} AND approvals.userId = $${keys.length + 1}`
+      let innerQuery = `SELECT  approvals.*,
+      jsonb_build_object(
+          'id', leaves.id,
+          'leavetype',leaves.leavetype,
+          'fromdate', leaves.fromdate,
+          'todate', leaves.todate,
+          'fromsession', leaves.fromsession,
+          'tosession', leaves.tosession,
+          'status',leaves.status,
+          'noofdays',leaves.noofdays,
+          'leavebalanceid',leaves.leavebalanceid,
+          'applyingtoid',leaves.applyingtoid,
+          'approvalid',leaves.approvalid,
+          'userid',leaves.userid,
+          'reason',leaves.reason,
+          'createdby',leaves.createdby,
+         'modifiedby',leaves.modifiedby          
+      ) AS "jsonLeave"
+      FROM
+      approvals 
+      INNER JOIN leaves ON leaves.approvalid = approvals.id  				
+      WHERE ${conditions} AND approvals.approverid = $${keys.length + 1}`;
 
-      let newParams = [...params, userId]
+      let newParams = [...params, userId];
       console.log("$$$$$$$$$$");
       console.log(innerQuery);
       console.log(newParams);
-      const result: QueryResult = await query(
-          innerQuery, newParams
-      );
+      const result: QueryResult = await query(innerQuery, newParams);
       console.log(result.rows, "query results");
-      return result.rows
-  } catch (error) {
+      return result.rows;
+    } catch (error) {
       console.log("ERROR leaves APPROVAL");
       return error.message;
+    }
   }
 
+  export async function getApprovalsByApproverAttendanceQuery(
+    userId: any,
+    reqQuery: any
+  ) {
+    console.log("getApprovalsByApproverLeaveQuery");
+    let keys = Object.keys(reqQuery);
+    let values = Object.values(reqQuery);
+    console.log(keys, values, "getApprovalsByApproverLeaveQuery");
+
+    const conditions = keys
+      .map((key, index) => `LOWER( approvals.${key}) LIKE LOWER($${index + 1})`)
+      .join(" AND ");
+
+    let params = values.map((value) => `%${value}%`);
+
+    try {
+      let innerQuery = `SELECT  approvals.*,
+      jsonb_build_object(
+          'id', attendanceregularizations.id,
+          'date',attendanceregularizations.date,
+          'reason', attendanceregularizations.reason,
+          'shiftstart', attendanceregularizations.shiftstart,
+          'shiftend', attendanceregularizations.shiftend,
+          'status',attendanceregularizations.status,
+          'userid',attendanceregularizations.userid,
+          'applyingtoid',attendanceregularizations.applyingtoid,
+          'approvalid',attendanceregularizations.approvalid       
+      ) AS "jsonAttendanceReg"
+      FROM
+      approvals 
+      INNER JOIN attendanceregularizations ON attendanceregularizations.approvalid = approvals.id   				
+      WHERE ${conditions} AND approvals.approverid = $${keys.length + 1}`;
+
+      let newParams = [...params, userId];
+      console.log("$$$$$$$$$$");
+      console.log(innerQuery);
+      console.log(newParams);
+      const result: QueryResult = await query(innerQuery, newParams);
+      console.log(result.rows, "query results");
+      return result.rows;
+    } catch (error) {
+      console.log("ERROR leaves APPROVAL");
+      return error.message;
+    }
   }
 
   export async function updateApprovals(requestBody: any, requestParams: any) {
@@ -171,25 +229,25 @@ export module approvalService {
       if (result.command === "UPDATE" && result.rowCount > 0) {
         //update the parent record
         let approvalRec = result.rows[0];
-        let updateParent ;
-        if(approvalRec.status.toLowerCase().includes("withdraw")){
-             // we already update leave so no need to call parent from here
-        }else{
+        let updateParent;
+        if (approvalRec.status.toLowerCase().includes("withdraw")) {
+          // we already update leave so no need to call parent from here
+        } else {
           updateParent = await updateParentRecord(approvalRec, requestParams);
           console.log(updateParent, "updateParent");
         }
-      
+
         return {
-          message: `${requestBody.type} ${requestBody.status} Successfully`,success:true
+          message: `${requestBody.type} ${requestBody.status} Successfully`,
+          success: true,
         };
       } else {
-        return { message: "Approval Update Failure" ,success:false};
+        return { message: "Approval Update Failure", success: false };
       }
     } catch (error) {
       return { error: error.message };
     }
   }
-
 
   async function updateParentRecord(approvalRec, approvalRecId) {
     console.log(approvalRec, "updateParentRecord values");
@@ -214,76 +272,77 @@ export module approvalService {
           );
         console.log(updateRegularize, "updateRegularize");
         //send notification mail
-        
+
         let updateAttendanceResult;
 
-        if(updateRegularize.status ===200){
-          console.log("updateRegularize.status",updateRegularize.status);
-           //update attendance
+        if (updateRegularize.status === 200) {
+          console.log("updateRegularize.status", updateRegularize.status);
+          //update attendance
           updateAttendanceResult = await updateAttendance(
             newObj,
             "attendanceRegularize"
           );
           console.log(updateAttendanceResult, "updateAttendanceResult");
-
         }
-        
-        if(updateAttendanceResult.status===200){
+
+        if (updateAttendanceResult.status === 200) {
           //update Leave Balance record
-          return updateAttendanceResult
-
+          return updateAttendanceResult;
         }
-        
       } catch (error) {
         console.log(error.message, "error updateParentResult");
       }
     } else if (approvalRec.type === "leave") {
-      
       console.log("inside leave updateParentRecord");
       try {
         let getLeaveRecord = await leaveService.getSingleLeaves(
           approvalRec.parentId || approvalRec.parentid
         );
-        console.log(getLeaveRecord,"getLeaveRecord");
+        console.log(getLeaveRecord, "getLeaveRecord");
         let newLeave1 = { ...getLeaveRecord[0] };
 
-        let { uuid, users,approverusers,...newLeave } = newLeave1;
+        let { uuid, users, approverusers, ...newLeave } = newLeave1;
 
         console.log(newLeave, "newLeave");
         newLeave.status = approvalRec.status;
-        newLeave.modifiedby = { id: approverusers.id ,name: `${approverusers.firstname} ${approverusers.lastname}`,timeStamp:new Date().getTime() };
-        console.log("****")
+        newLeave.modifiedby = {
+          id: approverusers.id,
+          name: `${approverusers.firstname} ${approverusers.lastname}`,
+          timeStamp: new Date().getTime(),
+        };
+        console.log("****");
         console.log(newLeave, "newLeave");
         let updateLeave = await leaveService.upsertLeaves(newLeave);
         console.log(updateLeave, "updateLeave");
         //expected updateleave is status=200 and record ,if yes update attendance record
-          // need to capture date and attendance record for particular date ,
-          //if date is past update attendance else store in somewere 
-          //and while CRON insert insert this leave data to the particular user
-          //** create attendance record for a particular leave Date
+        // need to capture date and attendance record for particular date ,
+        //if date is past update attendance else store in somewere
+        //and while CRON insert insert this leave data to the particular user
+        //** create attendance record for a particular leave Date
 
-    
-          if(updateLeave.status===200 && updateLeave.record.status.toLowerCase().includes("approve")){
+        if (
+          updateLeave.status === 200 &&
+          updateLeave.record.status.toLowerCase().includes("approve")
+        ) {
+          console.log("if try update leave balance");
+          let updateLeaveBalanceResult = await updateLeaveBalance(newLeave);
+          console.log(updateLeaveBalanceResult, "updateLeaveBalanceResult");
 
-            console.log("if try update leave balance")
-            let updateLeaveBalanceResult = await updateLeaveBalance(newLeave);
-            console.log(updateLeaveBalanceResult,"updateLeaveBalanceResult")
-
-            const updateAttendanceResult = await updateAttendanceApprovalReq(newLeave)
-            console.log(updateAttendanceResult,"updateAttendanceResult")
+          const updateAttendanceResult = await updateAttendanceApprovalReq(
+            newLeave
+          );
+          console.log(updateAttendanceResult, "updateAttendanceResult");
           /*  let updateAttendanceResult = await updateAttendance(newLeave, "leave");
             console.log(
               updateAttendanceResult,
               "updateAttendance from updateParentRecord"
             );*/
-    
-            return updateLeave
-          }else{
-            console.log("updateleave no need update attendance and leavebalance")
-            return updateLeave
-          }
 
-   
+          return updateLeave;
+        } else {
+          console.log("updateleave no need update attendance and leavebalance");
+          return updateLeave;
+        }
       } catch (error) {
         console.log(error.message, "error leave updateParentResult");
       }
@@ -320,26 +379,33 @@ export module approvalService {
       console.log(updatedAttendanceRecord, "updatedAttendanceRecord");
       // Modify the record based on the update type
 
-      let calculatedWorkingHours = await calculateAttendance({signIn:other.shiftstart,signOut:other.shiftend},updatedAttendanceRecord)
-      console.log(calculatedWorkingHours,"calculatedWorkingHours result");
+      let calculatedWorkingHours = await calculateAttendance(
+        { signIn: other.shiftstart, signOut: other.shiftend },
+        updatedAttendanceRecord
+      );
+      console.log(calculatedWorkingHours, "calculatedWorkingHours result");
       if (updateType === "attendanceRegularize") {
+        let status = attendanceRecord?.status.toLowerCase().includes("approve")
+          ? true
+          : attendanceRecord?.status.toLowerCase().includes("reject")
+          ? false
+          : false;
 
-        let status =attendanceRecord?.status.toLowerCase().includes('approve')?true :attendanceRecord?.status.toLowerCase().includes('reject') ? false :false
-
-
-        updatedAttendanceRecord.signin.data = status ?  [
-          { lat: null, lng: null, timeStamp: other.shiftstart },
-        ] : updatedAttendanceRecord.signin.data ;
-        updatedAttendanceRecord.signout.data = status ? [
-          { lat: null, lng: null, timeStamp: other.shiftend },
-        ] : updatedAttendanceRecord.signout.data;
+        updatedAttendanceRecord.signin.data = status
+          ? [{ lat: null, lng: null, timeStamp: other.shiftstart }]
+          : updatedAttendanceRecord.signin.data;
+        updatedAttendanceRecord.signout.data = status
+          ? [{ lat: null, lng: null, timeStamp: other.shiftend }]
+          : updatedAttendanceRecord.signout.data;
 
         updatedAttendanceRecord.isregularized = true;
-        updatedAttendanceRecord.status = status ? "present" :"LOP"
-        updatedAttendanceRecord.workinghours = status ? calculatedWorkingHours.workinghours :updatedAttendanceRecord.workinghours 
-        updatedAttendanceRecord.session = status ? calculatedWorkingHours.session :updatedAttendanceRecord.session 
-
-
+        updatedAttendanceRecord.status = status ? "present" : "LOP";
+        updatedAttendanceRecord.workinghours = status
+          ? calculatedWorkingHours.workinghours
+          : updatedAttendanceRecord.workinghours;
+        updatedAttendanceRecord.session = status
+          ? calculatedWorkingHours.session
+          : updatedAttendanceRecord.session;
       } else if (updateType === "leave") {
         updatedAttendanceRecord.status = {
           label: other.status,
@@ -356,7 +422,7 @@ export module approvalService {
           updatedAttendanceRecord
         );
         console.log(result, "updateAttendance result");
-        if (result.status ===200 ) {
+        if (result.status === 200) {
           return result;
         }
       } catch (error) {
@@ -398,132 +464,147 @@ export module approvalService {
         leaveRec.userid,
         leaveBalance[0]
       );
-    console.log(upsertLeaveBalance,"upsertLeaveBalance ***");
-    return upsertLeaveBalance
+    console.log(upsertLeaveBalance, "upsertLeaveBalance ***");
+    return upsertLeaveBalance;
   };
 }
 
+const calculateAttendance = async (signinDates, updatedAttendanceRecord) => {
+  console.log("inside calculateAttendance");
+  console.log(
+    "inside calculateAttendance updatedAttendanceRecord",
+    updatedAttendanceRecord
+  );
+  console.log("inside calculateAttendance signinDates", signinDates);
+  let signIns = signinDates.signIn;
+  let signOuts = signinDates.signOut;
+  console.log("*******");
+  console.log(signIns, "signIns");
+  console.log(signOuts, "signOuts");
+  console.log("*******");
+  let dateA: any = new Date(Number(signIns));
+  let dateB: any = new Date(Number(signOuts));
 
-  const calculateAttendance = async (signinDates,updatedAttendanceRecord)=>{
-    console.log("inside calculateAttendance");
-    console.log("inside calculateAttendance updatedAttendanceRecord",updatedAttendanceRecord);
-    console.log("inside calculateAttendance signinDates",signinDates);
-    let signIns = signinDates.signIn
-    let signOuts = signinDates.signOut
-    console.log("*******");
-    console.log(signIns,"signIns");
-    console.log(signOuts,"signOuts");
-    console.log("*******");
-    let dateA: any = new Date(Number(signIns));
-    let dateB: any = new Date(Number(signOuts));
- 
-    let timeDifference = dateB - dateA;
+  let timeDifference = dateB - dateA;
 
-    // Convert the time difference to hours
+  // Convert the time difference to hours
 
-    let totalHours = Math.floor(timeDifference / (1000 * 60 * 60));
-    let totalMinutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+  let totalHours = Math.floor(timeDifference / (1000 * 60 * 60));
+  let totalMinutes = Math.floor(
+    (timeDifference % (1000 * 60 * 60)) / (1000 * 60)
+  );
 
-    console.log(totalHours, totalMinutes, "&&&&&&&&&")
-    updatedAttendanceRecord.workinghours = {
-        firstIn: signIns, lastOut: signOuts,
-        totalWorkHours: {
-            hours: totalHours,
-            minutes: totalMinutes
-        }
-    }
+  console.log(totalHours, totalMinutes, "&&&&&&&&&");
+  updatedAttendanceRecord.workinghours = {
+    firstIn: signIns,
+    lastOut: signOuts,
+    totalWorkHours: {
+      hours: totalHours,
+      minutes: totalMinutes,
+    },
+  };
 
-    //session calculation
+  //session calculation
 
-    let sessionDate = new Date(Number(updatedAttendanceRecord.date))
-    console.log(sessionDate, "sessionDate");
-    sessionDate.setHours(13, 1, 0, 0)//set time as 13:01
+  let sessionDate = new Date(Number(updatedAttendanceRecord.date));
+  console.log(sessionDate, "sessionDate");
+  sessionDate.setHours(13, 1, 0, 0); //set time as 13:01
 
-    const session1EndTime = sessionDate.getTime();
-    const signOutTime = dateB.getTime();
-    const signInTime = dateA.getTime();
+  const session1EndTime = sessionDate.getTime();
+  const signOutTime = dateB.getTime();
+  const signInTime = dateA.getTime();
 
-    console.log(session1EndTime, "session1EndTime sessioncalculation");
-    console.log(signOutTime, "signOutTime sessioncalculation");
-    console.log(signInTime, "signInTime sessioncalculation");
+  console.log(session1EndTime, "session1EndTime sessioncalculation");
+  console.log(signOutTime, "signOutTime sessioncalculation");
+  console.log(signInTime, "signInTime sessioncalculation");
 
-    if (signOutTime <= session1EndTime) {
-        console.log("if signOutTime");
-        updatedAttendanceRecord.session = {
-            'session 1': {
-                sessionTimings: '09:00 - 13:00',
-                firstIn: signIns,
-                lastOut: signOuts
-            },
-            'session 2': { sessionTimings: '13:01 - 18:00', firstIn: null, lastOut: null }
-        };
-    }
-    else if (signInTime >= session1EndTime) {
-        console.log("else if");
-        updatedAttendanceRecord.session = {
-            'session 1': {
-                sessionTimings: '09:00 - 13:00',
-                firstIn: null,
-                lastOut: null
-            },
-            'session 2': {
-                sessionTimings: '13:01 - 18:00',
-                firstIn: signIns,
-                lastOut: signOuts
-            }
-        }
-    }
-    else {
-        console.log("else signOutTime");
-        updatedAttendanceRecord.session = {
-            'session 1': {
-                sessionTimings: '09:00 - 13:00',
-                firstIn: signIns,
-                lastOut: null
-            },
-            'session 2': {
-                sessionTimings: '13:01 - 18:00',
-                firstIn: null,
-                lastOut: signOuts
-            }
-        };
-    }
-    console.log(updatedAttendanceRecord,"updatedAttendanceRecord after change");
-      return updatedAttendanceRecord;
+  if (signOutTime <= session1EndTime) {
+    console.log("if signOutTime");
+    updatedAttendanceRecord.session = {
+      "session 1": {
+        sessionTimings: "09:00 - 13:00",
+        firstIn: signIns,
+        lastOut: signOuts,
+      },
+      "session 2": {
+        sessionTimings: "13:01 - 18:00",
+        firstIn: null,
+        lastOut: null,
+      },
+    };
+  } else if (signInTime >= session1EndTime) {
+    console.log("else if");
+    updatedAttendanceRecord.session = {
+      "session 1": {
+        sessionTimings: "09:00 - 13:00",
+        firstIn: null,
+        lastOut: null,
+      },
+      "session 2": {
+        sessionTimings: "13:01 - 18:00",
+        firstIn: signIns,
+        lastOut: signOuts,
+      },
+    };
+  } else {
+    console.log("else signOutTime");
+    updatedAttendanceRecord.session = {
+      "session 1": {
+        sessionTimings: "09:00 - 13:00",
+        firstIn: signIns,
+        lastOut: null,
+      },
+      "session 2": {
+        sessionTimings: "13:01 - 18:00",
+        firstIn: null,
+        lastOut: signOuts,
+      },
+    };
   }
+  console.log(updatedAttendanceRecord, "updatedAttendanceRecord after change");
+  return updatedAttendanceRecord;
+};
 
-  const updateAttendanceApprovalReq =async(values)=>{
-    console.log(values,"inside updateAttendance")
+const updateAttendanceApprovalReq = async (values) => {
+  console.log(values, "inside updateAttendance");
 
-    let startDate = new Date(Number(values?.fromdate))
-    let endDate = new Date( Number(values?.todate))
-    startDate.setHours(0,0,0,0)
-    endDate.setHours(0,0,0,0)
+  let startDate = new Date(Number(values?.fromdate));
+  let endDate = new Date(Number(values?.todate));
+  startDate.setHours(0, 0, 0, 0);
+  endDate.setHours(0, 0, 0, 0);
 
-    let startDay= startDate.getDate()
-    let endDay= endDate.getDate()
-    console.log("^^^^")
-console.log(startDate,endDate)
-console.log(startDay,endDay)
-console.log("^^^^")
+  let startDay = startDate.getDate();
+  let endDay = endDate.getDate();
+  console.log("^^^^");
+  console.log(startDate, endDate);
+  console.log(startDay, endDay);
+  console.log("^^^^");
 
-if (startDay === endDay) {
-  let obj = { date: startDate, leavetype: values.leavetype, userid: values.userid };
-  let upsertAttendance = await attendanceService.upsertAttendanceforLeaves(obj);
-  console.log(upsertAttendance, "upsertAttendance response");
-} else {
-  console.log("for loop");
-  for (let day = startDay; day <= endDay; day++) {
-      let currentDate = new Date(startDate); 
-      currentDate.setUTCDate(day); 
-      currentDate.setUTCHours(0, 0, 0, 0); 
-      let obj = { date: currentDate, leavetype: values.leavetype, userid: values.userid };
-      let upsertAttendance = await attendanceService.upsertAttendanceforLeaves(obj);
+  if (startDay === endDay) {
+    let obj = {
+      date: startDate,
+      leavetype: values.leavetype,
+      userid: values.userid,
+    };
+    let upsertAttendance = await attendanceService.upsertAttendanceforLeaves(
+      obj
+    );
+    console.log(upsertAttendance, "upsertAttendance response");
+  } else {
+    console.log("for loop");
+    for (let day = startDay; day <= endDay; day++) {
+      let currentDate = new Date(startDate);
+      currentDate.setUTCDate(day);
+      currentDate.setUTCHours(0, 0, 0, 0);
+      let obj = {
+        date: currentDate,
+        leavetype: values.leavetype,
+        userid: values.userid,
+      };
+      let upsertAttendance = await attendanceService.upsertAttendanceforLeaves(
+        obj
+      );
       console.log(upsertAttendance, "upsertAttendance response");
+    }
   }
-}
-
-  
-
-
-  }
+};
