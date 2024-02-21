@@ -40,12 +40,26 @@ export async function getApprovalsById(request:any,reply:any) {
   
 }
 export async function getApprovalbyApprover(request:any,reply:any) {
-    try{
-        let result = await approvalService.getApprovalbyApprover(request.params.approverId)
-        reply.send(result)
-    }catch(error){
-        reply.status(500).send(error.message)
-    }    
+    console.log(request.query,"req query")
+    if (Object.keys(request.query).length > 0) {
+    
+          console.log("else testquery pending");
+          try {
+            let result = await approvalService.getApprovalsByApproverLeaveQuery(request.params.userId, request.query)
+            reply.send(result)
+          } catch (error: any) {
+            reply.status(500).send(error.message);
+          }     
+      }
+      else{
+        try{
+            let result = await approvalService.getApprovalbyApprover(request.params.approverId)
+            reply.send(result)
+        }catch(error){
+            reply.status(500).send(error.message)
+        }   
+      }
+  
 }
 
 export async function updateApprovals(request:any,reply:any){

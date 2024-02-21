@@ -108,6 +108,45 @@ export module approvalService {
     }
   }
 
+  export async function getApprovalsByApproverLeaveQuery(userId:any, reqQuery:any){
+    console.log("getApprovalsByApproverLeaveQuery")
+    let keys = Object.keys(reqQuery)
+    let values = Object.values(reqQuery)
+    console.log(keys, values, "getApprovalsByApproverLeaveQuery");
+
+    const conditions = keys.map((key, index) => `LOWER(${key}) LIKE LOWER($${index + 1})`).join(' AND ');
+    
+    let params = values.map(value => `%${value}%`);
+
+    try {
+       let innerQuery =`SELECT  approvals.*,
+       jsonb_build_object(
+           'id', users.id,
+           'firstname', users.firstname,
+             'lastname', users.lastname,
+               'employeeid', users.employeeid
+       ) AS "jsonApplyUsers"
+       FROM
+       approvals 
+       INNER JOIN users ON users.id = approvals.requesterid  				
+      WHERE ${conditions} AND approvals.userId = $${keys.length + 1}`
+
+      let newParams = [...params, userId]
+      console.log("$$$$$$$$$$");
+      console.log(innerQuery);
+      console.log(newParams);
+      const result: QueryResult = await query(
+          innerQuery, newParams
+      );
+      console.log(result.rows, "query results");
+      return result.rows
+  } catch (error) {
+      console.log("ERROR leaves APPROVAL");
+      return error.message;
+  }
+
+  }
+
   export async function updateApprovals(requestBody: any, requestParams: any) {
     console.log("inside updateApprovals service");
     console.log(requestParams, "requestParams");

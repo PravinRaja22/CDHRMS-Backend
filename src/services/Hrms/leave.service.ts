@@ -248,6 +248,7 @@ console.log(querydata,"querydata")
         console.log(keys, values, "getLeavesByUsersQuery");
 
         const conditions = keys.map((key, index) => `LOWER(${key}) LIKE LOWER($${index + 1})`).join(' AND ');
+        
         let params = values.map(value => `%${value}%`);
         try {
             let querydata = `SELECT * FROM leaves WHERE ${conditions} AND userId = $${keys.length + 1}`
