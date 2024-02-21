@@ -204,7 +204,7 @@ const Routes = function (
   fastify.get("/attendance/:userId/:attendanceDate", getAttendanceByUserIdDate);
   fastify.get("/attendance/:userId/:month/:year", getAttendaceForMonthandYear);
   fastify.put("/attendance/:userId/:attendanceDate", updateAttendance);
-  fastify.put("/attendance/:attendanceDate", updateAttendanceStatus);
+  fastify.put("/attendance/status/:attendanceDate/:userId", updateAttendanceStatus);
   fastify.get("/attendance/:id", getsingleAttendance);
   fastify.post("/attendance/bulk", upsertBulkAttendance);
   fastify.post("/attendance/time/:userId", upsertAttendancetime);

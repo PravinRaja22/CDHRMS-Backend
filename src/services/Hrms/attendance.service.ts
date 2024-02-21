@@ -166,6 +166,7 @@ export module attendanceService {
             let currentDate = new Date(startDate); // Initialize currentDate with startDate
 
             while (currentDate <= endDate) {
+
                 const dateInMillis = currentDate.getTime();
 
                 const record = {
@@ -192,7 +193,7 @@ export module attendanceService {
                         ],
                     },
                     isweekend: currentDate.getDay() === 0 || currentDate.getDay() === 6, // Sunday or Saturday
-                    status: currentDate.getDay() === 0 || currentDate.getDay() === 6 ? "weekoff" : "present",
+                    status: currentDate.getDay() === 0 || currentDate.getDay() === 6 ? "weekoff" : null,
                     shift: {
                         shiftType: "GS",
                         shiftStart: "09:00",
@@ -294,13 +295,14 @@ export module attendanceService {
     export async function updateAttendanceStatus(params: any) {
         console.log(params, "updateAttendanceStatus params");
         let attendanceDate = params.attendanceDate;
+        let userId = params.userId
 
         try {
             let updatesqlCount = 0;
             let failuresqlCount = 0;
             let returnValue = {};
 
-            let result = await query(`SELECT * FROM attendances WHERE date = ${attendanceDate}`, {});
+            let result = await query(`SELECT * FROM attendances WHERE date = ${attendanceDate} And userId=${userId}`, {});
             console.log(result, "attendanceRecords");
             console.log('***********');
             console.log(result.rows);
@@ -474,15 +476,15 @@ export module attendanceService {
         const isWeekend = item.isweekend;
 
         if (isHoliday) {
-            item.status = { "value": "holiday", "label": "Holiday" };
+            item.status = "holiday"
         } else if (isWeekend) {
-            item.status = { "value": "offfDay", "label": "Off Day" }
+            item.status = "offfDay"
         } else {
             const hasSignIn = item.signin.data[0].timeStamp || item.signIn.data[0].timeStamp != null;
             if (hasSignIn) {
-                item.status = { "value": "present", "label": "Present" }
+                item.status = "present"
             } else {
-                item.status = { "value": "absent", "label": "Absent" }
+                item.status ="absent"
             }
         }
         console.log(item, "item calculateAttendance");
@@ -498,7 +500,7 @@ export module attendanceService {
             let successInsert = 0;
             let failureInsert = 0;
             let newDate = new Date();
-            newDate.setHours(0, 5, 0, 0);
+            newDate.setHours(0, 0, 0, 0);
             let newDateUTC = newDate.getTime();
             console.log("*******");
             console.log(newDateUTC);
@@ -587,16 +589,16 @@ export module attendanceService {
     }
 
     const updateAttendaceTimesData = async (updatedRecord) => {
-      
+
 
         try {
-            console.log(updatedRecord[0].signin ,'Record data');
-            const {uuid ,...others} = updatedRecord[0]
+            console.log(updatedRecord[0].signin, 'Record data');
+            const { uuid, ...others } = updatedRecord[0]
             const fieldNames = Object.keys(others);
             const fieldValues = Object.values(others);
             console.log(fieldNames, "update Attendance fieldNames");
             console.log(fieldValues, "update Attendance  fieldValues");
-    
+
             let querydata;
             let params: any[] = [];
             querydata = `UPDATE attendances SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(', ')} WHERE id = $${fieldNames.length + 1}`;
@@ -622,9 +624,9 @@ export module attendanceService {
             console.log(data);
             console.log(userId);
             console.log("upsert TIme in Attendance date");
-            console.log(data.date);
+            console.log(data.signInDate);
 
-            const result: QueryResult = await query(`SELECT * FROM attendances where date = ${data.date} And userId = ${Number(userId)}`, []);
+            const result: QueryResult = await query(`SELECT * FROM attendances where date = ${data.signInDate} And userId = ${Number(userId)}`, []);
             console.log(result.rows);
             result.rows.forEach((e) => {
                 console.log(e);
@@ -632,7 +634,7 @@ export module attendanceService {
                     e.signin.data.forEach((edata) => {
                         console.log(edata.timeStamp);
                         // if (edata.timeStamp === null) {
-                            edata.timeStamp = data.signIn
+                        edata.timeStamp = data.signIn
                         // }
                     })
                 }
@@ -640,8 +642,8 @@ export module attendanceService {
                     console.log('else condition data sset ');
                     e.signout.data.forEach((edata) => {
                         console.log(edata.timeStamp);
-                        // if (edata.timeStamp === null) {
-                            edata.timeStamp = data.signOut
+                        // if (edata.timeStamp === null) {  
+                        edata.timeStamp = data.signOut
                         // }
 
                     })
