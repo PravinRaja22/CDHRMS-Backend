@@ -467,27 +467,23 @@ export module approvalService {
 console.log(startDate,endDate)
 console.log(startDay,endDay)
 console.log("^^^^")
-    // let obj = {date:startDate,leavetype:values.leavetype,userid:values.userid}
-    // let upsertAttendance = attendanceService.upsertAttendanceforLeaves(obj)
 
-    // console.log(upsertAttendance,"upsertAttendance response")
-  
+if (startDay === endDay) {
+  let obj = { date: startDate, leavetype: values.leavetype, userid: values.userid };
+  let upsertAttendance = await attendanceService.upsertAttendanceforLeaves(obj);
+  console.log(upsertAttendance, "upsertAttendance response");
+} else {
+  console.log("for loop");
+  for (let day = startDay; day <= endDay; day++) {
+      let currentDate = new Date(startDate); 
+      currentDate.setUTCDate(day); 
+      currentDate.setUTCHours(0, 0, 0, 0); 
+      let obj = { date: currentDate, leavetype: values.leavetype, userid: values.userid };
+      let upsertAttendance = await attendanceService.upsertAttendanceforLeaves(obj);
+      console.log(upsertAttendance, "upsertAttendance response");
+  }
+}
 
-   /* if(fromDay === endDay){
-      let obj = {date:startDate,leavetype:values.leavetype,userid:values.userid}
-      let upsertAttendance = attendanceService.upsertAttendanceforLeaves(obj)
-  
-      console.log(upsertAttendance,"upsertAttendance response")
-    }
-    else{
-      console.log("for loop")
-      for(let day= startDay ; day <= endDay; day++){
-        let obj = {date:startDate,leavetype:values.leavetype,userid:values.userid}
-      let upsertAttendance = attendanceService.upsertAttendanceforLeaves(obj)
-  
-      console.log(upsertAttendance,"upsertAttendance response")
-      }
-    }*/
   
 
 
