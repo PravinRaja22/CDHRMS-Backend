@@ -339,8 +339,8 @@ export module approvalService {
           updateLeave.record.status.toLowerCase().includes("approve")
         ) {
           console.log("if try update leave balance");
-          let updateLeaveBalanceResult = await updateLeaveBalance(newLeave);
-          console.log(updateLeaveBalanceResult, "updateLeaveBalanceResult");
+        //  let updateLeaveBalanceResult = await updateLeaveBalance(newLeave);
+          //console.log(updateLeaveBalanceResult, "updateLeaveBalanceResult");
 
           const updateAttendanceResult = await updateAttendanceApprovalReq(
             newLeave
@@ -383,12 +383,12 @@ export module approvalService {
         } else {
         }
       }
-
+console.log("dollar")
       let existingAttendanceRecord =
         await attendanceService.getAttendanceByUserIdDate(params);
-      console.log(existingAttendanceRecord, "existingAttendanceRecord");
-
-      let { uuid, ...updatedAttendanceRecord } = existingAttendanceRecord;
+      console.log(existingAttendanceRecord, "existingAttendanceRecord ");
+console.log("dollar")
+      let { uuid, ...updatedAttendanceRecord } = existingAttendanceRecord[0];
 
       console.log(updatedAttendanceRecord, "updatedAttendanceRecord");
       // Modify the record based on the update type

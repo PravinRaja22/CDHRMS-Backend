@@ -45,10 +45,10 @@ export module attendanceService {
         if (existingRecord.rows.length === 0) {
             // No attendance record found for the user and date
             console.log(`No attendance record found for user ${params.userId} on ${params.attendanceDate}`);
-            return { success: false, data:existingRecord };
+            return existingRecord.rows
         }
         else {
-            return { success: true, data:existingRecord };
+            return existingRecord.rows;
         }
 
     }
@@ -726,9 +726,9 @@ export module attendanceService {
         
         let getExistingAttRecord = await getAttendanceByUserIdDate({userId:values.userid ,attendanceDate:Number(values.date) })
         console.log(getExistingAttRecord,"getExistingAttRecord upsertAttendanceforLeaves")
-        if(getExistingAttRecord.success){
-            console.log(getExistingAttRecord.data.rows,"exist attendance data rows ")
-            let attRecord = getExistingAttRecord.data.rows[0]
+        if(getExistingAttRecord.length>0){
+            console.log(getExistingAttRecord,"exist attendance data rows ")
+            let attRecord = getExistingAttRecord[0]
 
                 const {uuid,...otherFields} = attRecord
                 console.log(otherFields,"other fileds ")
