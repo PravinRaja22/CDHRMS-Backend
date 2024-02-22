@@ -158,6 +158,7 @@ import {
 } from "../../controllers/HRMS/medicalInsurance.Controller.js";
 import { filesUpload, Multer } from "../../multer/Multer.js";
 import { testing } from "../../controllers/HRMS/testing.controller.js";
+import { getTimeSheet, upsertTimeSheet } from "../../controllers/HRMS/timeSheet.controller.js";
 
 const Routes = function (
   fastify: FastifyInstance,
@@ -197,6 +198,9 @@ const Routes = function (
   //Leave-Balance Object Routes
   fastify.get("/leave-balance/:userId", getLeaveBalanceByUsers);
   fastify.post("/leave-balance/:userId", upsertLeaveBalanceByUsers);
+
+  fastify.get("/Time-sheet/:userId", getTimeSheet);
+  fastify.post("/Time-sheet", upsertTimeSheet);
 
   //attendance
   fastify.get("/attendance", getAttendanceDate);
