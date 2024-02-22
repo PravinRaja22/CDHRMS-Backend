@@ -451,7 +451,7 @@ export module approvalService {
       if (item.leaveType.toLowerCase() === leaveRec.leavetype.toLowerCase()) {
         console.log("inside if item leavetype");
         item.consumed += Number(leaveRec.noofdays);
-        item.granted = item.granted - Number(leaveRec.noofdays);
+        item.balance = item.balance - Number(leaveRec.noofdays);
       }
       console.log(item);
       return item;
@@ -593,11 +593,14 @@ const updateAttendanceApprovalReq = async (values) => {
     return upsertAttendance
   } else {
     console.log("for loop");
+    let upsertAttendanceResponse;
+
     for (let day = startDay; day <= endDay; day++) {
       let currentDate = new Date(startDate);
-      currentDate.setUTCDate(day);
-      currentDate.setUTCHours(0, 0, 0, 0);
-      let obj = {
+      console.log(day,"day")
+      currentDate.setDate(day);
+      currentDate.setHours(0, 0, 0, 0);
+       let obj = {
         date: currentDate,
         leavetype: values.leavetype,
         userid: values.userid,
@@ -606,7 +609,10 @@ const updateAttendanceApprovalReq = async (values) => {
         obj
       );
       console.log(upsertAttendance, "upsertAttendance response");
-      return upsertAttendance
+      upsertAttendanceResponse = upsertAttendance
     }
+  
+    return upsertAttendanceResponse
+   
   }
 };
