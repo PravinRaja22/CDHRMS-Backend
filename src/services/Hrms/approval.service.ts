@@ -590,6 +590,7 @@ const updateAttendanceApprovalReq = async (values) => {
       obj
     );
     console.log(upsertAttendance, "upsertAttendance response");
+    return upsertAttendance
   } else {
     console.log("for loop");
     for (let day = startDay; day <= endDay; day++) {
@@ -605,6 +606,7 @@ const updateAttendanceApprovalReq = async (values) => {
         obj
       );
       console.log(upsertAttendance, "upsertAttendance response");
+      return upsertAttendance
     }
   }
 };

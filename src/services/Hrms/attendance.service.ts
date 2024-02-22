@@ -681,7 +681,7 @@ export module attendanceService {
             let params: any[] = [];
             if(updatedRecord?.id){
                 querydata = `UPDATE attendances SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(', ')} WHERE id = $${fieldNames.length + 1} RETURNING *`;
-                params = [...fieldValues, updatedRecord[0].id];
+                params = [...fieldValues, updatedRecord.id];
             }else{
                 querydata = `INSERT INTO attendances (${fieldNames.join(', ')}) VALUES (${fieldValues.map((_, index) => `$${index + 1}`).join(', ')}) RETURNING *`;
                 params = [...fieldValues];
@@ -727,7 +727,9 @@ export module attendanceService {
         let getExistingAttRecord = await getAttendanceByUserIdDate({userId:values.userid ,attendanceDate:Number(values.date) })
         console.log(getExistingAttRecord,"getExistingAttRecord upsertAttendanceforLeaves")
         if(getExistingAttRecord.success){
+            console.log(getExistingAttRecord.data.rows,"exist attendance data rows ")
             let attRecord = getExistingAttRecord.data.rows[0]
+
                 const {uuid,...otherFields} = attRecord
                 console.log(otherFields,"other fileds ")
                 otherFields.status = values.leavetype
