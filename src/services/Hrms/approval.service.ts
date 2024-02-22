@@ -140,9 +140,16 @@ export module approvalService {
           'reason',leaves.reason,
           'createdby',leaves.createdby,
          'modifiedby',leaves.modifiedby          
-      ) AS "jsonLeave"
+      ) AS "jsonLeave",
+      jsonb_build_object(
+        'id', users.id,
+        'firstname', users.firstname,
+          'lastname', users.lastname,
+            'employeeid', users.employeeid
+    ) AS "jsonApplyUsers"
       FROM
       approvals 
+      INNER JOIN users ON users.id = approvals.requesterid  
       INNER JOIN leaves ON leaves.approvalid = approvals.id  				
       WHERE ${conditions} AND approvals.approverid = $${keys.length + 1}`;
 
@@ -186,10 +193,17 @@ export module approvalService {
           'userid',attendanceregularizations.userid,
           'applyingtoid',attendanceregularizations.applyingtoid,
           'approvalid',attendanceregularizations.approvalid       
-      ) AS "jsonAttendanceReg"
+      ) AS "jsonAttendanceReg",
+      jsonb_build_object(
+        'id', users.id,
+        'firstname', users.firstname,
+          'lastname', users.lastname,
+            'employeeid', users.employeeid
+    ) AS "jsonApplyUsers"
       FROM
       approvals 
-      INNER JOIN attendanceregularizations ON attendanceregularizations.approvalid = approvals.id   				
+      INNER JOIN attendanceregularizations ON attendanceregularizations.approvalid = approvals.id   	
+      INNER JOIN users ON users.id = approvals.requesterid  				
       WHERE ${conditions} AND approvals.approverid = $${keys.length + 1}`;
 
       let newParams = [...params, userId];
