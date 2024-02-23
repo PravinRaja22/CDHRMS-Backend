@@ -18,6 +18,23 @@ export module timeSheetServices {
             };
         }
     }
+    export async function getTimeSheetbydateanduser(userId,date) {
+        try {
+            console.log("gettimeSheetServices call");
+            console.log(userId,date);
+            const result: QueryResult = await query(
+                `SELECT * FROM timesheets where userId = ${userId} And date = ${date} `, []
+            );
+            console.log(result, "query results");
+            return result.rows;
+        } catch (error) {
+            console.error("Error in gettimeSheetServices:", error);
+            throw {
+                success: false,
+                message: `Error retrieving time Sheet Services: ${error.message}`,
+            };
+        }
+    }
 
     export async function upserttimeSheetServices(data) {
         try {

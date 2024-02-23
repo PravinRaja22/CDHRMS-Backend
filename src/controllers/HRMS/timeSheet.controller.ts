@@ -25,13 +25,12 @@ export async function upsertTimeSheet(request: any, reply: any) {
     reply.status(500).send(error.message);
   }
 }
-
-
-
-export async function deleteUser(request: any, reply: any) {
+export async function getTimeSheetbydateanduser(request: any, reply: any) {
   try {
-    let result = await userService.deleteUser(request.params.id)
-    return result
+    console.log('upsert Users are')
+    const {userId,applidDate} = request.params
+    let result = await timeSheetServices.getTimeSheetbydateanduser(userId,applidDate)
+    reply.send(result)
   } catch (error: any) {
     reply.status(500).send(error.message);
   }
@@ -39,32 +38,3 @@ export async function deleteUser(request: any, reply: any) {
 
 
 
-export const getUsersBankdetails =async(request:any,reply:any)=>{
-  try{
-    console.log(request.params,"request");
-    let result = await userService.getUsersBankdetails(request.params.id)
-    return result
-  }catch(error){
-    reply.status(500).send(error.message)
-  }
-}
-
-export const getUsersPFdetails =async(request:any,reply:any)=>{
-  try{
-    console.log(request.params,"request");
-    let result = await userService.getUsersPFdetails(request.params.id)
-    return result
-  }catch(error){
-    reply.status(500).send(error.message)
-  }
-}
-
-export const getUsersMedicalInsurence =async(request:any,reply:any)=>{
-  try{
-    console.log(request.params,"request");
-    let result = await userService.getUsersMedicalInsurence(request.params.id)
-    return result
-  }catch(error){
-    reply.status(500).send(error.message)
-  }
-}
