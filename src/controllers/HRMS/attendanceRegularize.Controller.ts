@@ -46,14 +46,14 @@ export async function updateAttendanceRegularize(request: any, reply: any) {
         reply.status(500).send(error.message)
     }
 }
-export async function getRegularizeByUsers(request: any, reply: any) {
-    try {
-        console.log(request.params, "regularized User Data is ")
-        console.log(request.query.status ,"query")
+// export async function getRegularizeByUsers(request: any, reply: any) {
+//     try {
+//         console.log(request.params, "regularized User Data is ")
+//         console.log(request.query.status ,"query")
     
-        let result = await attendanceRegularizeService.getRegularizeByUsers(request.params.userId ,request.query )
-        reply.send(result)
-    } catch (error) {
-        reply.status(500).send(error.message)
-    }
-}
+//         let result = await attendanceRegularizeService.getRegularizeByUsers(request.params.userId ,request.query )
+//         reply.send(result)
+//     } catch (error) {
+//         reply.status(500).send(error.message)
+//     }
+// }

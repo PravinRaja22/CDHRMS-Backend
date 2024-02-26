@@ -219,12 +219,12 @@ const Routes = function (
   fastify.get("/attendance-regularize", getAllAttendanceRegularize);
   fastify.post("/attendance-regularize", insertAttendanceRegularize);
   fastify.get(
-    "/attendance-regularize/userdetails/:userId",
+    "/attendance-regularize/user/:userId",
     getAttendanceRegularizebyUser
   );
   fastify.get("/attendance-regularize/:id", getAttendanceRegularizebyId);
   fastify.put("/attendance-regularize/:id", updateAttendanceRegularize);
-  fastify.get("/attendance-regularize/user/:userId", getRegularizeByUsers);
+  // fastify.get("/attendance-regularize/user/:userId", getRegularizeByUsers);
 
   //Payslip
 

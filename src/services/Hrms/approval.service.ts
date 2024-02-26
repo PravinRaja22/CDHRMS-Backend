@@ -265,7 +265,7 @@ export module approvalService {
 
   async function updateParentRecord(approvalRec, approvalRecId) {
     console.log(approvalRec, "updateParentRecord values");
-    if (approvalRec.type === "attendanceRegularizations") {
+    if (approvalRec.type.toLowerCase().includes("attendance")) {
       try {
         let getRegularzeRecord =
           await attendanceRegularizeService.getAttendanceRegularizebyId(
@@ -274,10 +274,11 @@ export module approvalService {
         console.log(getRegularzeRecord, "getRegularzeRecord");
         let newObj1 = { ...getRegularzeRecord[0] };
         console.log(newObj1, "newObj");
-        const { uuid, ...newObj } = newObj1;
+        const { uuid,jsonapproverusers, ...newObj } = newObj1;
 
         newObj.status = approvalRec.status;
-        // newObj.modifiedby = {id:}
+        newObj.modifiedby = {id:jsonapproverusers.id,name:`${jsonapproverusers.firstname} ${jsonapproverusers.lastname}`,
+      timeStamp:new Date().getTime()}
         // newObj.approval = { id: approvalRecId };
         let updateRegularize =
           await attendanceRegularizeService.updateAttendanceRegularize(
@@ -289,8 +290,8 @@ export module approvalService {
 
         let updateAttendanceResult;
 
-        if (updateRegularize.status === 200) {
-          console.log("updateRegularize.status", updateRegularize.status);
+        if (updateRegularize?.status === 200) {
+          console.log("updateRegularize.status", updateRegularize?.status);
           //update attendance
           updateAttendanceResult = await updateAttendance(
             newObj,
@@ -300,9 +301,9 @@ export module approvalService {
         }
 
         if (updateAttendanceResult.status === 200) {
-          //update Leave Balance record
           return updateAttendanceResult;
         }
+        console.log(updateAttendanceResult,"updateAttendanceResult last")
       } catch (error) {
         console.log(error.message, "error updateParentResult");
       }
