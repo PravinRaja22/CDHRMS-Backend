@@ -36,5 +36,17 @@ export async function getTimeSheetbydateanduser(request: any, reply: any) {
   }
 }
 
+export async function getTimeSheetForMonthandYear(requst:any , reply:any){
+  try{
+      const {userId,month,year} = requst.params
+      console.log(requst.params)
+      let Result = await timeSheetServices.getTimeSheetForMonthandYear(userId,month,year)
+      reply.send(Result)
+  }
+  catch(error){
+      reply.status(500).send(error.message)
+  }
+}
+
 
 
