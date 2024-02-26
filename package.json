@@ -7,7 +7,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "start":"nodemon npx tsx src/new"
+    "start": "nodemon npx tsx src/new"
   },
   "repository": {
     "type": "git",
@@ -27,6 +27,7 @@
     "aws-sdk": "^2.1508.0",
     "axios": "^1.6.2",
     "cors": "^2.8.5",
+    "date-fns-tz": "^2.0.0",
     "docxtemplater": "^3.44.0",
     "dotenv": "^8.6.0",
     "fastify": "^4.26.0",

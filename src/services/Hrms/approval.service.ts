@@ -414,7 +414,7 @@ console.log("dollar")
           : updatedAttendanceRecord.signout.data;
 
         updatedAttendanceRecord.isregularized = true;
-        updatedAttendanceRecord.status = status ? "present" : "LOP";
+        updatedAttendanceRecord.status = status ? "present" : "absent";
         updatedAttendanceRecord.workinghours = status
           ? calculatedWorkingHours.workinghours
           : updatedAttendanceRecord.workinghours;
