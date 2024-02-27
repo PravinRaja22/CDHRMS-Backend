@@ -583,6 +583,7 @@ export module attendanceService {
             console.log(data.startTime)
             const result: QueryResult = await query(`SELECT * FROM attendances where date >= ${data.startTime} And date <=${data.endTime} And userId = ${Number(userId)}`, []);
             console.log(result.rows, "query results");
+            console.log(result.rows.length, "query results length");
             return result.rows
         } catch (error) {
             return error.message

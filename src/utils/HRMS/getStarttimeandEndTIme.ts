@@ -29,6 +29,8 @@ export async function getStartandEndTIme(month, year) {
             startDate = new Date(year, monthIndex, 1);
             endDate = new Date(year, monthIndex + 1, 0);
             totalNumberOfDays = endDate.getDate();
+            console.log(startDate ,'Starting Date in the start time ');
+            console.log(endDate ,'end Date in the end time ');
         }
     } else {
         console.log("Invalid parameters");
@@ -36,8 +38,8 @@ export async function getStartandEndTIme(month, year) {
     }
     console.log("startTime")
     console.log("endTime")
-    const startTime = startDate.setHours(0, 0, 0, 0);
-    const endTime = endDate.setHours(23, 59, 59, 999);
+    const startTime = startDate.setUTCHours(0, 0, 0, 0);
+    const endTime = endDate.setUTCHours(23, 59, 59, 999);
     console.log(startTime)
     console.log(endTime)
     return { startTime, endTime }
