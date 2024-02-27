@@ -1,6 +1,9 @@
 import { array } from "joi";
 import { query } from "../../database/postgress.js";
-import { generateBulkPayslipFile ,generatePayslipFile} from "../../utils/HRMS/payslipGenerator.js";
+import {
+  generateBulkPayslipFile,
+  generatePayslipFile,
+} from "../../utils/HRMS/payslipGenerator.js";
 import { userService } from "./user.service.js";
 export module PayslipServices {
   export async function generatePayslip(request: any) {
@@ -62,19 +65,19 @@ export module PayslipServices {
       console.log("%%%%%%%%%%%%%");
       // console.log(getAttendance, "getAttendance result1");
       if (getAttendance.rowCount > 0) {
-        console.log("if calculate payslip  getAttendance has records ")
+        console.log("if calculate payslip  getAttendance has records ");
         let generatePayslip = await calculatePayslip(
           getAttendance.rows,
           totalNumberOfDays,
           request
         );
-        console.log(generatePayslip,"generatePayslip")
-        let payslipAmounts = [generatePayslip]
+        console.log(generatePayslip, "generatePayslip");
+        let payslipAmounts = [generatePayslip];
         let payslipFile;
-        console.log(payslipAmounts,"payslipAmounts")
+        console.log(payslipAmounts, "payslipAmounts");
         if (payslipAmounts.length > 0) {
-          payslipFile =  await generateBulkPayslipFile(request, payslipAmounts);
-          console.log(payslipFile, "payslipFile generateBulkPayslipFile")
+          payslipFile = await generateBulkPayslipFile(request, payslipAmounts);
+          console.log(payslipFile, "payslipFile generateBulkPayslipFile");
           return payslipFile; //payslipAmounts
           // Return array of payslip amounts OR paylsipFile inserted file
         } else {
@@ -83,7 +86,7 @@ export module PayslipServices {
 
         return generatePayslip;
       } else {
-        console.log("else  getAttendance has no records ")
+        console.log("else  getAttendance has no records ");
         return [];
       }
     } catch (error) {
@@ -163,7 +166,7 @@ export module PayslipServices {
           console.log(getAttendance, "getAttendance");
 
           if (getAttendance.rowCount > 0) {
-            console.log("if getAttendance has rec , call calculate payslip")
+            console.log("if getAttendance has rec , call calculate payslip");
             let payslipAmount = await calculatePayslip(
               getAttendance.rows,
               totalNumberOfDays,
@@ -172,7 +175,7 @@ export module PayslipServices {
             console.log(payslipAmount, "payslipAmount");
             payslipAmounts.push(payslipAmount);
           } else {
-            console.log("else getAttendance no records")
+            console.log("else getAttendance no records");
             // payslipAmounts.push([]);
           }
         }
@@ -295,23 +298,21 @@ export module PayslipServices {
       //   "/" +
       //   final[0].payslipUrl;
       // console.log(fileurl, "DSA");
-      result= obj
+      result = obj;
       return obj;
     } catch (error) {
       console.log(error.message, "getusers error");
-
     }
-  
   };
 
   export async function insertpaySlip(data: any) {
     console.log(data, "Insert Pay slip Data");
-    let { payslipmonth, payslipyear, userId, ...otherFields } = data;
-    userId = Number(userId);
+    let { payslipmonth, payslipyear, userid, ...otherFields } = data;
+    userid = Number(userid);
     try {
       let querydata2 = `SELECT * FROM payslips WHERE paySlipMonth = $1 AND payslipyear = $2 AND userId = $3 `;
 
-      let queryParams = [payslipmonth, payslipyear, userId];
+      let queryParams = [payslipmonth, payslipyear, userid];
       let findMatchingdata = await query(querydata2, queryParams);
       console.log(findMatchingdata.rows, "findMatchingdata row");
 
@@ -324,25 +325,46 @@ export module PayslipServices {
         console.log(data);
         const mergedData = { ...existPayslipRecords, ...data };
         console.log(mergedData, "mergedData");
-        const fieldNames = Object.keys(mergedData);
-        const fieldValues = Object.values(mergedData);
+
+        //remove uuid
+        const { uuid, ...mergedDataFields } = mergedData;
+
+        const fieldNames = Object.keys(mergedDataFields);
+        const fieldValues = Object.values(mergedDataFields);
 
         let querydata;
         let params = [];
         let existPayslipRecord = existPayslipRecords[0];
         // If id is not provided, insert a new scheduled interview
+        console.log(existPayslipRecord, "existPayslipRecord");
+        // querydata = `UPDATE  payslips SET(${fieldNames.join(
+        //   ", "
+        // )}) VALUES (${fieldValues
+        //   .map((_, index) => `$${index + 1}`)
+        //   .join(", ")}) WHERE id = ${mergedData.id}  RETURNING *`;
 
-        querydata = `UPDATE  payslips SET(${fieldNames.join(
-          ", "
-        )}) VALUES (${fieldValues
-          .map((_, index) => `$${index + 1}`)
-          .join(", ")}) WHERE id = ${mergedData.id}  RETURNING *`;
-        params = fieldValues;
+        querydata = `UPDATE payslips SET ${fieldNames
+          .map((field, index) => `${field} = $${index + 1}`)
+          .join(", ")} WHERE id = $${fieldNames.length + 1} RETURNING *`;
 
-        const result = await query(querydata, params);
-        console.log(querydata, "********** querydata result");
+        params = [...fieldValues, mergedData.id];
+        let upsertPayslipResult;
+        console.log(querydata, "querydata");
+        console.log(params, "params");
+        try {
+          console.log("try");
+          upsertPayslipResult = await query(querydata, params);
+          console.log(
+            upsertPayslipResult,
+            "********** upsertPayslipResult result"
+          );
+        } catch (error) {
+          console.log("catch");
+          console.log(error.message, "upsert payslip error ");
+        }
+
         return {
-          message: `${result.rowCount} payslips Updated`,
+          message: `${upsertPayslipResult.rowCount} payslips Updated`,
         };
       } else {
         console.log("else ***");
