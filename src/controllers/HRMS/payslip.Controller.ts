@@ -30,3 +30,15 @@ export async function generateBulkPayslip(request: any, reply: any) {
     reply.send(error.message);
   }
 }
+
+
+export async function getPayslipByUserMonth(request: any, reply: any) {
+  //generate payslip for single user request body has userId,Month,year
+  console.log("getPayslipByUserMonth");
+  try {
+    let result = await PayslipServices.getPayslipByUserMonth(request);
+    return result;
+  } catch (error) {
+    reply.send(error.message);
+  }
+}

@@ -407,4 +407,22 @@ export module PayslipServices {
     console.log(result.rows);
     return result.rows;
   }
+
+  export async function getPayslipByUserMonth(request) {
+    console.log(request,"getPayslipByUserMonth");
+    const { month, year, userId } = request.params;
+    try {
+      let querydata = `SELECT * FROM payslips WHERE paySlipMonth = $1 AND payslipyear = $2 AND userId = $3`;
+      let queryParams = [month, year, userId];
+      let result = await query(querydata, queryParams);
+      console.log(result, "QueryResult getPayslipByUserMonth");
+      return result.rows
+  }
+  catch (error) {
+      return error.message
+  }
+  }
+
 }
+
+

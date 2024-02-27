@@ -149,6 +149,7 @@ import {
   generateBulkPayslip,
   generatePayslip,
   getPaySlip,
+  getPayslipByUserMonth,
 } from "../../controllers/HRMS/payslip.Controller.js";
 import { generatePayslipFile } from "../../utils/HRMS/payslipGenerator.js";
 import {
@@ -228,7 +229,7 @@ const Routes = function (
 
   //Payslip
 
-  fastify.get("/payslip/:userId/:month/:year", generatePayslip);
+  fastify.get("/payslip/:userId/:month/:year", getPayslipByUserMonth);
   fastify.get("/payslip/bulk/:month/:year", generateBulkPayslip);
   fastify.post("/payslip/file", generatePayslipFile);
 
