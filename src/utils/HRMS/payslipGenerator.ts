@@ -86,6 +86,7 @@ export const generateBulkPayslipFile = async (request, payslipJSON) => {
 
 const fileGeneration = async (data, protocol, host) => {
   //   const currentEpochTimeInSeconds = Math.floor(Date.now() / 1000);
+  console.log(data,"fileGeneration data")
   const content = await fs.promises.readFile(
     path.resolve("CD_paySlip.docx"),
     "binary"
@@ -127,7 +128,7 @@ const fileGeneration = async (data, protocol, host) => {
 
   await fs.promises.writeFile(docxFilePath, buf);
   let payslipUrl = await convertToPdf(docxFilePath, pdfFilePath);
-
+    console.log(payslipUrl,"payslipUrl")
   return {
     userId: data.userId,
     fileName: payslipUrl,

@@ -20,8 +20,22 @@ export async function getMonthAndYearFromUTC(month: any, year: any) {
             "November",
             "December",
         ];
-        const monthIndex = months.indexOf(month);
-        console.log(monthIndex)
+        const months1 = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+        ];
+        const monthIndex = month.length===3 ? months1.indexOf(month): months.indexOf(month) ;
+        console.log(monthIndex,"monthIndex")
         if (monthIndex !== -1) {
             console.log(startDate)
             console.log(endDate)

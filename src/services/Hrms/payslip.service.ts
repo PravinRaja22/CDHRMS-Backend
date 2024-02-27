@@ -1,6 +1,6 @@
 import { array } from "joi";
 import { query } from "../../database/postgress.js";
-import { generateBulkPayslipFile } from "../../utils/HRMS/payslipGenerator.js";
+import { generateBulkPayslipFile ,generatePayslipFile} from "../../utils/HRMS/payslipGenerator.js";
 import { userService } from "./user.service.js";
 export module PayslipServices {
   export async function generatePayslip(request: any) {
@@ -62,13 +62,28 @@ export module PayslipServices {
       console.log("%%%%%%%%%%%%%");
       // console.log(getAttendance, "getAttendance result1");
       if (getAttendance.rowCount > 0) {
-        let payslipAmount = calculatePayslip(
+        console.log("if calculate payslip  getAttendance has records ")
+        let generatePayslip = await calculatePayslip(
           getAttendance.rows,
           totalNumberOfDays,
           request
         );
-        return payslipAmount;
+        console.log(generatePayslip,"generatePayslip")
+        let payslipAmounts = [generatePayslip]
+        let payslipFile;
+        console.log(payslipAmounts,"payslipAmounts")
+        if (payslipAmounts.length > 0) {
+          payslipFile =  await generateBulkPayslipFile(request, payslipAmounts);
+          console.log(payslipFile, "payslipFile generateBulkPayslipFile")
+          return payslipFile; //payslipAmounts
+          // Return array of payslip amounts OR paylsipFile inserted file
+        } else {
+          return payslipAmounts;
+        }
+
+        return generatePayslip;
       } else {
+        console.log("else  getAttendance has no records ")
         return [];
       }
     } catch (error) {
@@ -148,6 +163,7 @@ export module PayslipServices {
           console.log(getAttendance, "getAttendance");
 
           if (getAttendance.rowCount > 0) {
+            console.log("if getAttendance has rec , call calculate payslip")
             let payslipAmount = await calculatePayslip(
               getAttendance.rows,
               totalNumberOfDays,
@@ -156,6 +172,7 @@ export module PayslipServices {
             console.log(payslipAmount, "payslipAmount");
             payslipAmounts.push(payslipAmount);
           } else {
+            console.log("else getAttendance no records")
             // payslipAmounts.push([]);
           }
         }
@@ -191,6 +208,7 @@ export module PayslipServices {
     console.log(attendanceRecords, "calculatePayslip attendanceRecords");
     //GET Users Records
     // console.log(object);
+    let result;
     try {
       let joinUsersResult: any = await userService.getSingleUser(userid);
 
@@ -277,11 +295,13 @@ export module PayslipServices {
       //   "/" +
       //   final[0].payslipUrl;
       // console.log(fileurl, "DSA");
-
+      result= obj
       return obj;
     } catch (error) {
       console.log(error.message, "getusers error");
+
     }
+  
   };
 
   export async function insertpaySlip(data: any) {

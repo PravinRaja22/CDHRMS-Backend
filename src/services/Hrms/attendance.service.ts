@@ -57,18 +57,17 @@ export module attendanceService {
  
   export async function getAttendanceByUserIdMonth(params: any) {
     try {
-      console.log(params);
+      console.log(params,"getAttendanceByUserIdMonth");
       const { userId, month, year } = params;
       console.log(month);
       console.log(year);
       let result = await getMonthAndYearFromUTC(month, year);
-      console.log("test");
       console.log(result);
       const queryData: any = await query(
         `SELECT * FROM attendances WHERE userId = $1 AND date >=${result.startTime} AND date <= ${result.endTime}`,
         [userId]
       );
-      console.log(queryData.rows.length);
+      console.log(queryData,"query result");
       return queryData.rows;
     } catch (error) {}
   }
@@ -191,7 +190,10 @@ export module attendanceService {
       console.log("^^^^^^^^");
       const today = new Date();
       today.getMonth();
- 
+
+      //get existing attendance 
+      let existingAttendanceRecords  = await attendanceService.getAttendanceByUserIdMonth(values)
+      console.log(existingAttendanceRecords,"existingAttendanceRecords result ")
       let ar = [];
       let currentDate = new Date(startDate); // Initialize currentDate with startDate
  
@@ -235,8 +237,8 @@ export module attendanceService {
             shiftEnd: "18:00",
           },
         };
- 
-        await upsertAttendanceRecord(record);
+
+        // await upsertAttendanceRecord(record);
         // Move to the next day
         currentDate.setDate(currentDate.getDate() + 1);
       }
