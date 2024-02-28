@@ -37,8 +37,6 @@ export async function getMonthAndYearFromUTC(month: any, year: any) {
         const monthIndex = month.length===3 ? months1.indexOf(month): months.indexOf(month) ;
         console.log(monthIndex,"monthIndex")
         if (monthIndex !== -1) {
-            console.log(startDate)
-            console.log(endDate)
             startDate = new Date(year, monthIndex, 1);
             endDate = new Date(year, monthIndex + 1, 0);
             totalNumberOfDays = endDate.getDate();

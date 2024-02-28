@@ -2,6 +2,7 @@ import { query } from "../../database/postgress.js";
 import { QueryResult } from "pg";
 import { getMonthAndYearFromUTC } from "../../utils/HRMS/getMonthandYearFromutc.js";
 import { getStartandEndTIme } from "../../utils/HRMS/getStarttimeandEndTIme.js";
+import { CloudHSM } from "aws-sdk";
 export module attendanceService {
   export async function getAttendanceData() {
     try {
@@ -194,56 +195,73 @@ export module attendanceService {
       //get existing attendance 
       let existingAttendanceRecords  = await attendanceService.getAttendanceByUserIdMonth(values)
       console.log(existingAttendanceRecords,"existingAttendanceRecords result ")
-      let ar = [];
+      let ar = {success:0,failure:0}
       let currentDate = new Date(startDate); // Initialize currentDate with startDate
- 
+
       while (currentDate <= endDate) {
         const dateInMillis = currentDate.getTime();
- 
-        const record = {
-          userId,
-          date: dateInMillis,
-          signin: {
-            data: [
-              {
-                // timeStamp: currentDate.getDay() === 0 || currentDate.getDay() === 6 ?  null : dateInMillis + 9 * 60 * 60 * 1000,
-                timeStamp:
-                  currentDate.getDay() === 0 || currentDate.getDay() === 6
-                    ? null
-                    : null,
-                lat: 0,
-                lng: 0,
-              },
-            ],
-          },
-          signout: {
-            data: [
-              {
-                //timeStamp: currentDate.getDay() === 0 || currentDate.getDay() === 6 ? null : dateInMillis + 18 * 60 * 60 * 1000 ,
-                timeStamp: null,
-                lat: 0,
-                lng: 0,
-              },
-            ],
-          },
-          isweekend: currentDate.getDay() === 0 || currentDate.getDay() === 6, // Sunday or Saturday
-          status:
-            currentDate.getDay() === 0 || currentDate.getDay() === 6
-              ? "weekoff"
-              : null,
-          shift: {
-            shiftType: "GS",
-            shiftStart: "09:00",
-            shiftEnd: "18:00",
-          },
-        };
+       
+        let existRecord = existingAttendanceRecords.find(record=>Number(record.date) === dateInMillis)
+        console.log(existRecord,"existRecord")
+        if(!existRecord){
+          const record = {
+            userId,
+            date: dateInMillis,
+            signin: {
+              data: [
+                {
+                  // timeStamp: currentDate.getDay() === 0 || currentDate.getDay() === 6 ?  null : dateInMillis + 9 * 60 * 60 * 1000,
+                  timeStamp:
+                    currentDate.getDay() === 0 || currentDate.getDay() === 6
+                      ? null
+                      : null,
+                  lat: 0,
+                  lng: 0,
+                },
+              ],
+            },
+            signout: {
+              data: [
+                {
+                  //timeStamp: currentDate.getDay() === 0 || currentDate.getDay() === 6 ? null : dateInMillis + 18 * 60 * 60 * 1000 ,
+                  timeStamp: null,
+                  lat: 0,
+                  lng: 0,
+                },
+              ],
+            },
+            isweekend: currentDate.getDay() === 0 || currentDate.getDay() === 6, // Sunday or Saturday
+            status:
+              currentDate.getDay() === 0 || currentDate.getDay() === 6
+                ? "weekoff"
+                : null,
+            shift: {
+              shiftType: "GS",
+              shiftStart: "09:00",
+              shiftEnd: "18:00",
+            },
+          };
+  
+          try {
+            await upsertAttendanceRecord(record);
+            ar.success++;
+          } catch (error) {
+            console.log("Error inserting record:", error);
+            ar.failure++;
+          }
 
-        await upsertAttendanceRecord(record);
+          // await upsertAttendanceRecord(record);
+        }
+        else{
+          ar.failure++
+        }
+       
         // Move to the next day
         currentDate.setDate(currentDate.getDate() + 1);
       }
       return ar;
     } catch (error) {
+    
       return error.message;
     }
   }
