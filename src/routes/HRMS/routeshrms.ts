@@ -148,6 +148,7 @@ import {
 import {
   generateBulkPayslip,
   generatePayslip,
+  getAllPaySlipData,
   getPaySlip,
   getPayslipByUserMonth,
 } from "../../controllers/HRMS/payslip.Controller.js";
@@ -159,7 +160,12 @@ import {
 } from "../../controllers/HRMS/medicalInsurance.Controller.js";
 import { filesUpload, Multer } from "../../multer/Multer.js";
 import { testing } from "../../controllers/HRMS/testing.controller.js";
-import { getTimeSheet, getTimeSheetForMonthandYear, getTimeSheetbydateanduser, upsertTimeSheet } from "../../controllers/HRMS/timeSheet.controller.js";
+import {
+  getTimeSheet,
+  getTimeSheetForMonthandYear,
+  getTimeSheetbydateanduser,
+  upsertTimeSheet,
+} from "../../controllers/HRMS/timeSheet.controller.js";
 
 const Routes = function (
   fastify: FastifyInstance,
@@ -211,7 +217,10 @@ const Routes = function (
   fastify.get("/attendance/:userId/:attendanceDate", getAttendanceByUserIdDate);
   fastify.get("/attendance/:userId/:month/:year", getAttendaceForMonthandYear);
   fastify.put("/attendance/:userId/:attendanceDate", updateAttendance);
-  fastify.put("/attendance/status/:attendanceDate/:userId", updateAttendanceStatus);
+  fastify.put(
+    "/attendance/status/:attendanceDate/:userId",
+    updateAttendanceStatus
+  );
   fastify.get("/attendance/:id", getsingleAttendance);
   fastify.post("/attendance/bulk", upsertBulkAttendance);
   fastify.post("/attendance/time/:userId", upsertAttendancetime);
@@ -234,6 +243,7 @@ const Routes = function (
   fastify.post("/payslip/file", generatePayslipFile);
 
   fastify.get("/payslip/file/:userId/:month/:year", getPaySlip);
+  fastify.get("/payslips", getAllPaySlipData);
 
   //Approval
 

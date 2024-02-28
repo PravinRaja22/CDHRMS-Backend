@@ -409,20 +409,47 @@ export module PayslipServices {
   }
 
   export async function getPayslipByUserMonth(request) {
-    console.log(request,"getPayslipByUserMonth");
+    console.log(request, "getPayslipByUserMonth");
     const { month, year, userId } = request.params;
     try {
       let querydata = `SELECT * FROM payslips WHERE paySlipMonth = $1 AND payslipyear = $2 AND userId = $3`;
       let queryParams = [month, year, userId];
       let result = await query(querydata, queryParams);
       console.log(result, "QueryResult getPayslipByUserMonth");
-      return result.rows
-  }
-  catch (error) {
-      return error.message
-  }
+      return result.rows;
+    } catch (error) {
+      return error.message;
+    }
   }
 
+  export async function getAllPaySlipData(request) {
+    console.log("Inside Get All Pay Slip Data");
+    let keys = Object.keys(request.query);
+    let values = Object.values(request.query);
+    console.log(keys, values, "getpayslipdatabyuserquery");
+
+    const conditions = keys
+      .map((key, index) => `LOWER( payslips.${key}) LIKE LOWER($${index + 1})`)
+      .join(" AND ");
+    let params = values.map((value) => `%${value}%`);
+
+    try {
+      let queryData = `SELECT payslips.*,
+      jsonb_build_object(
+          'id', users.id,
+          'firstname', users.firstname,
+            'lastname', users.lastname,
+              'employeeid', users.employeeid
+      ) AS "jsonPayslipUsers"
+      FROM
+      payslips
+      INNER JOIN users ON users.id = payslips.userid
+      WHERE ${conditions}`;
+      let result = await query(queryData, params);
+      console.log(result.rows, "Query Result getAllPaySlipData");
+      return result.rows;
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
 }
-
-
