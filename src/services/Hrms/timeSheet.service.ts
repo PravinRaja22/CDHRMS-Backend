@@ -81,7 +81,7 @@ export module timeSheetServices {
     //              fieldNames = Object.keys(upsertFields);
     //              fieldValues = Object.values(upsertFields);
     //         }
-              
+
 
     //             let querydata;
     //             let params = [];
@@ -111,7 +111,7 @@ export module timeSheetServices {
     //                     } successfully.`,
     //             };
 
-            
+
 
     //     } catch (error) {
     //         console.error(error);
@@ -123,11 +123,11 @@ export module timeSheetServices {
         try {
             console.log(data);
             let existingData = await getTimeSheetbydateanduser(data.userId, data.date);
-            console.log(existingData ,'existing Data');
+            console.log(existingData, 'existing Data');
             let fieldNames, fieldValues, querydata, params;
-    
+
             if (existingData && existingData.length > 0) {
-              console.log('if Conditions');
+                console.log('if Conditions');
                 const mergedData = existingData.map(item => ({
                     ...item,
                     timesheetdata: {
@@ -137,32 +137,66 @@ export module timeSheetServices {
                         ]
                     }
                 }));
-    
-                const { id,uuid, ...upsertFields } = mergedData[0];
-                fieldNames = Object.keys(upsertFields);
-                fieldValues = Object.values(upsertFields);
-                querydata = `UPDATE timesheets SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(", ")} WHERE id = $${fieldNames.length + 1}`;
-                params = [...fieldValues, id];
+
+                const { id, uuid, ...upsertFields } = mergedData[0];
+                let totalHours = 0;
+                mergedData.forEach((s) => {
+                    s.timesheetdata.data.forEach((e) => {
+                        totalHours = Number(e.hours) + totalHours
+                    })
+                })
+                if (totalHours <= 9) {
+                    console.log(totalHours, 'Total Hours ');
+                    fieldNames = Object.keys(upsertFields);
+                    fieldValues = Object.values(upsertFields);
+                    querydata = `UPDATE timesheets SET ${fieldNames.map((field, index) => `${field} = $${index + 1}`).join(", ")} WHERE id = $${fieldNames.length + 1}`;
+                    params = [...fieldValues, id];
+                    const result = await query(querydata, params);
+                    return {
+                        message: `${result.rowCount} Time Sheet ${result.rowCount === 1 ? "updated" : "inserted"} successfully.`,
+                    };
+                }
+                else if (totalHours > 9) {
+                    console.log('else if condition');
+                    return { status: 'failure', message: 'you are applying time sheet for more than allowed 9 hours.' }
+                }
+
             } else {
                 // Insert new data if no match found
-                console.log('inside else');
-                const { id, ...upsertFields } = data;
-                fieldNames = Object.keys(upsertFields);
-                fieldValues = Object.values(upsertFields);
-                querydata = `INSERT INTO timesheets (${fieldNames.join(", ")}) VALUES (${fieldValues.map((_, index) => `$${index + 1}`).join(", ")}) RETURNING *`;
-                params = fieldValues;
+                let totalHours = 0;
+                console.log(  data.timeSheetdata.data ,'data value is ');
+                data.timeSheetdata.data.forEach((s) => {
+                        totalHours = Number(s.hours) + totalHours
+                })
+                console.log(totalHours ,'Total Hpurs new insert');
+                if (totalHours <= 9) {
+                    console.log('inside else');
+                    const { id, ...upsertFields } = data;
+                    fieldNames = Object.keys(upsertFields);
+                    fieldValues = Object.values(upsertFields);
+                    querydata = `INSERT INTO timesheets (${fieldNames.join(", ")}) VALUES (${fieldValues.map((_, index) => `$${index + 1}`).join(", ")}) RETURNING *`;
+                    params = fieldValues;
+                    const result = await query(querydata, params);
+                    return {
+                        status: 'sucess', message: `${result.rowCount} Time Sheet ${result.rowCount === 1 ? "updated" : "inserted"} successfully.`,
+                    };
+
+                }
+                else if (totalHours > 9) {
+                    console.log('else if condition');
+                    return { status: 'failure', message: 'you are applying time sheet for more than allowed 9 hours.' }
+                }
+
+
             }
-    
-            const result = await query(querydata, params);
-    
-            return {
-                message: `${result.rowCount} Time Sheet ${result.rowCount === 1 ? "updated" : "inserted"} successfully.`,
-            };
-    
+
+
+           
+
         } catch (error) {
             console.error(error);
             return { error: error.message };
         }
     }
-    
+
 }

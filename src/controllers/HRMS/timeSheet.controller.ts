@@ -20,7 +20,16 @@ export async function upsertTimeSheet(request: any, reply: any) {
   try {
     console.log('upsert Users are')
     let result = await timeSheetServices.upserttimeSheetServices(request.body)
-    reply.send(result)
+    console.log(result.status ,'result in timesheet');
+
+    if(result.status === 'failure'){
+      console.log(result.status ,'inside failure');
+      reply.status(404).send(result)
+
+  }
+  else{
+      reply.send(result)
+  }
   } catch (error: any) {
     reply.status(500).send(error.message);
   }
