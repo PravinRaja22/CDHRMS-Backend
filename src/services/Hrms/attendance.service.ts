@@ -460,9 +460,9 @@ export module attendanceService {
     console.log(signIns, "signIns aaaaaaaaaaa");
     console.log(signOuts, "signOuts aaaaaaaaaaa");
  
-    let dateA: any = new Date(signIns[0].timeStamp);
-    let dateB: any = new Date(signOuts[0].timeStamp);
-    let timeDifference = dateB - dateA;
+    let dateA: any = new Date(Number(signIns[0].timeStamp));
+    let dateB: any = new Date(Number(signOuts[0].timeStamp));
+    let timeDifference = Number(dateB) - Number(dateA);
  
     // Convert the time difference to hours
  
