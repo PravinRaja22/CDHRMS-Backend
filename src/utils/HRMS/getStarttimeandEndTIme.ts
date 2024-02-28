@@ -38,8 +38,10 @@ export async function getStartandEndTIme(month, year) {
     }
     console.log("startTime")
     console.log("endTime")
-    const startTime = startDate.setUTCHours(0, 0, 0, 0);
-    const endTime = endDate.setUTCHours(23, 59, 59, 999);
+    // const startTime = startDate.setUTCHours(0, 0, 0, 0);
+    // const endTime = endDate.setUTCHours(23, 59, 59, 999);
+    const startTime = startDate.setHours(0, 0, 0, 0);
+    const endTime = endDate.setHours(23, 59, 59, 999);
     console.log(startTime)
     console.log(endTime)
     return { startTime, endTime }
