@@ -267,7 +267,9 @@ export module PayslipServices {
       );
       let obj = {
         userId: `${userRecord?.id}`,
-        name: `${userRecord?.firstname}_${userRecord?.lastname}`,
+        name: `${userRecord?.firstname} ${
+          userRecord?.lastname === null ? "" : userRecord?.lastname
+        }`,
         paySlipMonth: month,
         paySlipYear: year,
         employeeNo: userRecord?.employeeid,
@@ -537,6 +539,7 @@ export module PayslipServices {
             // payslipAmounts.push([]);
           }
         }
+        return payslipAmounts;
         // let payslipFile;
         // if (payslipAmounts.length > 0) {
         //   payslipFile = await generateBulkPayslipFile(request, payslipAmounts);
