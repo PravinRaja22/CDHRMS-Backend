@@ -146,6 +146,7 @@ import {
   upsertDeclaredTaxAmountData,
 } from "../../controllers/HRMS/declaredTaxAmount.Controller.js";
 import {
+  generateBulkPaySlipData,
   generateBulkPayslip,
   generatePayslip,
   getAllPaySlipData,
@@ -241,9 +242,9 @@ const Routes = function (
   fastify.get("/payslip/:userId/:month/:year", getPayslipByUserMonth);
   fastify.get("/payslip/bulk/:month/:year", generateBulkPayslip);
   fastify.post("/payslip/file", generatePayslipFile);
-
   fastify.get("/payslip/file/:userId/:month/:year", getPaySlip);
   fastify.get("/payslips", getAllPaySlipData);
+  fastify.get("/payslip/bulk-data/:month/:year", generateBulkPaySlipData);
 
   //Approval
 

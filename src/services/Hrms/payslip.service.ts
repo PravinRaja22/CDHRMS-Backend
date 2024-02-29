@@ -452,4 +452,106 @@ export module PayslipServices {
       console.log(error.message);
     }
   }
+
+  export async function generateBulkPayslipData(request) {
+    console.log("generateBulkPayslip control");
+    console.log("generateBulkPayslip", request);
+    const { month, year, utcSec } = request.params;
+
+    let startDate;
+    let endDate;
+    let totalNumberOfDays;
+
+    if (month && year) {
+      const months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+      const monthIndex = months.indexOf(month);
+      console.log(monthIndex, "monthIndex");
+      if (monthIndex !== -1) {
+        startDate = new Date(year, monthIndex, 1);
+        endDate = new Date(year, monthIndex + 1, 0);
+        totalNumberOfDays = endDate.getDate();
+      }
+    } else if (utcSec) {
+      const utcDate = new Date(utcSec);
+      startDate = new Date(utcDate.getUTCFullYear(), utcDate.getUTCMonth(), 1);
+      endDate = new Date(
+        utcDate.getUTCFullYear(),
+        utcDate.getUTCMonth() + 1,
+        0
+      );
+      totalNumberOfDays = endDate.getDate();
+    } else {
+      console.log("Invalid parameters");
+      return;
+    }
+
+    const startTime = startDate.setHours(0, 0, 0, 0);
+    const endTime = endDate.setHours(23, 59, 59, 999);
+    console.log(startDate, "* startDate");
+    console.log(endDate, "* endDate");
+    console.log(endTime, "* endTime *startTime", startTime);
+
+    try {
+      let result = await query(
+        `SELECT id, joiningdate, userName FROM users
+                                  WHERE joiningDate < ${endTime}`,
+        {}
+      );
+      console.log(result, "result users*** ");
+
+      if (result.rowCount > 0) {
+        let payslipAmounts = []; // Array to store payslip amounts
+
+        for (const item of result.rows) {
+          console.log(item, "item ***");
+          let queryData = `SELECT * FROM attendances WHERE userId = ${item.id} AND date>= ${startTime} AND date<=${endTime}`;
+          console.log(queryData, "queryData");
+
+          let getAttendance = await query(queryData, {});
+          console.log(getAttendance, "getAttendance");
+
+          if (getAttendance.rowCount > 0) {
+            console.log("if getAttendance has rec , call calculate payslip");
+            let payslipAmount = await calculatePayslip(
+              getAttendance.rows,
+              totalNumberOfDays,
+              request
+            );
+            console.log(payslipAmount, "payslipAmount");
+            payslipAmounts.push(payslipAmount);
+          } else {
+            console.log("else getAttendance no records");
+            // payslipAmounts.push([]);
+          }
+        }
+        // let payslipFile;
+        // if (payslipAmounts.length > 0) {
+        //   payslipFile = await generateBulkPayslipFile(request, payslipAmounts);
+        //   console.log(payslipFile, "payslipFile *******");
+        //   return payslipFile; //payslipAmounts
+        //   // Return array of payslip amounts OR paylsipFile inserted file
+        // } else {
+        //   return payslipAmounts;
+        // }
+      } else {
+        return [];
+      }
+    } catch (error) {
+      console.log(error.message, "getAttendance error");
+      return error.message;
+    }
+  }
 }

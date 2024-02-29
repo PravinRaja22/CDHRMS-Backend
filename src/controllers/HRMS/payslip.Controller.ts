@@ -52,3 +52,14 @@ export async function getAllPaySlipData(request: any, reply: any) {
     reply.send(error.message);
   }
 }
+
+export async function generateBulkPaySlipData(request: any, reply: any) {
+  console.log("inside generateBulkPaySlipData");
+  console.log(request, "request from generateBulkPaySlipData");
+  try {
+    let result = await PayslipServices.generateBulkPayslipData(request);
+    return result;
+  } catch (error) {
+    reply.send(error.message);
+  }
+}
