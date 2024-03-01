@@ -266,7 +266,7 @@ export module attendanceService {
     }
   }
  
-  export async function       upsertAttendanceRecord(record: any) {
+  export async function  upsertAttendanceRecord(record: any) {
     // Your upsert or insert logic goes here
     console.log("Upserting record:", record);
     let fieldNames = Object.keys(record);

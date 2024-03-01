@@ -1,7 +1,12 @@
 import { QueryResult } from "pg";
 import { query } from "../../database/postgress.js";
 import { getStartandEndTIme } from "../../utils/HRMS/getStarttimeandEndTIme.js";
-
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+import path from "path";
+import ExcelJS from 'exceljs'
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 export module timeSheetServices {
     export async function gettimeSheetServices(userId) {
         try {
@@ -51,6 +56,185 @@ export module timeSheetServices {
             return error.message
         }
     }
+
+
+    // non template function
+    // export async function excelGenearator(request ,reply) {
+    //     try {
+    //         const data = request.body
+    //         const workbook = new ExcelJS.Workbook();
+    //         const worksheet = workbook.addWorksheet('Timesheet');
+    //         // Define column headers
+    //         worksheet.columns = [
+    //         //   { header: 'S.No', key: 'sno', width: 10 },
+    //           { header: 'Date', key: 'date', width: 10 },
+    //           { header: 'Hours', key: 'hours', width: 10 },
+    //           { header: 'Task Name', key: 'taskName', width: 20 },
+    //           { header: 'Project Name', key: 'projectName', width: 20 },
+    //           { header: 'Task Description', key: 'taskDescription', width: 30 }
+    //         ];
+
+    //         // Add data rows
+    //         data.forEach(entry => {
+    //           const dataset = new Date(Number(entry.date))
+    //           const datevalue = `${dataset.getDate()}/${dataset.getMonth() + 1}/${dataset.getFullYear()}`
+    //           entry.timesheetdata.data.forEach((row, index) => {
+    //             worksheet.addRow({
+    //             //   sno: index + 1,
+    //               date: datevalue,
+    //               hours: row.hours,
+    //               taskName: row.taskName,
+    //               projectName: row.porjectName,
+    //               taskDescription: row.taskdescription
+    //             });
+    //           });
+    //         });
+
+    //         // Generate a unique filename for the Excel file
+    //         const fileName = `timesheet_${Date.now()}.xlsx`;
+    //         const filePath = path.join(__dirname, '../../../uploads', fileName);
+
+    //         // Save the workbook to a file
+    //         await workbook.xlsx.writeFile(filePath);
+    //         const fileUrl = `${request.protocol}://${request.headers.host}/${fileName}`;
+
+    //         // Send the generated Excel file back to the client
+    //         reply.header('Content-Disposition', `attachment; filename="${fileName}"`);
+    //         reply.type('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    //         reply.send(fileUrl);
+    //       } catch (error) {
+    //         console.error('Error generating Excel file:', error);
+    //         reply.code(500).send('Error generating Excel file');
+    //       }
+    // }
+
+
+    //// template single record function
+
+    //     export async function excelGenearator(request, reply) {
+    //         try {
+    //             const data = request.body;
+
+    //             // Load the template Excel file
+    //             const templatePath = path.join(__dirname, '../../../excel/Timesheet_Template.xlsx');
+    //             const workbook = new ExcelJS.Workbook();
+    //             await workbook.xlsx.readFile(templatePath);
+    //             const worksheet = workbook.getWorksheet('sheet1');
+    //             console.log(worksheet, 'WORK SHEETS');
+    //             if (!worksheet) {
+    //                 console.error('Worksheet not found');
+    //                 reply.code(500).send('Worksheet not found');
+    //                 return;
+    //             }
+    //         //  let dta =    worksheet. getRow(6).values
+    //         //  console.log(dta ,'Data set reand');
+
+
+    //         //     // Add data rows
+    //         //     data.forEach(entry => {
+    //         //         const dataset = new Date(Number(entry.date));
+    //         //         const datevalue = `${dataset.getDate()}/${dataset.getMonth() + 1}/${dataset.getFullYear()}`;
+    //         //         entry.timesheetdata.data.forEach((row, index) => {
+    //         //             worksheet.addRow({
+    //         //                 date: datevalue,
+    //         //                 "No. of Hours": row.hours,
+    //         //                 "Task Type": row.taskName,
+    //         //                 projectName: row.porjectName, // Corrected typo in property name
+    //         //                 "Task Description": row.taskdescription // Corrected typo in property name
+    //         //             });
+    //         //         });
+    //         //     });
+
+    //         const headersRow = worksheet.getRow(6); // Assuming headers are in the first row
+    // console.log(headersRow.values,'Header Row');
+    // headersRow.values.forEach((e,index)=>{
+    //     console.log(e);
+    //     console.log(index);
+    // })
+    // // Find the indices of the headers you want to bind data to
+    // let hoursIndex = headersRow.values.findIndex(header => header === 'No. of Hours');
+    // let taskTypeIndex = headersRow.values.findIndex(header => header === 'Task Type');
+    // let taskDescriptionIndex = headersRow.values.findIndex(header => header === 'Task Description'); 
+    // let dateIndex = headersRow.values.findIndex(header => header === 'Date (dd/mm/yy)');
+    // hoursIndex = hoursIndex -1
+    // taskTypeIndex = taskTypeIndex -1
+    // taskDescriptionIndex = taskDescriptionIndex-1
+    // dateIndex = dateIndex-1
+    // console.log(hoursIndex ,'Hours Index');
+    // console.log(taskTypeIndex ,'Task Type Index');
+    // console.log(taskDescriptionIndex ,'taskDescriptionIndex Index');
+    // console.log(dateIndex ,'date Index');
+    // // Iterate through the data and bind values to the respective columns
+    // data.forEach((entry, entryIndex) => {
+    //     const dataset = new Date(Number(entry.date));
+    //     const datevalue = `${dataset.getDate()}/${dataset.getMonth() + 1}/${dataset.getFullYear()}`;
+
+    //     entry.timesheetdata.data.forEach((row, rowIndex) => {
+    //         // Add data row
+    //         const targetRowIndex = headersRow.number + 1 + rowIndex; // Add 1 to skip the header row
+    // row.date = datevalue
+    //         const newRow = worksheet.addRow({
+    //             date: row.date,
+    //             hours: row.hours,
+    //             taskName: row.taskName,
+    //             projectName: row.porjectName,
+    //             taskDescription: row.taskdescription
+    //         },targetRowIndex);
+
+    //         // Calculate the row index where data is inserted
+    //         // const targetRowIndex = newRow.number;
+
+    //         // Bind values to respective columns
+    //         if (hoursIndex !== -1) {
+    //             console.log('if hoursIndex');
+    //             console.log(row.hours ,'before hours');
+
+    //             worksheet.getCell(`${String.fromCharCode(65 + hoursIndex)}${targetRowIndex}`).value = row.hours;
+    //             console.log(row.hours ,'after hours');
+
+    //         }
+
+    //         if (taskTypeIndex !== -1) {
+    //             console.log('if taskTypeIndex'); 
+    //             console.log(row.taskName ,'before taskName');
+    //             console.log(targetRowIndex ,'target row index');
+    //             worksheet.getCell(`${String.fromCharCode(65 + taskTypeIndex)}${targetRowIndex}`).value = row.taskName;
+    //             console.log(row.taskName ,'after taskName');
+    //         }
+    //         if (taskDescriptionIndex !== -1) {
+    //             console.log('if taskDescriptionIndex'); 
+    //             console.log(row.taskdescription ,'before taskDescriptionIndex');
+    //             console.log(targetRowIndex ,'target row index');
+    //             worksheet.getCell(`${String.fromCharCode(65 + taskDescriptionIndex)}${targetRowIndex}`).value = row.taskdescription;
+    //             console.log(row.taskdescription ,'after taskDescriptionIndex');
+    //         }
+    //         if (dateIndex !== -1) {
+    //             console.log('if date'); 
+    //             console.log(row.date ,'before datevalue');
+    //             console.log(targetRowIndex ,'target row index');
+    //             worksheet.getCell(`${String.fromCharCode(65 + dateIndex)}${targetRowIndex}`).value = row.date;
+    //             console.log(row.date ,'after datevalue');
+    //         }
+    //     });
+    // });
+
+    //             // Generate a unique filename for the Excel file
+    //             const fileName = `timesheet_${Date.now()}.xlsx`;
+    //             const filePath = path.join(__dirname, '../../../uploads', fileName);
+
+    //             // Save the modified workbook to a new file
+    //             await workbook.xlsx.writeFile(filePath);
+    //             const fileUrl = `${request.protocol}://${request.headers.host}/${fileName}`;
+
+    //             // Send the generated Excel file back to the client
+    //             reply.header('Content-Disposition', `attachment; filename="${fileName}"`);
+    //             reply.type('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    //             reply.send(fileUrl);
+    //         } catch (error) {
+    //             console.error('Error generating Excel file:', error);
+    //             reply.code(500).send('Error generating Excel file');
+    //         }
+    //     }
 
     // export async function upserttimeSheetServices(data) {
     //     try {
@@ -119,6 +303,185 @@ export module timeSheetServices {
     //     }
     // }
 
+    //template function  workded important 
+    export async function excelGenearator(request, reply) {
+        try {
+            const data = request.body;
+            const templatePath = path.join(__dirname, '../../../excel/Timesheet_Template.xlsx');
+            const workbook = new ExcelJS.Workbook();
+            await workbook.xlsx.readFile(templatePath);
+            const worksheet = workbook.getWorksheet('sheet1');
+
+            if (!worksheet) {
+                console.error('Worksheet not found');
+                reply.code(500).send('Worksheet not found');
+                return;
+            }
+
+            const headersRow = worksheet.getRow(6); // Assuming headers are in the sixth row
+
+            // Find the indices of the headers you want to bind data to
+            let hoursIndex = headersRow.values.findIndex(header => header === 'No. of Hours') - 1;
+            let taskTypeIndex = headersRow.values.findIndex(header => header === 'Task Type') - 1;
+            let taskDescriptionIndex = headersRow.values.findIndex(header => header === 'Task Description') - 1;
+            let dateIndex = headersRow.values.findIndex(header => header === 'Date (dd/mm/yy)') - 1;
+            // hoursIndex = hoursIndex - 1
+            // taskTypeIndex = taskTypeIndex - 1
+            // taskDescriptionIndex = taskDescriptionIndex - 1
+            // dateIndex = dateIndex - 1
+
+            let startingRowIndex : any = headersRow.number + 1;
+            console.log(hoursIndex);
+            console.log(taskTypeIndex);
+            console.log(taskDescriptionIndex);
+            console.log(dateIndex);
+            // Iterate through the data and bind values to the respective columns
+            data.forEach((entry) => {
+                const dataset = new Date(Number(entry.date));
+                const datevalue = `${dataset.getDate()}/${dataset.getMonth() + 1}/${dataset.getFullYear()}`;
+
+                entry.timesheetdata.data.forEach((row,rowIndex) => {
+                    row.date= datevalue
+                    const newRow = worksheet.addRow({
+                        date: row.date,
+                        hours: row.hours,
+                        taskName: row.taskName,
+                        projectName: row.porjectName,
+                        taskDescription: row.taskdescription
+                    },startingRowIndex);
+
+                    // Bind values to respective columns
+                    if (hoursIndex !== -1) {
+                        console.log(hoursIndex , 'Hours Index');
+                        console.log(newRow.number ,'Hours New Number');
+                        console.log(startingRowIndex);
+                        worksheet.getCell(`${String.fromCharCode(65 + hoursIndex)}${startingRowIndex}`).value = row.hours;
+                    }
+
+                    if (taskTypeIndex !== -1) {
+                        worksheet.getCell(`${String.fromCharCode(65 + taskTypeIndex)}${startingRowIndex}`).value = row.taskName;
+                    }
+
+                    if (taskDescriptionIndex !== -1) {
+                        worksheet.getCell(`${String.fromCharCode(65 + taskDescriptionIndex)}${startingRowIndex}`).value = row.taskdescription;
+                    }
+
+                    if (dateIndex !== -1) {
+                        worksheet.getCell(`${String.fromCharCode(65 + dateIndex)}${startingRowIndex}`).value = row.date;
+                    }
+
+                    startingRowIndex++;
+                });
+            });
+
+            // Generate a unique filename for the Excel file
+            const fileName = `timesheet_${Date.now()}.xlsx`;
+            const filePath = path.join(__dirname, '../../../uploads', fileName);
+
+            // Save the modified workbook to a new file
+            await workbook.xlsx.writeFile(filePath);
+            const fileUrl = `${request.protocol}://${request.headers.host}/${fileName}`;
+
+            // Send the generated Excel file back to the client
+            reply.header('Content-Disposition', `attachment; filename="${fileName}"`);
+            reply.type('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            reply.send(fileUrl);
+        } catch (error) {
+            console.error('Error generating Excel file:', error);
+            reply.code(500).send('Error generating Excel file');
+        }
+    }
+
+
+    // export async function excelGenearator(request, reply) {
+    //     try {
+    //         const data = request.body;
+    //         const templatePath = path.join(__dirname, '../../../excel/Timesheet_Template.xlsx');
+    //         const workbook = new ExcelJS.Workbook();
+    //         await workbook.xlsx.readFile(templatePath);
+    //         const worksheet = workbook.getWorksheet('sheet1');
+    
+    //         if (!worksheet) {
+    //             console.error('Worksheet not found');
+    //             reply.code(500).send('Worksheet not found');
+    //             return;
+    //         }
+    
+    //         const headersRow = worksheet.getRow(6); // Assuming headers are in the sixth row
+    
+    //         // Find the indices of the headers you want to bind data to
+    //         let hoursIndex = headersRow.values.findIndex(header => header === 'No. of Hours') - 1;
+    //         let taskTypeIndex = headersRow.values.findIndex(header => header === 'Task Type') - 1;
+    //         let taskDescriptionIndex = headersRow.values.findIndex(header => header === 'Task Description') - 1;
+    //         let dateIndex = headersRow.values.findIndex(header => header === 'Date (dd/mm/yy)') - 1;
+    
+    //         // Find the starting row index to add new data
+    //         let startingRowIndex = headersRow.number + 1;
+    
+    //         // Find the last row of existing data
+    //         let lastRow = worksheet.lastRow;
+    //         let lastDataRowIndex = lastRow ? lastRow.number : startingRowIndex;
+    
+    //         // Calculate available space between the last row of data and the footer
+    //         let footerRowIndex = lastDataRowIndex + 1; // Assuming footer is right below the last data row
+    //         let availableSpace = worksheet.rowCount - footerRowIndex;
+    
+    //         // Iterate through the data and bind values to the respective columns
+    //         data.forEach((entry) => {
+    //             const dataset = new Date(Number(entry.date));
+    //             const datevalue = `${dataset.getDate()}/${dataset.getMonth() + 1}/${dataset.getFullYear()}`;
+    
+    //             entry.timesheetdata.data.forEach((row:any, rowIndex:any) => {
+    //                 row.date = datevalue;
+    
+    //                 // If available space is less than the number of rows to be added, insert additional rows
+    //                 if (availableSpace <= rowIndex) {
+    //                     worksheet.spliceRows(footerRowIndex, 0, rowIndex - availableSpace + 1);
+    //                     availableSpace = worksheet.rowCount - footerRowIndex;
+    //                 }
+    
+    //                 const newRow = worksheet.getRow(startingRowIndex);
+    
+    //                 // Bind values to respective columns
+    //                 if (hoursIndex !== -1) {
+    //                     newRow.getCell(hoursIndex + 1).value = row.hours;
+    //                 }
+    
+    //                 if (taskTypeIndex !== -1) {
+    //                     newRow.getCell(taskTypeIndex + 1).value = row.taskName;
+    //                 }
+    
+    //                 if (taskDescriptionIndex !== -1) {
+    //                     newRow.getCell(taskDescriptionIndex + 1).value = row.taskdescription;
+    //                 }
+    
+    //                 if (dateIndex !== -1) {
+    //                     newRow.getCell(dateIndex + 1).value = row.date;
+    //                 }
+    
+    //                 startingRowIndex++;
+    //             });
+    //         });
+    
+    //         // Generate a unique filename for the Excel file
+    //         const fileName = `timesheet_${Date.now()}.xlsx`;
+    //         const filePath = path.join(__dirname, '../../../uploads', fileName);
+    
+    //         // Save the modified workbook to a new file
+    //         await workbook.xlsx.writeFile(filePath);
+    //         const fileUrl = `${request.protocol}://${request.headers.host}/${fileName}`;
+    
+    //         // Send the generated Excel file back to the client
+    //         reply.header('Content-Disposition', `attachment; filename="${fileName}"`);
+    //         reply.type('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    //         reply.send(fileUrl);
+    //     } catch (error) {
+    //         console.error('Error generating Excel file:', error);
+    //         reply.code(500).send('Error generating Excel file');
+    //     }
+    // }
+    
+
     export async function upserttimeSheetServices(data) {
         try {
             console.log(data);
@@ -164,11 +527,11 @@ export module timeSheetServices {
             } else {
                 // Insert new data if no match found
                 let totalHours = 0;
-                console.log(  data.timeSheetdata.data ,'data value is ');
+                console.log(data.timeSheetdata.data, 'data value is ');
                 data.timeSheetdata.data.forEach((s) => {
-                        totalHours = Number(s.hours) + totalHours
+                    totalHours = Number(s.hours) + totalHours
                 })
-                console.log(totalHours ,'Total Hpurs new insert');
+                console.log(totalHours, 'Total Hpurs new insert');
                 if (totalHours <= 9) {
                     console.log('inside else');
                     const { id, ...upsertFields } = data;
@@ -191,7 +554,7 @@ export module timeSheetServices {
             }
 
 
-           
+
 
         } catch (error) {
             console.error(error);
