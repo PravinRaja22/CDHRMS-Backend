@@ -72,6 +72,7 @@ export module PayslipServices {
           request
         );
         console.log(generatePayslip, "generatePayslip");
+        ///////////////////////////////
         let payslipAmounts = [generatePayslip];
         let payslipFile;
         console.log(payslipAmounts, "payslipAmounts");
@@ -197,7 +198,7 @@ export module PayslipServices {
     }
   }
 
-  const calculatePayslip = async (
+  export const calculatePayslip = async (
     attendanceRecords,
     totalNumberOfDaysMonth,
     request
