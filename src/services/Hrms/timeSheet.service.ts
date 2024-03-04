@@ -5,6 +5,8 @@ import { fileURLToPath } from "url";
 import { dirname } from "path";
 import path from "path";
 import ExcelJS from 'exceljs'
+import { getSingleUser } from "../../controllers/HRMS/user.Controller.js";
+import { userService } from "./user.service.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 export module timeSheetServices {
@@ -306,6 +308,17 @@ export module timeSheetServices {
     //template function  workded important 
     export async function excelGenearator(request, reply) {
         try {
+            const { userId } = request.params;
+            const getUser = await userService.getSingleUser(userId)
+            const { employeeid, firstname, lastname, department, phone, joiningdate, designation } = getUser[0];
+            const UserJoiningDate = new Date(Number(joiningdate));
+            const UserJoiningDateValue = `${UserJoiningDate.getDate()}/${UserJoiningDate.getMonth() + 1}/${UserJoiningDate.getFullYear()}`;
+            // console.log(UserJoiningDateValue, 'UserJoiningDateValue');
+            // console.log(getUser, 'Got user Data');
+            // console.log(userId, 'User Id is ');
+            const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+
             const data = request.body;
             const templatePath = path.join(__dirname, '../../../excel/Timesheet_Template.xlsx');
             const workbook = new ExcelJS.Workbook();
@@ -319,42 +332,84 @@ export module timeSheetServices {
             }
 
             const headersRow = worksheet.getRow(6); // Assuming headers are in the sixth row
+            const headersRowEmployeedataone = worksheet.getRow(2);
+            const headersRowEmployeedatatwo = worksheet.getRow(3);
+            const headersRowEmployeedatathree = worksheet.getRow(4);
+            const prepbyNameandDayworked = worksheet.getRow(51);
+            const prepbysignatureandHolidays = worksheet.getRow(52);
+            const prepbyDateandLeaves = worksheet.getRow(53);
+            //  console.log(headersRowEmployeedataone ,'headersRowEmployeedataone');
+            //  console.log(headersRowEmployeedatatwo ,'Employee data');
+            //  console.log(headersRowEmployeedatatwo ,'headersRowEmployeedatatwo');
 
             // Find the indices of the headers you want to bind data to
-            let hoursIndex = headersRow.values.findIndex(header => header === 'No. of Hours') - 1;
-            let taskTypeIndex = headersRow.values.findIndex(header => header === 'Task Type') - 1;
-            let taskDescriptionIndex = headersRow.values.findIndex(header => header === 'Task Description') - 1;
-            let dateIndex = headersRow.values.findIndex(header => header === 'Date (dd/mm/yy)') - 1;
+            let hoursIndex = headersRow?.values?.findIndex(header => header === 'No. of Hours') - 1;
+            let serialIndex = headersRow?.values?.findIndex(header => header === 'Sl. No.') - 1;
+            let taskTypeIndex = headersRow?.values?.findIndex(header => header === 'Task Type') - 1;
+            let taskDescriptionIndex = headersRow?.values?.findIndex(header => header === 'Task Description') - 1;
+            let dateIndex = headersRow?.values?.findIndex(header => header === 'Date (dd/mm/yy)') - 1;
+            let dayIndex = headersRow?.values?.findIndex(header => header === 'Day') - 1;
+            let employeeIdindex = headersRowEmployeedataone?.values?.findIndex(header => header === 'Employee Id') - 1;
+            let employeeNameIndex = headersRowEmployeedatatwo?.values?.findIndex(header => header === 'Employee Name') - 1;
+            let TechnologyIndex = headersRowEmployeedatathree?.values?.findIndex(header => header === 'Technology') - 1;
+            let employeeContactNumberIndex = headersRowEmployeedataone?.values?.findIndex(header => header === 'Contact number:') - 1;
+            let employeeDateofJoiningIndex = headersRowEmployeedatatwo?.values?.findIndex(header => header === 'Date of Joining:') - 1;
+            let employeeDesignationIndex = headersRowEmployeedatathree?.values?.findIndex(header => header === 'Designation:') - 1;
+            let prepbyNameIndex = prepbyNameandDayworked?.values?.findIndex(header => header === 'Name:') - 1;
+            let dayWorkedIndex = prepbyNameandDayworked?.values?.findIndex(header => header === 'Days worked') - 1;
+            let prepbySignIndex = prepbysignatureandHolidays?.values?.findIndex(header => header === 'Signature') - 1;
+            let holidayIndex = prepbysignatureandHolidays?.values?.findIndex(header => header === 'Holidays') - 1;
+            let prepbyDateIndex = prepbyDateandLeaves?.values?.findIndex(header => header === 'Date:') - 1;
+            let LeaveWorkedIndex = prepbyDateandLeaves?.values?.findIndex(header => header === 'Leaves') - 1;
+            console.log(employeeIdindex, 'Employee ID');
+            console.log(employeeNameIndex, 'employeeName');
+            console.log(TechnologyIndex, 'Technology');
+            console.log(employeeDateofJoiningIndex, 'employeeDateofJoining');
+            console.log(employeeContactNumberIndex, 'employeeContactNumber');
+            console.log(employeeDesignationIndex, 'employeeDesignation');
+            console.log(prepbyNameIndex, 'prepbyNameIndex');
+            console.log(headersRowEmployeedataone.number + 1, 'GOt Number');
             // hoursIndex = hoursIndex - 1
             // taskTypeIndex = taskTypeIndex - 1
             // taskDescriptionIndex = taskDescriptionIndex - 1
             // dateIndex = dateIndex - 1
 
-            let startingRowIndex : any = headersRow.number + 1;
+            let startingRowIndex: any = headersRow.number + 1;
             console.log(hoursIndex);
             console.log(taskTypeIndex);
             console.log(taskDescriptionIndex);
             console.log(dateIndex);
+            let serialvalue = 1
+            const options :any = { day: 'numeric', month: 'numeric', year: 'numeric' };
+            const formattedDate = new Date().toLocaleDateString('en-GB', options);
+            console.log(formattedDate);
             // Iterate through the data and bind values to the respective columns
-            data.forEach((entry) => {
+            data.forEach((entry, indexdata) => {
                 const dataset = new Date(Number(entry.date));
+                console.log(dataset.getDay(), 'day is ');
                 const datevalue = `${dataset.getDate()}/${dataset.getMonth() + 1}/${dataset.getFullYear()}`;
-
-                entry.timesheetdata.data.forEach((row,rowIndex) => {
-                    row.date= datevalue
+                const currentDayOfWeek = daysOfWeek[dataset.getDay()];
+                console.log(datevalue, 'day Value is ');
+                entry.timesheetdata.data.forEach((row, rowIndex) => {
+                    serialvalue = serialvalue
+                    row.serial = serialvalue
+                    row.date = datevalue
+                    row.day = currentDayOfWeek
+                    console.log(row.day, 'Current Day  of weeek');
+                    serialvalue = serialvalue + 1
                     const newRow = worksheet.addRow({
+                        serial: row.serial,
                         date: row.date,
+                        day: row.day,
                         hours: row.hours,
                         taskName: row.taskName,
                         projectName: row.porjectName,
                         taskDescription: row.taskdescription
-                    },startingRowIndex);
+                    }, startingRowIndex);
 
                     // Bind values to respective columns
                     if (hoursIndex !== -1) {
-                        console.log(hoursIndex , 'Hours Index');
-                        console.log(newRow.number ,'Hours New Number');
-                        console.log(startingRowIndex);
+
                         worksheet.getCell(`${String.fromCharCode(65 + hoursIndex)}${startingRowIndex}`).value = row.hours;
                     }
 
@@ -368,6 +423,66 @@ export module timeSheetServices {
 
                     if (dateIndex !== -1) {
                         worksheet.getCell(`${String.fromCharCode(65 + dateIndex)}${startingRowIndex}`).value = row.date;
+                    }
+                    if (dayIndex !== -1) {
+                        worksheet.getCell(`${String.fromCharCode(65 + dayIndex)}${startingRowIndex}`).value = row.day;
+                    }
+                    if (serialIndex !== -1) {
+                        worksheet.getCell(`${String.fromCharCode(65 + serialIndex)}${startingRowIndex}`).value = row.serial;
+                    }
+
+                    if (employeeIdindex !== -1) {
+                        console.log('employee Id ');
+                        console.log(headersRowEmployeedataone.number + 1);
+                        worksheet.getCell(`E2`).value = employeeid;
+                    }
+                    if (employeeNameIndex !== -1) {
+                        console.log('employeeNameIndex Id ');
+                        worksheet.getCell(`E3`).value = `${firstname} ${lastname}`;
+                    }
+                    if (prepbyNameIndex !== -1) {
+                        console.log('prepbyNameIndex Id ');
+                        worksheet.getCell(`C51`).value = `${firstname} ${lastname}`;
+                    }
+                    if (dayWorkedIndex !== -1) {
+                        console.log('dayWorkedIndex Id ');
+                        worksheet.getCell(`H51`).value = ``;
+                    }
+                    if (prepbySignIndex !== -1) {
+                        console.log('prepbySignIndex Id ');
+                        worksheet.getCell(`C52`).value = `${firstname} ${lastname}`;
+                    }
+                    if (holidayIndex !== -1) {
+                        console.log('holidayIndex Id ');
+                        worksheet.getCell(`H52`).value = ``;
+                    }
+                    if (prepbyDateIndex !== -1) {
+                        console.log('prepbyDateIndex Id ');
+                        worksheet.getCell(`C53`).value = formattedDate;
+                    }
+                    if (LeaveWorkedIndex !== -1) {
+                        console.log('LeaveWorkedIndex Id ');
+                        worksheet.getCell(`H53`).value = ``;
+                    }
+                    if (TechnologyIndex !== -1) {
+                        console.log('employee Id ');
+                        console.log(headersRowEmployeedataone.number + 1);
+                        worksheet.getCell(`E4`).value = department;
+                    }
+
+                    if (employeeContactNumberIndex !== -1) {
+                        console.log('employeeContactNumberIndexd ');
+                        console.log(headersRowEmployeedataone.number + 1);
+                        worksheet.getCell(`H2`).value = phone;
+                    }
+                    if (employeeDateofJoiningIndex !== -1) {
+                        console.log('employeeDateofJoiningIndex');
+                        worksheet.getCell(`H3`).value = UserJoiningDateValue;
+                    }
+                    if (employeeDesignationIndex !== -1) {
+                        console.log('employeeDesignationIndex ');
+                        console.log(headersRowEmployeedataone.number + 1);
+                        worksheet.getCell(`H4`).value = designation;
                     }
 
                     startingRowIndex++;
@@ -400,77 +515,77 @@ export module timeSheetServices {
     //         const workbook = new ExcelJS.Workbook();
     //         await workbook.xlsx.readFile(templatePath);
     //         const worksheet = workbook.getWorksheet('sheet1');
-    
+
     //         if (!worksheet) {
     //             console.error('Worksheet not found');
     //             reply.code(500).send('Worksheet not found');
     //             return;
     //         }
-    
+
     //         const headersRow = worksheet.getRow(6); // Assuming headers are in the sixth row
-    
+
     //         // Find the indices of the headers you want to bind data to
     //         let hoursIndex = headersRow.values.findIndex(header => header === 'No. of Hours') - 1;
     //         let taskTypeIndex = headersRow.values.findIndex(header => header === 'Task Type') - 1;
     //         let taskDescriptionIndex = headersRow.values.findIndex(header => header === 'Task Description') - 1;
     //         let dateIndex = headersRow.values.findIndex(header => header === 'Date (dd/mm/yy)') - 1;
-    
+
     //         // Find the starting row index to add new data
     //         let startingRowIndex = headersRow.number + 1;
-    
+
     //         // Find the last row of existing data
     //         let lastRow = worksheet.lastRow;
     //         let lastDataRowIndex = lastRow ? lastRow.number : startingRowIndex;
-    
+
     //         // Calculate available space between the last row of data and the footer
     //         let footerRowIndex = lastDataRowIndex + 1; // Assuming footer is right below the last data row
     //         let availableSpace = worksheet.rowCount - footerRowIndex;
-    
+
     //         // Iterate through the data and bind values to the respective columns
     //         data.forEach((entry) => {
     //             const dataset = new Date(Number(entry.date));
     //             const datevalue = `${dataset.getDate()}/${dataset.getMonth() + 1}/${dataset.getFullYear()}`;
-    
+
     //             entry.timesheetdata.data.forEach((row:any, rowIndex:any) => {
     //                 row.date = datevalue;
-    
+
     //                 // If available space is less than the number of rows to be added, insert additional rows
     //                 if (availableSpace <= rowIndex) {
     //                     worksheet.spliceRows(footerRowIndex, 0, rowIndex - availableSpace + 1);
     //                     availableSpace = worksheet.rowCount - footerRowIndex;
     //                 }
-    
+
     //                 const newRow = worksheet.getRow(startingRowIndex);
-    
+
     //                 // Bind values to respective columns
     //                 if (hoursIndex !== -1) {
     //                     newRow.getCell(hoursIndex + 1).value = row.hours;
     //                 }
-    
+
     //                 if (taskTypeIndex !== -1) {
     //                     newRow.getCell(taskTypeIndex + 1).value = row.taskName;
     //                 }
-    
+
     //                 if (taskDescriptionIndex !== -1) {
     //                     newRow.getCell(taskDescriptionIndex + 1).value = row.taskdescription;
     //                 }
-    
+
     //                 if (dateIndex !== -1) {
     //                     newRow.getCell(dateIndex + 1).value = row.date;
     //                 }
-    
+
     //                 startingRowIndex++;
     //             });
     //         });
-    
+
     //         // Generate a unique filename for the Excel file
     //         const fileName = `timesheet_${Date.now()}.xlsx`;
     //         const filePath = path.join(__dirname, '../../../uploads', fileName);
-    
+
     //         // Save the modified workbook to a new file
     //         await workbook.xlsx.writeFile(filePath);
     //         const fileUrl = `${request.protocol}://${request.headers.host}/${fileName}`;
-    
+
     //         // Send the generated Excel file back to the client
     //         reply.header('Content-Disposition', `attachment; filename="${fileName}"`);
     //         reply.type('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -480,7 +595,7 @@ export module timeSheetServices {
     //         reply.code(500).send('Error generating Excel file');
     //     }
     // }
-    
+
 
     export async function upserttimeSheetServices(data) {
         try {

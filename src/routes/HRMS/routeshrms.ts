@@ -262,7 +262,7 @@ const Routes = function (
   //     return error.message
   //   }
   // });
-  fastify.post("/generate/excel",excelGenearator) 
+  fastify.post("/generate/excel/:userId",excelGenearator) 
   //Approval
 
   fastify.get("/approval", getAllApprovals);
