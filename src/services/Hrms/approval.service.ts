@@ -219,6 +219,149 @@ export module approvalService {
     }
   }
 
+  //super admin approvals
+
+  export async function getApprovalbySuperAdmin(approverId: any) {
+    try {
+      console.log("getApprovalbyApprover call");
+      let joinQuery = `SELECT  approvals.*,
+      jsonb_build_object(
+          'id', users.id,
+          'firstname', users.firstname,
+            'lastname', users.lastname,
+              'employeeid', users.employeeid
+      ) AS "jsonApplyUsers"
+      FROM
+      approvals 
+      INNER JOIN users ON users.id = approvals.requesterid  		
+     `;
+
+      let params = approverId;
+      const result: QueryResult = await query(joinQuery, [params]);
+
+      console.log(result, "getApprovalbyApprover query results");
+      return result.rows;
+    } catch (error) {
+      return error.message;
+    }
+  }
+
+  export async function getApprovalsBySuperAdminLeaveQuery(
+    userId: any,
+    reqQuery: any
+  ) {
+    console.log("getApprovalsBySuperAdminLeaveQuery");
+    let keys = Object.keys(reqQuery);
+    let values = Object.values(reqQuery);
+    console.log(keys, values, "getApprovalsBySuperAdminLeaveQuery");
+
+    const conditions = keys
+      .map((key, index) => `LOWER( approvals.${key}) LIKE LOWER($${index + 1})`)
+      .join(" AND ");
+
+    let params = values.map((value) => `%${value}%`);
+
+    try {
+      let innerQuery = `SELECT  approvals.*,
+      jsonb_build_object(
+          'id', leaves.id,
+          'leavetype',leaves.leavetype,
+          'fromdate', leaves.fromdate,
+          'todate', leaves.todate,
+          'fromsession', leaves.fromsession,
+          'tosession', leaves.tosession,
+          'status',leaves.status,
+          'noofdays',leaves.noofdays,
+          'leavebalanceid',leaves.leavebalanceid,
+          'applyingtoid',leaves.applyingtoid,
+          'approvalid',leaves.approvalid,
+          'userid',leaves.userid,
+          'reason',leaves.reason,
+          'createdby',leaves.createdby,
+         'modifiedby',leaves.modifiedby          
+      ) AS "jsonLeave",
+      jsonb_build_object(
+        'id', users.id,
+        'firstname', users.firstname,
+          'lastname', users.lastname,
+            'employeeid', users.employeeid
+    ) AS "jsonApplyUsers"
+      FROM
+      approvals 
+      INNER JOIN users ON users.id = approvals.requesterid  
+      INNER JOIN leaves ON leaves.approvalid = approvals.id  				
+      WHERE ${conditions}`;
+
+      // WHERE ${conditions} AND approvals.approverid = $${keys.length + 1}`;
+
+      let newParams = [...params];
+      console.log("$$$$$$$$$$");
+      console.log(innerQuery);
+      console.log(newParams);
+      const result: QueryResult = await query(innerQuery, newParams);
+      console.log(result.rows, "query results");
+      return result.rows;
+    } catch (error) {
+      console.log("ERROR leaves APPROVAL");
+      return error.message;
+    }
+  }
+
+  export async function getApprovalsBySuperAdminAttendanceQuery(
+    userId: any,
+    reqQuery: any
+  ) {
+    console.log("getApprovalsBySuperAdminAttendanceQuery");
+    let keys = Object.keys(reqQuery);
+    let values = Object.values(reqQuery);
+    console.log(keys, values, "getApprovalsBySuperAdminAttendanceQuery");
+
+    const conditions = keys
+      .map((key, index) => `LOWER( approvals.${key}) LIKE LOWER($${index + 1})`)
+      .join(" AND ");
+
+    let params = values.map((value) => `%${value}%`);
+
+    try {
+      let innerQuery = `SELECT  approvals.*,
+      jsonb_build_object(
+          'id', attendanceregularizations.id,
+          'date',attendanceregularizations.date,
+          'reason', attendanceregularizations.reason,
+          'shiftstart', attendanceregularizations.shiftstart,
+          'shiftend', attendanceregularizations.shiftend,
+          'status',attendanceregularizations.status,
+          'userid',attendanceregularizations.userid,
+          'applyingtoid',attendanceregularizations.applyingtoid,
+          'approvalid',attendanceregularizations.approvalid       
+      ) AS "jsonAttendanceReg",
+      jsonb_build_object(
+        'id', users.id,
+        'firstname', users.firstname,
+          'lastname', users.lastname,
+            'employeeid', users.employeeid
+    ) AS "jsonApplyUsers"
+      FROM
+      approvals 
+      INNER JOIN attendanceregularizations ON attendanceregularizations.approvalid = approvals.id   	
+      INNER JOIN users ON users.id = approvals.requesterid  				
+      WHERE ${conditions}`;
+//      WHERE ${conditions} AND approvals.approverid = $${keys.length + 1}`;
+
+      let newParams = [...params];
+      console.log("$$$$$$$$$$");
+      console.log(innerQuery);
+      console.log(newParams);
+      const result: QueryResult = await query(innerQuery, newParams);
+      console.log(result.rows, "query results");
+      return result.rows;
+    } catch (error) {
+      console.log("ERROR leaves APPROVAL");
+      return error.message;
+    }
+  }
+
+
   export async function updateApprovals(requestBody: any, requestParams: any) {
     console.log("inside updateApprovals service");
     console.log(requestParams, "requestParams");

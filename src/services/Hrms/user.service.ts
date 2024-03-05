@@ -294,4 +294,19 @@ export module userService {
       console.log(error.message, "error getUsersByQueries");
     }
   };
+
+  export const checkSuperAdminUser = async (userId) => {
+    try {
+      console.log("checkSuperAdminUser",userId);
+
+      let joinQuery = `select * from users where role ='superadmin' AND id =${userId}`
+      const result = await query(joinQuery, {});
+      // const result = await query('SELECT * FROM users WHERE id = $1', [recId]);
+      console.log(result.rows, "result getSuperAdminUser");
+      return result.rows[0];
+    } catch (error) {
+      return error.message;
+    }
+  };
+
 }

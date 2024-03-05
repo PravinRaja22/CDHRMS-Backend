@@ -116,6 +116,7 @@ import {
 import {
   getAllApprovals,
   getApprovalbyApprover,
+  getApprovalbySuperAdmin,
   getApprovalsById,
   insertApprovals,
   updateApprovals,
@@ -270,7 +271,7 @@ const Routes = function (
   fastify.get("/approval/:id", getApprovalsById);
   fastify.put("/approval/:id", updateApprovals);
   fastify.get("/approval/approver/:approverId", getApprovalbyApprover);
-
+  fastify.get("/approval/superadmin/:superadminId", getApprovalbySuperAdmin);
   //loan
   fastify.get("/loan", getLoans);
   fastify.get("/loan/:id", getSingleLoan);
