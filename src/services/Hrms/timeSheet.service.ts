@@ -155,19 +155,13 @@ export module timeSheetServices {
                         cell.alignment = { wrapText: true };
                         // Calculate the height needed for the content
                         const text = row.taskdescription;
-                        console.log(text ,'text');
                         const wrapCount = text.length;
-                        console.log(text.length ,'Lengths ');
                         const estimatedLineHeight = 11; // Adjust this value based on your font and font size
                         const textHeight = (wrapCount * estimatedLineHeight)/50;
-                        console.log(wrapCount ,'Wrap count');
-                        console.log(textHeight, 'Text Height');
                         // Set the row height based on the content size
                         const currentRow = worksheet.getRow(startingRowIndex);
                         const currentRowHeight = currentRow.height;
-                        console.log(currentRowHeight, 'Current Row Height');
                         const newRowHeight = Math.max(currentRowHeight, textHeight);
-                        console.log(newRowHeight, 'NEW ROW HEIGHT');
                         currentRow.height = newRowHeight;
                     }
                     if (dateIndex !== -1) {
