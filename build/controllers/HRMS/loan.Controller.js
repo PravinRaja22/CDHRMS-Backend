@@ -1,0 +1,44 @@
+import { loanService } from "../../services/Hrms/loan.service.js";
+export async function getLoans(request, reply) {
+    try {
+        const loans = await loanService.getAllLoans();
+        reply.send(loans);
+    }
+    catch (error) {
+        console.error("Error in GET /loan:", error);
+        reply.status(500).json({ error: "Internal Server Error" });
+    }
+}
+export async function getSingleLoan(request, reply) {
+    console.log(request.params.id, "getSingleLoan callback request");
+    try {
+        const loan = await loanService.getLoanById(request.params.id);
+        reply.send(loan);
+    }
+    catch (error) {
+        console.error(`Error in GET /loan/${request.params.id}:`, error);
+        reply.status(500).json({ error: "Internal Server Error" });
+    }
+}
+export async function upsertLoan(request, reply) {
+    try {
+        console.log("upsert Loans are");
+        const result = await loanService.upsertLoan(request.body);
+        reply.send(result);
+    }
+    catch (error) {
+        console.error("Error in POST /loan:", error);
+        reply.status(500).json({ error: "Internal Server Error" });
+    }
+}
+export async function deleteLoan(request, reply) {
+    try {
+        const result = await loanService.deleteLoan(request.params.id);
+        return result;
+    }
+    catch (error) {
+        console.error(`Error in DELETE /loan/${request.params.id}:`, error);
+        reply.status(500).json({ error: "Internal Server Error" });
+    }
+}
+//# sourceMappingURL=loan.Controller.js.map
