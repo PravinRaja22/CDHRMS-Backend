@@ -222,7 +222,7 @@ export module timeSheetServices {
             const filePath = path.join(__dirname, '../../../uploads', fileName);
             // Save the modified workbook to a new file
             await workbook.xlsx.writeFile(filePath);
-            const fileUrl = `${request.protocol}://${request.headers.host}/${fileName}`;
+            const fileUrl = `${request.protocol}s://${request.headers.host}/${fileName}`;
             // Send the generated Excel file back to the client
             reply.header('Content-Disposition', `attachment; filename="${fileName}"`);
             reply.type('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
