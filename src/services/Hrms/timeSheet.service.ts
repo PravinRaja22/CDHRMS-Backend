@@ -5,7 +5,6 @@ import { fileURLToPath } from "url";
 import { dirname } from "path";
 import path from "path";
 import ExcelJS from 'exceljs'
-import { getSingleUser } from "../../controllers/HRMS/user.Controller.js";
 import { userService } from "./user.service.js";
 import { attendanceService } from "./attendance.service.js";
 const __filename = fileURLToPath(import.meta.url);
@@ -61,20 +60,20 @@ export module timeSheetServices {
     }
     export async function excelGenearator(request, reply) {
         try {
-            const { userId,Year,Month } = request.params;
+            const { userId, Year, Month } = request.params;
             const getUser = await userService.getSingleUser(userId)
-            console.log(Month ,"Month");
-            console.log(Year ,"Year");
-            console.log(userId ,'User ID');
+            console.log(Month, "Month");
+            console.log(Year, "Year");
+            console.log(userId, 'User ID');
             console.log(request.params);
-            const getAttendace = await attendanceService.caculateAttendaceForMonth(Month,Year,userId)
-            console.log(getAttendace ,"Get Attendance data set");
-            const {totaldays ,noOfPresentDays,noOfLeaveDays,nofoLopDays,noofWeekofDays} =getAttendace
+            const getAttendace = await attendanceService.caculateAttendaceForMonth(Month, Year, userId)
+            console.log(getAttendace, "Get Attendance data set");
+            const { totaldays, noOfPresentDays, noOfLeaveDays, nofoLopDays, noofWeekofDays } = getAttendace
             const { employeeid, firstname, lastname, department, phone, joiningdate, designation } = getUser[0];
             const UserJoiningDate = new Date(Number(joiningdate));
             const UserJoiningDateValue = `${UserJoiningDate.getDate()}/${UserJoiningDate.getMonth() + 1}/${UserJoiningDate.getFullYear()}`;
             const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-          
+
             const data = request.body;
             const templatePath = path.join(__dirname, '../../../excel/Timesheet_Template.xlsx');
             const workbook = new ExcelJS.Workbook();
@@ -93,6 +92,7 @@ export module timeSheetServices {
             const headersRowEmployeedatathree = worksheet.getRow(4);
             const prepbyNameandDayworked = worksheet.getRow(51);
             const prepbysignatureandHolidays = worksheet.getRow(52);
+            const prepbyTotalDays = worksheet.getRow(90);
             const prepbyDateandLeaves = worksheet.getRow(53);
             let hoursIndex = headersRow?.values?.findIndex(header => header === 'No. of Hours') - 1;
             let serialIndex = headersRow?.values?.findIndex(header => header === 'Sl. No.') - 1;
@@ -100,7 +100,7 @@ export module timeSheetServices {
             let taskDescriptionIndex = headersRow?.values?.findIndex(header => header === 'Task Description') - 1;
             let dateIndex = headersRow?.values?.findIndex(header => header === 'Date (dd/mm/yy)') - 1;
             let dayIndex = headersRow?.values?.findIndex(header => header === 'Day') - 1;
-            let employeeIdindex  = headersRowEmployeedataone?.values?.findIndex(header => header === 'Employee Id') - 1;
+            let employeeIdindex = headersRowEmployeedataone?.values?.findIndex(header => header === 'Employee Id') - 1;
             let employeeNameIndex = headersRowEmployeedatatwo?.values?.findIndex(header => header === 'Employee Name') - 1;
             let TechnologyIndex = headersRowEmployeedatathree?.values?.findIndex(header => header === 'Technology') - 1;
             let employeeContactNumberIndex = headersRowEmployeedataone?.values?.findIndex(header => header === 'Contact number:') - 1;
@@ -112,11 +112,13 @@ export module timeSheetServices {
             let holidayIndex = prepbysignatureandHolidays?.values?.findIndex(header => header === 'Holidays') - 1;
             let prepbyDateIndex = prepbyDateandLeaves?.values?.findIndex(header => header === 'Date:') - 1;
             let LeaveWorkedIndex = prepbyDateandLeaves?.values?.findIndex(header => header === 'Leaves') - 1;
+            let totalDaysIndex = prepbyTotalDays?.values?.findIndex(header => header === 'Total') - 1;
             let startingRowIndex: any = headersRow.number + 1;
-       
+
             let serialvalue = 1
             const options: any = { day: 'numeric', month: 'numeric', year: 'numeric' };
             const formattedDate = new Date().toLocaleDateString('en-GB', options);
+            let previousDate;
             // Iterate through the data and bind values to the respective columns
             data.forEach((entry, indexdata) => {
                 const dataset = new Date(Number(entry.date));
@@ -141,18 +143,33 @@ export module timeSheetServices {
 
                     // Bind values to respective columns
                     if (hoursIndex !== -1) {
-
                         worksheet.getCell(`${String.fromCharCode(65 + hoursIndex)}${startingRowIndex}`).value = row.hours;
                     }
 
                     if (taskTypeIndex !== -1) {
                         worksheet.getCell(`${String.fromCharCode(65 + taskTypeIndex)}${startingRowIndex}`).value = row.taskName;
                     }
-
-                    if (taskDescriptionIndex !== -1) {
-                        worksheet.getCell(`${String.fromCharCode(65 + taskDescriptionIndex)}${startingRowIndex}`).value = row.taskdescription;
+                   if (taskDescriptionIndex !== -1) {
+                        const cell = worksheet.getCell(`${String.fromCharCode(65 + taskDescriptionIndex)}${startingRowIndex}`);
+                        cell.value = row.taskdescription;
+                        cell.alignment = { wrapText: true };
+                        // Calculate the height needed for the content
+                        const text = row.taskdescription;
+                        console.log(text ,'text');
+                        const wrapCount = text.length;
+                        console.log(text.length ,'Lengths ');
+                        const estimatedLineHeight = 11; // Adjust this value based on your font and font size
+                        const textHeight = (wrapCount * estimatedLineHeight)/50;
+                        console.log(wrapCount ,'Wrap count');
+                        console.log(textHeight, 'Text Height');
+                        // Set the row height based on the content size
+                        const currentRow = worksheet.getRow(startingRowIndex);
+                        const currentRowHeight = currentRow.height;
+                        console.log(currentRowHeight, 'Current Row Height');
+                        const newRowHeight = Math.max(currentRowHeight, textHeight);
+                        console.log(newRowHeight, 'NEW ROW HEIGHT');
+                        currentRow.height = newRowHeight;
                     }
-
                     if (dateIndex !== -1) {
                         worksheet.getCell(`${String.fromCharCode(65 + dateIndex)}${startingRowIndex}`).value = row.date;
                     }
@@ -162,13 +179,10 @@ export module timeSheetServices {
                     if (serialIndex !== -1) {
                         worksheet.getCell(`${String.fromCharCode(65 + serialIndex)}${startingRowIndex}`).value = row.serial;
                     }
-
                     if (employeeIdindex !== -1) {
-                       
                         worksheet.getCell(`E2`).value = employeeid;
                     }
                     if (employeeNameIndex !== -1) {
-                       
                         worksheet.getCell(`E3`).value = `${firstname} ${lastname}`;
                     }
                     if (prepbyNameIndex !== -1) {
@@ -176,40 +190,34 @@ export module timeSheetServices {
                         worksheet.getCell(`C87`).value = `${firstname} ${lastname}`;
                     }
                     if (dayWorkedIndex !== -1) {
-                      
                         worksheet.getCell(`H87`).value = noOfPresentDays;
                     }
                     if (prepbySignIndex !== -1) {
-                       
                         worksheet.getCell(`C88`).value = `${firstname} ${lastname}`;
                     }
                     if (holidayIndex !== -1) {
-                       
                         worksheet.getCell(`H88`).value = noofWeekofDays;
                     }
                     if (prepbyDateIndex !== -1) {
-                        
                         worksheet.getCell(`C89`).value = formattedDate;
                     }
                     if (LeaveWorkedIndex !== -1) {
-                      
                         worksheet.getCell(`H89`).value = noOfLeaveDays;
                     }
+                    if (totalDaysIndex !== -1) {
+                        worksheet.getCell(`H90`).value = totaldays;
+                    }
                     if (TechnologyIndex !== -1) {
-                        
                         worksheet.getCell(`E4`).value = department;
                     }
 
                     if (employeeContactNumberIndex !== -1) {
-                     
                         worksheet.getCell(`H2`).value = phone;
                     }
                     if (employeeDateofJoiningIndex !== -1) {
-                        
                         worksheet.getCell(`H3`).value = UserJoiningDateValue;
                     }
                     if (employeeDesignationIndex !== -1) {
-                       
                         worksheet.getCell(`H4`).value = designation;
                     }
                     startingRowIndex++;
@@ -301,9 +309,6 @@ export module timeSheetServices {
 
 
             }
-
-
-
 
         } catch (error) {
             console.error(error);
