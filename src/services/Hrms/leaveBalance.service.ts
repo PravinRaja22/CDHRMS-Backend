@@ -56,25 +56,24 @@ export module leaveBalanceService {
                     INSERT INTO leaveBalances (userId, balance)
                     VALUES ($1, $2) RETURNING *
                 `,
-          [requestBody.userId, requestBody.balance]
+          [requestBody.userid, requestBody.balance]
         );
         console.log(resultInsert, "resultInsert");
-        if(resultInsert.command ==='INSERT'){
-          let message = `${requestBody.userId.userName} leaveBalance inserted successfully`;
-          return {success:true,message, command:resultInsert.command};
-        }else{
-          let message = `${requestBody.userId.userName} leaveBalance inserted Failure`;
-          return {success:false,message, command:resultInsert.command};
+        if (resultInsert.command === "INSERT") {
+          let message = `${requestBody.userid} leaveBalance inserted successfully`;
+          return { success: true, message, command: resultInsert.command };
+        } else {
+          let message = `${requestBody.userid} leaveBalance inserted Failure`;
+          return { success: false, message, command: resultInsert.command };
         }
-      
+
         //   } else {
         //     return message;
-      }
-      else if(result.rowCount ===1 && result.command==='UPDATE'){
-        console.log("leave balamce updated ")
+      } else if (result.rowCount === 1 && result.command === "UPDATE") {
+        console.log("leave balamce updated ");
         let message = `${requestBody.userid} leaveBalance inserted successfully`;
 
-        return {success:true,message, command:result.command};
+        return { success: true, message, command: result.command };
       }
     } catch (error: any) {
       return error.message;

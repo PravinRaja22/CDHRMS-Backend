@@ -3,6 +3,8 @@ import { QueryResult } from "pg";
 import { getMonthAndYearFromUTC } from "../../utils/HRMS/getMonthandYearFromutc.js";
 import { getStartandEndTIme } from "../../utils/HRMS/getStarttimeandEndTIme.js";
 import { CloudHSM } from "aws-sdk";
+import { payslipService } from "../../PaySlipGenerator.js";
+import { userService } from "./user.service.js";
 export module attendanceService {
   export async function getAttendanceData() {
     try {
@@ -14,7 +16,7 @@ export module attendanceService {
       return error.message;
     }
   }
- 
+
   export async function upsertAttendance(values: any) {
     try {
       console.log("inside upsertAttendance", values);
@@ -26,20 +28,20 @@ export module attendanceService {
           ? `${attendanceData.success} Attendace Inserted Succesfully ,
                 ${attendanceData.success} Attendace Insert failure`
           : attendanceData.success === 0 && attendanceData.failure > 0
-          ? ` ${attendanceData.failure} Attendace Insert failure`
-          : `${attendanceData.success} Attendace Inserted Succesfully`;
- 
+            ? ` ${attendanceData.failure} Attendace Insert failure`
+            : `${attendanceData.success} Attendace Inserted Succesfully`;
+
       return message;
     } catch (error) {
       return error.message;
     }
   }
- 
+
   export async function getAttendanceByUserIdDate(request: any) {
     console.log("getAttendanceByUserIdDate");
     let params = request.params || request;
     console.log(params, "params");
- 
+
     const existingRecord: any = await query(
       "SELECT * FROM attendances WHERE userId = $1 AND date = $2",
       [params.userId, params.attendanceDate]
@@ -55,10 +57,10 @@ export module attendanceService {
       return existingRecord.rows;
     }
   }
- 
+
   export async function getAttendanceByUserIdMonth(params: any) {
     try {
-      console.log(params,"getAttendanceByUserIdMonth");
+      console.log(params, "getAttendanceByUserIdMonth");
       const { userId, month, year } = params;
       console.log(month);
       console.log(year);
@@ -68,15 +70,15 @@ export module attendanceService {
         `SELECT * FROM attendances WHERE userId = $1 AND date >=${result.startTime} AND date <= ${result.endTime}`,
         [userId]
       );
-      console.log(queryData,"query result");
+      console.log(queryData, "query result");
       return queryData.rows;
-    } catch (error) {}
+    } catch (error) { }
   }
- 
+
   export async function updateAttendance(params: any, body: any) {
     console.log(params, "params updateAttendance service");
     console.log(body, "body updateAttendance service");
- 
+
     const existingRecord: any = await query(
       "SELECT * FROM attendances WHERE userId = $1 AND date = $2",
       [params.userId, params.attendanceDate]
@@ -116,15 +118,15 @@ export module attendanceService {
         console.log(result, "upsert result");
         if (result.command === "UPDATE" && result.rowCount > 0) {
           console.log("inside status update");
-          let attendance= result.rows[0]
-          console.log(attendance,"attendancerecord ")
-          if(attendance?.signout.data[0]?.timeStamp && attendance?.signout.data.length === attendance?.signin.data.length){
+          let attendance = result.rows[0]
+          console.log(attendance, "attendancerecord ")
+          if (attendance?.signout.data[0]?.timeStamp && attendance?.signout.data.length === attendance?.signin.data.length) {
             console.log("inside status update signout")
             let updateAttendanceStatus =
-            attendanceService.updateAttendanceStatus(params);
-          console.log(updateAttendanceStatus, "updateAttendanceStatus");
+              attendanceService.updateAttendanceStatus(params);
+            console.log(updateAttendanceStatus, "updateAttendanceStatus");
           }
-    
+
         } else {
           console.log("else");
         }
@@ -139,10 +141,10 @@ export module attendanceService {
       }
     }
   }
- 
+
   export async function getsingleAttendance(recId: any) {
     console.log("getsingleAttendance", recId);
- 
+
     try {
       const result: any = await query(
         `SELECT * FROM attendances WHERE id = ${recId}`,
@@ -156,12 +158,12 @@ export module attendanceService {
       return error.message;
     }
   }
- 
+
   //attendance bulk insert
   export async function upsertBulkAttendance(values: any) {
     try {
       console.log("inside upsertBulkAttendance", values);
- 
+
       const { month, year, userId, utcsec } = values;
       let startDate;
       let endDate;
@@ -182,7 +184,7 @@ export module attendanceService {
       const monthIndex = months.indexOf(month);
       startDate = new Date(year, monthIndex, 1);
       endDate = new Date(year, monthIndex + 1, 0);
- 
+
       console.log("^^^^^^^^");
       console.log(startDate, "startDate");
       console.log(endDate, "endDate");
@@ -193,17 +195,17 @@ export module attendanceService {
       today.getMonth();
 
       //get existing attendance 
-      let existingAttendanceRecords  = await attendanceService.getAttendanceByUserIdMonth(values)
-      console.log(existingAttendanceRecords,"existingAttendanceRecords result ")
-      let ar = {success:0,failure:0}
+      let existingAttendanceRecords = await attendanceService.getAttendanceByUserIdMonth(values)
+      console.log(existingAttendanceRecords, "existingAttendanceRecords result ")
+      let ar = { success: 0, failure: 0 }
       let currentDate = new Date(startDate); // Initialize currentDate with startDate
 
       while (currentDate <= endDate) {
         const dateInMillis = currentDate.getTime();
-       
-        let existRecord = existingAttendanceRecords.find(record=>Number(record.date) === dateInMillis)
-        console.log(existRecord,"existRecord")
-        if(!existRecord){
+
+        let existRecord = existingAttendanceRecords.find(record => Number(record.date) === dateInMillis)
+        console.log(existRecord, "existRecord")
+        if (!existRecord) {
           const record = {
             userId,
             date: dateInMillis,
@@ -241,7 +243,7 @@ export module attendanceService {
               shiftEnd: "18:00",
             },
           };
-  
+
           try {
             await upsertAttendanceRecord(record);
             ar.success++;
@@ -252,26 +254,26 @@ export module attendanceService {
 
           // await upsertAttendanceRecord(record);
         }
-        else{
+        else {
           ar.failure++
         }
-       
+
         // Move to the next day
         currentDate.setDate(currentDate.getDate() + 1);
       }
       return ar;
     } catch (error) {
-    
+
       return error.message;
     }
   }
- 
-  export async function       upsertAttendanceRecord(record: any) {
+
+  export async function upsertAttendanceRecord(record: any) {
     // Your upsert or insert logic goes here
     console.log("Upserting record:", record);
     let fieldNames = Object.keys(record);
     let fieldValues = Object.values(record);
- 
+
     let querydata = `INSERT INTO attendances (${fieldNames.join(
       ", "
     )}) VALUES (${fieldValues
@@ -281,10 +283,10 @@ export module attendanceService {
     const result = await query(querydata, params);
     console.log(result.command, "record insert result");
   }
- 
+
   // export async function updateAttendanceStatus(params: any) {
   //     //update all user attendance status,working hours, session timings
- 
+
   //     console.log(params, "updateAttendanceStatus params");
   //     let attendanceDate = params.attendanceDate;
   //     try {
@@ -305,12 +307,12 @@ export module attendanceService {
   //         if (attendanceRecords) {
   //             attendanceRecords.map(async (i: any) => {
   //                 console.log(i, "______________");
- 
+
   //                 let updatedRecord1: any = await calculateAttendance(i)
- 
+
   //                 console.log(updatedRecord1, "calculateAttendance result");
   //                 //remove uuid in updatedRecord1 for Update record
- 
+
   //                 if (updatedRecord1) {
   //                     let { uuid, ...updatedRecord } = updatedRecord1;
   //                     returnValue = await sqlUpdate(updatedRecord)
@@ -330,32 +332,32 @@ export module attendanceService {
   //                     console.log(updatesqlCount);
   //                     return { success: updatesqlCount, failure: failuresqlCount };
   //                 }
- 
+
   //             })
   //         }
   //         console.log(updatesqlCount, "updatesqlCount", failuresqlCount);
   //         let message = updatesqlCount && failuresqlCount ? `${updatesqlCount} Attendance Update successfully & ${failuresqlCount} Attendance Update Failure` :
   //             updatesqlCount ? `${updatesqlCount} Attendance Update successfully` : updatesqlCount ? `${failuresqlCount} Attendance Update Failure` : null
   //         return  returnValue;
- 
+
   //     }
   //     catch (error) {
   //         console.log(error.message, "error updateAttendanceStatus");
- 
+
   //     }
- 
+
   // }
- 
+
   export async function updateAttendanceStatus(params: any) {
     console.log(params, "updateAttendanceStatus params");
     let attendanceDate = params.attendanceDate;
     let userId = params.userId;
- 
+
     try {
       let updatesqlCount = 0;
       let failuresqlCount = 0;
       let returnValue = {};
- 
+
       let result = await query(
         `SELECT * FROM attendances WHERE date = ${attendanceDate} And userId=${userId}`,
         {}
@@ -364,24 +366,24 @@ export module attendanceService {
       console.log("***********");
       console.log(result.rows);
       console.log("***********");
- 
+
       if (result.rowCount > 0) {
         let attendanceRecords = result.rows;
- 
+
         // Use Promise.all to wait for all asynchronous operations to complete
         const updatePromises = attendanceRecords.map(async (i: any) => {
           console.log(i, "______________");
           let updatedRecord1: any = await calculateAttendance(i);
           console.log(updatedRecord1, "calculateAttendance result");
- 
+
           if (updatedRecord1) {
             let { uuid, ...updatedRecord } = updatedRecord1;
             return sqlUpdate(updatedRecord);
           }
         });
- 
+
         const updateResults = await Promise.all(updatePromises);
- 
+
         // Aggregate results
         updateResults.forEach((result) => {
           if (result.statusCode === 200) {
@@ -392,9 +394,9 @@ export module attendanceService {
             failuresqlCount += result.count;
           }
         });
- 
+
         console.log(updatesqlCount, "updatesqlCount", failuresqlCount);
- 
+
         returnValue = {
           success: updatesqlCount,
           failure: failuresqlCount,
@@ -402,30 +404,30 @@ export module attendanceService {
             updatesqlCount && failuresqlCount
               ? `${updatesqlCount} Attendance Update successfully & ${failuresqlCount} Attendance Update Failure`
               : updatesqlCount
-              ? `${updatesqlCount} Attendance Update successfully`
-              : failuresqlCount
-              ? `${failuresqlCount} Attendance Update Failure`
-              : "No Records Found",
+                ? `${updatesqlCount} Attendance Update successfully`
+                : failuresqlCount
+                  ? `${failuresqlCount} Attendance Update Failure`
+                  : "No Records Found",
         };
       } else {
         return { message: "No Records Found" };
       }
- 
+
       return returnValue;
     } catch (error) {
       console.log(error.message, "error updateAttendanceStatus");
     }
   }
- 
+
   async function sqlUpdate(updatedRecord: any) {
     const fieldNames = Object.keys(updatedRecord);
     const fieldValues = Object.values(updatedRecord);
     console.log(fieldNames, "update Attendance fieldNames");
     console.log(fieldValues, "update Attendance  fieldValues");
- 
+
     let querydata;
     let params: any[] = [];
- 
+
     try {
       querydata = `UPDATE attendances SET ${fieldNames
         .map((field, index) => `${field} = $${index + 1}`)
@@ -450,30 +452,30 @@ export module attendanceService {
       return { error: error.message, count: 1 };
     }
   }
- 
+
   async function calculateAttendance(item: any) {
     console.log(item, "calculateAttendance record");
- 
+
     //calculate working hours
     let signIns = item.signin.data;
     let signOuts = item.signout.data;
     console.log(signIns, "signIns aaaaaaaaaaa");
     console.log(signOuts, "signOuts aaaaaaaaaaa");
- 
+
     let dateA: any = new Date(Number(signIns[0].timeStamp));
     let dateB: any = new Date(Number(signOuts[0].timeStamp));
     let timeDifference = Number(dateB) - Number(dateA);
- 
+
     // Convert the time difference to hours
- 
+
     let totalHours = Math.floor(timeDifference / (1000 * 60 * 60));
     let totalMinutes = Math.floor(
       (timeDifference % (1000 * 60 * 60)) / (1000 * 60)
     );
- 
+
     let totalHoursString = String(totalHours).padStart(2, "0");
     let totalMinutesString = String(totalMinutes).padStart(2, "0");
- 
+
     console.log(totalHours, totalMinutes, "&&&&&&&&&");
     item.workinghours = {
       firstIn: signIns[0].timeStamp,
@@ -483,22 +485,22 @@ export module attendanceService {
         minutes: totalMinutesString,
       },
     };
- 
+
     //session calculation
- 
+
     console.log(typeof item.date, "type of item.date");
     let sessionDate = new Date(Number(item.date));
     console.log(sessionDate, "sessionDate");
     sessionDate.setHours(13, 1, 0, 0); //set time as 13:01
- 
+
     const session1EndTime = sessionDate.getTime();
     const signOutTime = dateB.getTime();
     const signInTime = dateA.getTime();
- 
+
     console.log(session1EndTime, "session1EndTime sessioncalculation");
     console.log(signOutTime, "signOutTime sessioncalculation");
     console.log(signInTime, "signInTime sessioncalculation");
- 
+
     if (signOutTime <= session1EndTime) {
       console.log("if signOutTime");
       item.session = {
@@ -542,12 +544,12 @@ export module attendanceService {
         },
       };
     }
- 
+
     //status update
- 
+
     const isHoliday = item.isholiday;
     const isWeekend = item.isweekend;
- 
+
     if (isHoliday) {
       item.status = "holiday";
     } else if (isWeekend) {
@@ -564,7 +566,7 @@ export module attendanceService {
     console.log(item, "item calculateAttendance");
     return item;
   }
- 
+
   async function generateAttendanceData(values: any) {
     console.log(values, "generateAttendanceData");
     const allUsers: QueryResult = await query("SELECT * FROM users", []);
@@ -588,12 +590,11 @@ export module attendanceService {
             [user.id, newDateUTC]
           );
           console.log(existingRecord, "existingRecord");
- 
+
           if (existingRecord.rows.length > 0) {
             console.log("inside if");
             console.log(
-              `Attendance record already exists for user ${user.id} on ${
-                new Date(newDateUTC).toISOString().split("T")[0]
+              `Attendance record already exists for user ${user.id} on ${new Date(newDateUTC).toISOString().split("T")[0]
               }`
             );
             failureInsert++;
@@ -621,11 +622,11 @@ export module attendanceService {
               session:
                 '{"session 1":{"sessionTimings":"09:00 - 13:00","firstIn":null,"lastOut":null},"session 2":{"sessionTimings":"13:01 - 18:00","firstIn":null,"lastOut":null}}',
             };
- 
+
             console.log(obj, "obj try");
             const fieldNames = Object.keys(obj);
             const fieldValues = Object.values(obj);
- 
+
             // Query for insert
             let querydata = `INSERT INTO attendances (${fieldNames.join(
               ", "
@@ -634,7 +635,7 @@ export module attendanceService {
               .join(", ")}) RETURNING *`;
             let params = fieldValues;
             const result = await query(querydata, params);
- 
+
             console.log("&&&&&&&&&&");
             console.log(result, "result");
             console.log("&&&&&&&&&&");
@@ -654,7 +655,7 @@ export module attendanceService {
           failureInsert++;
         }
       }
- 
+
       console.log(successInsert, "success insert");
       console.log(failureInsert, "failure insert");
       return { success: successInsert, failure: failureInsert };
@@ -663,7 +664,7 @@ export module attendanceService {
       return { success: 0, failure: allUsers.rows.length };
     }
   }
- 
+
   export async function getAttendaceForMonthandYear(userId, Month, Year) {
     try {
       console.log(userId, Month, Year);
@@ -671,8 +672,7 @@ export module attendanceService {
       let data: any = await getStartandEndTIme(Month, Year);
       console.log(data.startTime);
       const result: QueryResult = await query(
-        `SELECT * FROM attendances where date >= ${data.startTime} And date <=${
-          data.endTime
+        `SELECT * FROM attendances where date >= ${data.startTime} And date <=${data.endTime
         } And userId = ${Number(userId)}`,
         []
       );
@@ -682,7 +682,7 @@ export module attendanceService {
       return error.message;
     }
   }
- 
+
   const updateAttendaceTimesData = async (updatedRecord) => {
     console.log("updateAttendaceTimesData", updatedRecord);
     try {
@@ -692,14 +692,14 @@ export module attendanceService {
       const fieldValues = Object.values(others);
       console.log(fieldNames, "update Attendance fieldNames");
       console.log(fieldValues, "update Attendance  fieldValues");
- 
+
       let querydata;
       let params: any[] = [];
       querydata = `UPDATE attendances SET ${fieldNames
         .map((field, index) => `${field} = $${index + 1}`)
         .join(", ")} WHERE id = $${fieldNames.length + 1} RETURNING *`;
       params = [...fieldValues, updatedRecord[0].id];
- 
+
       let result = await query(querydata, params);
       console.log(result, "upsert result");
       if (result.command === "UPDATE" && result.rowCount > 0) {
@@ -719,17 +719,16 @@ export module attendanceService {
       return { error: error.message, count: 1 };
     }
   };
- 
+
   export async function upsertAttendanceTime(data, userId) {
     try {
       console.log(data);
       console.log(userId);
       console.log("upsert TIme in Attendance date");
       console.log(data.signInDate);
- 
+
       const result: QueryResult = await query(
-        `SELECT * FROM attendances where date = ${
-          data.signInDate
+        `SELECT * FROM attendances where date = ${data.signInDate
         } And userId = ${Number(userId)}`,
         []
       );
@@ -756,7 +755,7 @@ export module attendanceService {
       const resultdata = await updateAttendaceTimesData(result.rows);
       return resultdata;
       console.log(result.rows);
- 
+
       // return result.rows
       // let data: any = await getStartandEndTIme(Month, Year)
       // console.log(data.startTime)
@@ -767,7 +766,7 @@ export module attendanceService {
       return error.message;
     }
   }
- 
+
   const insertUpdateAttendance = async (updatedRecord) => {
     console.log("insertUpdateAttendance", updatedRecord);
     try {
@@ -776,7 +775,7 @@ export module attendanceService {
       const fieldValues = Object.values(others);
       console.log(fieldNames, "update Attendance fieldNames");
       console.log(fieldValues, "update Attendance  fieldValues");
- 
+
       let querydata;
       let params: any[] = [];
       if (updatedRecord?.id) {
@@ -819,11 +818,11 @@ export module attendanceService {
       return { error: error.message, count: 1 };
     }
   };
- 
+
   export async function upsertAttendanceforLeaves(values) {
     console.log("call upsertAttendanceforLeaves", values);
     let attendanceRecordData;
- 
+
     let newDate = new Date(values.date);
     let obj: any = {
       date: Number(values.date),
@@ -839,7 +838,7 @@ export module attendanceService {
       session:
         '{"session 1":{"sessionTimings":"09:00 - 13:00","firstIn":null,"lastOut":null},"session 2":{"sessionTimings":"13:01 - 18:00","firstIn":null,"lastOut":null}}',
     };
- 
+
     let getExistingAttRecord = await getAttendanceByUserIdDate({
       userId: values.userid,
       attendanceDate: Number(values.date),
@@ -851,7 +850,7 @@ export module attendanceService {
     if (getExistingAttRecord.length > 0) {
       console.log(getExistingAttRecord, "exist attendance data rows ");
       let attRecord = getExistingAttRecord[0];
- 
+
       const { uuid, ...otherFields } = attRecord;
       console.log(otherFields, "other fileds ");
       otherFields.status = values.leavetype;
@@ -862,11 +861,113 @@ export module attendanceService {
     }
     let upsertResult = await insertUpdateAttendance(attendanceRecordData);
     console.log(upsertResult, "upsertResult");
- 
+
     return upsertResult;
   }
+
+  export async function caculateAttendaceForMonth(month, year, userId) {
+    try {
+      console.log(month, 'Attendace Data MOnth');
+      console.log(year);
+      console.log(userId);
+      let startDate;
+      let endDate;
+      let totalNumberOfDays;
+
+      if (month && year) {
+        const months = [
+          "January", "February", "March", "April", "May", "June",
+          "July", "August", "September", "October", "November", "December"
+        ];
+        const monthIndex = months.indexOf(month);
+        console.log(monthIndex, 'Month Index is ');
+        if (monthIndex !== -1) {
+          startDate = new Date(year, monthIndex, 1);
+          endDate = new Date(year, monthIndex + 1, 0);
+          totalNumberOfDays = endDate.getDate();
+        }
+      } else {
+        console.log("Invalid parameters");
+        return;
+      }
+
+      const startTime = startDate.setHours(0, 0, 0, 0);
+      const endTime = endDate.setHours(23, 59, 59, 999);
+
+      // console.log(startDate, "* startDate");
+      // console.log(endDate, "* endDate");
+      console.log(startTime, "* startTime");
+      console.log(endTime, "* endTime");
+
+      let queryData = `SELECT * FROM attendances WHERE userId = ${userId} AND date>= ${startTime} AND date<=${endTime}`;
+      //   console.log(queryData);
+      let getAttendance = await query(queryData, {});
+      // console.log(getAttendance, "getAttendance result1");
+      console.log(getAttendance, 'GOt A data ');
+      if (getAttendance.rowCount > 0) {
+
+        let joinUsersResult: any = await userService.getSingleUser(userId);
+
+        console.log("*******", joinUsersResult, "*********");
+
+        let userRecord;
+
+        if (joinUsersResult.length > 0) {
+          userRecord = joinUsersResult[0];
+        }
+        //need to pf,profetinal tax,income tax from user, now value is hardcoded,need to work
+        let currentCTC = Number(userRecord?.ctc);
+        let currentPF = (currentCTC / 12) * 0.03;
+        let currentIT = 0;
+        let currentPT = 0;
+
+        //calculate Present Days
+
+        let noOfPresentDays = 0;
+        let noOfLeaveDays = 0;
+        let noofWeekofDays = 0
+        let totaldays = 0
+        let nofoLopDays= 0
+
+        getAttendance.rows.map((i) => {
+
+          if (i) {
+            totaldays++
+          }
+          if (i.status === "present") {
+            noOfPresentDays++;
+          } else if (i.status === "weekoff") {
+            noofWeekofDays++;
+          } else if (i.status === "AnnualLeave") {
+            noOfLeaveDays++;
+          }
+          else if(i.status === "LOP"){
+            nofoLopDays++
+          }
+          else {
+            noOfLeaveDays++
+          }
+        });
+
+        console.log(noOfPresentDays, 'Present Days')
+        console.log(noofWeekofDays, 'week OFF Days')
+        console.log(noOfLeaveDays, 'Lop Days')
+        console.log(totaldays, 'Total Days');
+        return {
+          totaldays,
+          noOfPresentDays,
+          nofoLopDays,
+          noOfLeaveDays,
+          noofWeekofDays
+        }
+      }
+
+    } catch (error) {
+
+    }
+  }
 }
- 
+
 /*import pool from "../../database/postgress.js";
 import { QueryResult } from 'pg';
  

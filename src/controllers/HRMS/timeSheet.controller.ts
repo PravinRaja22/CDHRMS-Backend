@@ -56,6 +56,16 @@ export async function getTimeSheetForMonthandYear(requst:any , reply:any){
       reply.status(500).send(error.message)
   }
 }
+export async function excelGenearator(requst:any ,reply:any){
+  try{
+    
+      let Result = await timeSheetServices.excelGenearator(requst ,reply)
+      reply.send(Result)
+  }
+  catch(error){
+      reply.status(500).send(error.message)
+  }
+}
 
 
 

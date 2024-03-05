@@ -1,4 +1,10 @@
 import { FastifyInstance } from "fastify";
+// import { fileURLToPath } from "url";
+// import { dirname } from "path";
+// import path from "path";
+// import ExcelJS from 'exceljs'
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = dirname(__filename);
 import {
   deleteUser,
   getAuthorizeduser,
@@ -110,6 +116,7 @@ import {
 import {
   getAllApprovals,
   getApprovalbyApprover,
+  getApprovalbySuperAdmin,
   getApprovalsById,
   insertApprovals,
   updateApprovals,
@@ -162,6 +169,7 @@ import {
 import { filesUpload, Multer } from "../../multer/Multer.js";
 import { testing } from "../../controllers/HRMS/testing.controller.js";
 import {
+  excelGenearator,
   getTimeSheet,
   getTimeSheetForMonthandYear,
   getTimeSheetbydateanduser,
@@ -245,7 +253,17 @@ const Routes = function (
   fastify.get("/payslip/file/:userId/:month/:year", getPaySlip);
   fastify.get("/payslips", getAllPaySlipData);
   fastify.get("/payslip/bulk-data/:month/:year", generateBulkPaySlipData);
-
+  // fastify.post("/generate/excel", async (request, reply) => {
+  //   try {
+  //     let data = await excelGenearator(request,reply);
+  //     console.log(data);
+  //     return data
+  //   } catch (error) {
+  //     console.log(error.message);
+  //     return error.message
+  //   }
+  // });
+  fastify.post("/generate/excel/:userId/:Year/:Month",excelGenearator) 
   //Approval
 
   fastify.get("/approval", getAllApprovals);
@@ -253,7 +271,7 @@ const Routes = function (
   fastify.get("/approval/:id", getApprovalsById);
   fastify.put("/approval/:id", updateApprovals);
   fastify.get("/approval/approver/:approverId", getApprovalbyApprover);
-
+  fastify.get("/approval/superadmin/:superadminId", getApprovalbySuperAdmin);
   //loan
   fastify.get("/loan", getLoans);
   fastify.get("/loan/:id", getSingleLoan);
