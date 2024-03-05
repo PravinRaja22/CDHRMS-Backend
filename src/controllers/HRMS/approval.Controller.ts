@@ -86,8 +86,7 @@ export async function getApprovalbySuperAdmin(request: any, reply: any) {
     
         if(superAdminRecord.id ===Number(request.params.superadminId)){
             console.log("inside if")
-         let result = await callSuperAdmin(request,reply)
-         console.log(result,"call superadmin result")
+         await callSuperAdmin(request,reply)
         }else{
             console.log("inside else")
         }

@@ -297,7 +297,6 @@ export module approvalService {
       let newParams = [...params];
       console.log("$$$$$$$$$$");
       console.log(innerQuery);
-      console.log(newParams);
       const result: QueryResult = await query(innerQuery, newParams);
       console.log(result.rows, "query results");
       return result.rows;
@@ -423,7 +422,7 @@ export module approvalService {
         newObj.modifiedby = {id:jsonapproverusers.id,name:`${jsonapproverusers.firstname} ${jsonapproverusers.lastname}`,
       timeStamp:new Date().getTime()}
         // newObj.approval = { id: approvalRecId };
-        let updateRegularize =
+        let updateRegularize:any =
           await attendanceRegularizeService.updateAttendanceRegularize(
             newObj.id,
             newObj
@@ -483,8 +482,8 @@ export module approvalService {
           updateLeave.record.status.toLowerCase().includes("approve")
         ) {
           console.log("if try update leave balance");
-        //  let updateLeaveBalanceResult = await updateLeaveBalance(newLeave);
-          //console.log(updateLeaveBalanceResult, "updateLeaveBalanceResult");
+         let updateLeaveBalanceResult = await updateLeaveBalance(newLeave);
+          console.log(updateLeaveBalanceResult, "updateLeaveBalanceResult");
 
           const updateAttendanceResult = await updateAttendanceApprovalReq(
             newLeave
