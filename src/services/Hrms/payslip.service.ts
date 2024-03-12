@@ -225,7 +225,8 @@ export module PayslipServices {
       }
       //need to pf,profetinal tax,income tax from user, now value is hardcoded,need to work
       let currentCTC = Number(userRecord?.ctc);
-      let currentPF = Math.round((currentCTC / 12) * 0.03);
+      // let currentPF = Math.round((currentCTC / 12) * 0.03);
+      let currentPF = 0;
       let currentIT = 0;
       let currentPT = 0;
 

@@ -54,7 +54,7 @@ export module userService {
     }
   };
 
-  export const getAuthorizedUserdata = async (username) => {
+  export const getAuthorizedUserdata = async (username, userData) => {
     try {
       console.log(username, "data in userName");
 
@@ -101,7 +101,7 @@ export module userService {
         return { status: "sucess", result: data.rows };
       } else {
         console.log("else section ");
-        let upsertResult = upsertUser({ userName: username });
+        let upsertResult = upsertUser(userData);
         console.log(upsertResult);
         return { status: "sucess", result: upsertResult };
       }
@@ -297,9 +297,9 @@ export module userService {
 
   export const checkSuperAdminUser = async (userId) => {
     try {
-      console.log("checkSuperAdminUser",userId);
+      console.log("checkSuperAdminUser", userId);
 
-      let joinQuery = `select * from users where role ='superadmin' AND id =${userId}`
+      let joinQuery = `select * from users where role ='superadmin' AND id =${userId}`;
       const result = await query(joinQuery, {});
       // const result = await query('SELECT * FROM users WHERE id = $1', [recId]);
       console.log(result.rows, "result getSuperAdminUser");
@@ -308,5 +308,4 @@ export module userService {
       return error.message;
     }
   };
-
 }

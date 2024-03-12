@@ -11,6 +11,7 @@ import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { payslipService } from "../../PaySlipGenerator.js";
 import { PayslipServices } from "../../services/Hrms/payslip.service.js";
+import { FormatDubaiCurrency } from "./FormatCurrency.js";
 // const PizZip = require("pizzip");
 // const Docxtemplater = require("docxtemplater");
 // const fs = require("fs");
@@ -27,7 +28,34 @@ export const generatePayslipFile = async (request, reply) => {
   console.log(data, "data is generatePayslipFile");
   const result = [];
   for (const e of data) {
-    e.netPayInWords = await convertCurrencyToWords(e.netPay);
+    if (e.earnings && e.earnings.reasons) {
+      for (let i = 0; i < e.earnings.reasons.length; i++) {
+        e.earnings.reasons[i].amount = FormatDubaiCurrency(
+          e.earnings.reasons[i].amount
+        );
+      }
+    }
+    if (e.deductions && e.deductions.reasons) {
+      for (let i = 0; i < e.deductions.reasons.length; i++) {
+        e.deductions.reasons[i].amount = FormatDubaiCurrency(
+          e.deductions.reasons[i].amount
+        );
+      }
+    }
+
+    for (let key in e.earnings) {
+      if (key !== "reasons") {
+        e.earnings[key] = FormatDubaiCurrency(e.earnings[key]);
+      }
+    }
+    for (let key in e.deductions) {
+      if (key !== "reasons") {
+        e.deductions[key] = FormatDubaiCurrency(e.deductions[key]);
+      }
+    }
+    e.netPayInWords = convertCurrencyToWords(Number(e.netPay));
+    e.netPay = FormatDubaiCurrency(e.netPay);
+
     console.log(e);
     let payslipData = await fileGeneration(
       e,
@@ -90,7 +118,7 @@ const fileGeneration = async (data, protocol, host) => {
   if (Object.values(data) === null || "") {
   }
   const content = await fs.promises.readFile(
-    path.resolve("src/CD_PaySlip_Chennai.docx"),
+    path.resolve("src/CD_payslip_Dubai (1)latest.docx"),
     "binary"
   );
 

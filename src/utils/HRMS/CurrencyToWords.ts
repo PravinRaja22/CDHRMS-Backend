@@ -99,5 +99,5 @@ export function convertCurrencyToWords(amount) {
     result += " and Cents " + wordsDecimalPart;
   }
 
-  return `${result} Only`;
+  return `${result} AED Only`;
 }
