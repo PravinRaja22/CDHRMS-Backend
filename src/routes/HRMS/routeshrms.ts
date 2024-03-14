@@ -213,7 +213,8 @@ const Routes = function (
 
   //Leave-Balance Object Routes
   fastify.get("/leave-balance/:userId", getLeaveBalanceByUsers);
-  fastify.post("/leave-balance/:userId", upsertLeaveBalanceByUsers);
+  // fastify.post("/leave-balance/:userId", upsertLeaveBalanceByUsers);
+  fastify.post("/leave-balance", upsertLeaveBalanceByUsers);
 
   fastify.get("/Time-sheet/:userId", getTimeSheet);
   fastify.get("/Time-sheet/:userId/:applidDate", getTimeSheetbydateanduser);

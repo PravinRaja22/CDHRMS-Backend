@@ -14,13 +14,14 @@ export async function getLeaveBalanceByUsers(request: any, reply: any) {
 
 export async function upsertLeaveBalanceByUsers(request: any, reply: any) {
   try {
-    let queryParams: any = request.params.userId;
+    // let queryParams: any = request.params.userId;
     let requestBody: any = request.body;
     console.log("upsertLeaveBalanceByUsers");
-    let result = await leaveBalanceService.upsertLeaveBalanceByUsers(
-      queryParams,
-      requestBody
-    );
+    let result = await leaveBalanceService.upsertLeaveBalance(requestBody);
+    // let result = await leaveBalanceService.upsertLeaveBalanceByUsers(
+    //   queryParams,
+    //   requestBody
+    // );
     reply.send(result);
   } catch (error: any) {
     reply.status(500).send(error.message);
