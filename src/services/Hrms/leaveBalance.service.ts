@@ -7,7 +7,7 @@ export module leaveBalanceService {
 
       const result: QueryResult = await query(
         `SELECT * FROM leaveBalances
-            WHERE userId = $1 `,
+            WHERE userId = $1`,
         [userId]
       );
       console.log(result.rows, "query results");
