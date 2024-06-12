@@ -1,0 +1,16 @@
+# Ignore node_modules directory
+node_modules
+
+# Ignore Visual Studio Code settings directory
+.vscode
+
+# Ignore package-lock.json file
+package-lock.json
+
+# Ignore .env files
+*/.env
+.env
+
+# Ignore files with .map extension
+*.map
+
