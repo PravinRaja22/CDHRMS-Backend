@@ -139,7 +139,8 @@ export module timeSheetServices {
                         taskName: row.taskName,
                         projectName: row.porjectName,
                         taskDescription: row.taskdescription
-                    }, startingRowIndex);
+                    }, 
+                    );
 
                     // Bind values to respective columns
                     if (hoursIndex !== -1) {
