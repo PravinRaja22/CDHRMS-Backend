@@ -318,17 +318,17 @@ export module PayslipServices {
 
       let queryParams = [payslipmonth, payslipyear, userid];
       let findMatchingdata = await query(querydata2, queryParams);
-      console.log(findMatchingdata.rows, "findMatchingdata row");
+      // console.log(findMatchingdata.rows, "findMatchingdata row");
 
       let existPayslipRecords = findMatchingdata.rows[0];
-      console.log("*******");
-      console.log(existPayslipRecords);
-      console.log("*******");
+      // console.log("*******");
+      // console.log(existPayslipRecords);
+      // console.log("*******");
       if (findMatchingdata.rows.length > 0) {
         console.log("if");
-        console.log(data);
+        // console.log(data);
         const mergedData = { ...existPayslipRecords, ...data };
-        console.log(mergedData, "mergedData");
+        // console.log(mergedData, "mergedData");
 
         //remove uuid
         const { uuid, ...mergedDataFields } = mergedData;
@@ -358,10 +358,6 @@ export module PayslipServices {
         try {
           console.log("try");
           upsertPayslipResult = await query(querydata, params);
-          console.log(
-            upsertPayslipResult,
-            "********** upsertPayslipResult result"
-          );
         } catch (error) {
           console.log("catch");
           console.log(error.message, "upsert payslip error ");

@@ -94,7 +94,7 @@ export module timeSheetServices {
             const prepbysignatureandHolidays = worksheet.getRow(52);
             const prepbyTotalDays = worksheet.getRow(90);
             const prepbyDateandLeaves = worksheet.getRow(53);
-            let hoursIndex = headersRow?.values?.findIndex(header => header === 'No. of Hours') - 1;
+            let hoursIndex= headersRow?.values?.findIndex(header => header === 'No. of Hours') - 1;
             let serialIndex = headersRow?.values?.findIndex(header => header === 'Sl. No.') - 1;
             let taskTypeIndex = headersRow?.values?.findIndex(header => header === 'Task Type') - 1;
             let taskDescriptionIndex = headersRow?.values?.findIndex(header => header === 'Task Description') - 1;
@@ -182,25 +182,28 @@ export module timeSheetServices {
                     }
                     if (prepbyNameIndex !== -1) {
                         console.log('prepbyNameIndex Id ');
-                        worksheet.getCell(`C87`).value = `${firstname} ${lastname}`;
+                        worksheet.getCell(`C33`).value = `${firstname} ${lastname}`;
                     }
                     if (dayWorkedIndex !== -1) {
-                        worksheet.getCell(`H87`).value = noOfPresentDays;
+                        // worksheet.getCell(`H87`).value = noOfPresentDays;
+                        worksheet.getCell(`H33`).value =20;
                     }
                     if (prepbySignIndex !== -1) {
-                        worksheet.getCell(`C88`).value = `${firstname} ${lastname}`;
+                        worksheet.getCell(`C34`).value = `${firstname} ${lastname}`;
                     }
                     if (holidayIndex !== -1) {
-                        worksheet.getCell(`H88`).value = noofWeekofDays;
+                        worksheet.getCell(`H34`).value = noofWeekofDays;
                     }
                     if (prepbyDateIndex !== -1) {
-                        worksheet.getCell(`C89`).value = formattedDate;
+                        worksheet.getCell(`C35`).value = formattedDate;
                     }
                     if (LeaveWorkedIndex !== -1) {
-                        worksheet.getCell(`H89`).value = noOfLeaveDays;
+                        // worksheet.getCell(`H89`).value = noOfLeaveDays;
+                        worksheet.getCell(`H35`).value =  0;
                     }
                     if (totalDaysIndex !== -1) {
-                        worksheet.getCell(`H90`).value = totaldays;
+                        // worksheet.getCell(`H90`).value = totaldays;
+                        worksheet.getCell(`H36`).value = 30;
                     }
                     if (TechnologyIndex !== -1) {
                         worksheet.getCell(`E4`).value = department;

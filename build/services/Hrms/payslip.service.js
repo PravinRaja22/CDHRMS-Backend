@@ -356,7 +356,7 @@ export var PayslipServices;
             let querydata = `SELECT * FROM payslips WHERE paySlipMonth = $1 AND payslipyear = $2 AND userId = $3`;
             let queryParams = [month, year, userId];
             let result = await query(querydata, queryParams);
-            console.log(result, "QueryResult getPayslipByUserMonth");
+            // console.log(result, "QueryResult getPayslipByUserMonth");
             return result.rows;
         }
         catch (error) {

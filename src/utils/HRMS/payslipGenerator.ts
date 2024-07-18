@@ -25,7 +25,6 @@ const __dirname = dirname(__filename);
 
 export const generatePayslipFile = async (request, reply) => {
   const data = request.body || request;
-  console.log(data, "data is generatePayslipFile");
   const result = [];
   for (const e of data) {
     if (e.earnings && e.earnings.reasons) {
@@ -55,13 +54,12 @@ export const generatePayslipFile = async (request, reply) => {
     }
     e.netPayInWords = convertCurrencyToWords(Number(e.netPay));
     e.netPay = FormatDubaiCurrency(e.netPay);
-
-    console.log(e);
     let payslipData = await fileGeneration(
       e,
       request.protocol,
       request.headers.host
     );
+    
     // let fileurl =
     //   request.protocol +
     //   "://" +
@@ -71,8 +69,7 @@ export const generatePayslipFile = async (request, reply) => {
     // console.log(fileurl, "File Url is ");
     // payslipData.url = fileurl;
     let insertPaysloip = await PayslipServices.insertpaySlip(payslipData);
-    console.log(insertPaysloip, "Data inserted ?????????");
-    console.log(payslipData, " final Pay slip data ");
+    // console.log(payslipData, " final Pay slip data ");
     result.push(payslipData);
   }
   return result;
@@ -80,7 +77,6 @@ export const generatePayslipFile = async (request, reply) => {
 
 export const generateBulkPayslipFile = async (request, payslipJSON) => {
   const data = payslipJSON;
-  console.log(data, "data is generatePayslipFile");
   const result = [];
   try {
     for (const e of data) {
@@ -101,8 +97,8 @@ export const generateBulkPayslipFile = async (request, payslipJSON) => {
       // console.log(fileurl, "File Url is ");
       // payslipData.url = fileurl;
       let insertPaysloip = await PayslipServices.insertpaySlip(payslipData);
-      console.log(insertPaysloip, "Data inserted ?????????");
-      console.log(payslipData, " final Pay slip data ");
+      // console.log(insertPaysloip, "Data inserted ?????????");
+      // console.log(payslipData, " final Pay slip data ");
       result.push(payslipData);
     }
   } catch (error) {
@@ -114,7 +110,7 @@ export const generateBulkPayslipFile = async (request, payslipJSON) => {
 
 const fileGeneration = async (data, protocol, host) => {
   //   const currentEpochTimeInSeconds = Math.floor(Date.now() / 1000);
-  console.log(data, "fileGeneration data");
+  // console.log(data, "fileGeneration data");
   if (Object.values(data) === null || "") {
   }
   const content = await fs.promises.readFile(

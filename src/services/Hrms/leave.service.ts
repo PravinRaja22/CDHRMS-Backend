@@ -143,7 +143,7 @@ console.log(querydata,"querydata")
                         console.log(error, "update leaves error");
                     }
                 }
-                return ({ status: 200, message: `Leave upserted successfully with record ID ${leaveRecord?.id}` });
+                return ({ status: 200, message: `Leave Applied Successfully` });
             }else if(result.rowCount >0 && result.command === 'UPDATE'){
                 let upsertLeave: any = result.rows[0]
                 if(upsertLeave.status.toLowerCase().includes('withdraw')){
